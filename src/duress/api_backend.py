@@ -249,7 +249,11 @@ def install_backend_routes(
 
     @app.get("/api/investigations")
     def investigation_index() -> dict[str, Any]:
-        return {"items": services.investigation_list(workspace()), "modes": list(MODES)}
+        return {
+            "items": services.investigation_list(workspace()),
+            "modes": list(MODES),
+            "creation_available": True,
+        }
 
     def _investigation(investigation_id: str) -> dict[str, Any]:
         _check_id(investigation_id, "unknown_investigation")

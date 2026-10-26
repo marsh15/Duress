@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Failure DNA library · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Failure DNA</span></nav>
+<header class="page-heading"><div><p class="eyebrow">Portable failure reproducers</p><h1>Failure DNA</h1><p class="heading-detail">Inspect the schedule, download the artifact, replay it, or verify a candidate fix.</p></div></header>
+
+{% if items %}
+<div class="dna-library-list">
+  {% for item in items %}
+  {% set signature = item.signature|default({}) %}
+  <article class="dna-library-row">
+    <div class="dna-library-id"><span class="dna-library-mark" aria-hidden="true">!</span><div><h2><a href="/dna/{{ item.dna_id }}">{{ item.dna_id }}</a></h2><p>{{ item.template_id|default('Scenario not recorded') }} · {{ item.control_level|default('control level not recorded')|replace('_', ' ') }}</p></div></div>
+    <div class="dna-library-signature"><span>{{ signature.check|default('Signature not recorded') }}</span><strong>{{ signature.kind|default('') }}</strong><small>{{ signature.roles|default([])|join(', ') }}</small></div>
+    <div class="dna-library-rate">{% if item.p0 is defined and item.p0 is not none %}<strong>{{ item.p0 }}</strong><span>characterization p₀</span>{% else %}<span>p₀ not recorded</span>{% endif %}</div>
+    <div class="dna-library-actions"><a href="/dna/{{ item.dna_id }}">Inspect</a><a href="/dna/{{ item.dna_id }}/download" download>Download JSON</a></div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state dna-empty"><span aria-hidden="true">—</span><h2>No DNA artifacts in this workspace</h2><p>Import a portable JSON file below, or inspect the recorded M2 benchmark if it is available.</p></div>
+{% endif %}
+
+<section class="content-section action-section library-import" aria-labelledby="library-import-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Portable artifact</p><h2 id="library-import-title">Import and replay</h2></div><span class="section-count">No workspace write</span></div>
+  <p class="section-intro">Choose a Failure DNA JSON file and target. Duress validates and replays the submitted document without adding it to the library.</p>
+  <div class="token-row"><label for="api-token">Access token</label><input id="api-token" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Optional token for this session"><span>Memory only · clears on reload</span></div>
+  <div class="library-import-controls">
+    <div><label for="import-file">Failure DNA JSON file</label><input id="import-file" type="file" accept="application/json,.json"></div>
+    <div><label for="import-target">Replay target</label><select id="import-target"><option value="razorpay-vulnerable">razorpay-vulnerable</option></select></div>
+    <button class="button button-primary" type="button" id="replay-import">Import and replay</button>
+  </div>
+  <p id="import-message" class="form-message" role="status" aria-live="polite"></p>
+  <div id="import-result" class="operation-result" aria-live="polite"></div>
+</section>
+{% endblock %}

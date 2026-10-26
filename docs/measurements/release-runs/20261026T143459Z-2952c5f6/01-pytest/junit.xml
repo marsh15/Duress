@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="7" time="65.393" timestamp="2026-10-26T20:05:00.182114+05:30" hostname="santoshs-MacBook-Air-3.local"><testcase classname="tests.browser.test_product" name="test_workspace_navigation_registry_and_pending_features" time="10.836"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; get_by_text(&quot;Recorded benchmark&quot;).first with timeout 5000ms&#10;  - waiting for get_by_text(&quot;Recorded benchmark&quot;).first&#10;&#10;Aria snapshot:&#10;- link &quot;Skip to content&quot;:&#10;  - /url: &quot;#main&quot;&#10;- banner:&#10;  - link &quot;Duress home&quot;:&#10;    - /url: /&#10;    - text: duress&#10;  - paragraph: Failure analysis for webhook systems&#10;  - navigation &quot;Primary navigation&quot;:&#10;    - link &quot;Workbench&quot;:&#10;      - /url: /&#10;    - link &quot;Targets&quot;:&#10;      - /url: /targets&#10;    - link &quot;Investigations&quot;:&#10;      - /url: /investigations&#10;    - link &quot;Failure DNA&quot;:&#10;      - /url: /dna&#10;- main:&#10;  - navigation &quot;Breadcrumb&quot;:&#10;    - link &quot;Workbench&quot;:&#10;      - /url: /&#10;    - text: Investigations&#10;  - paragraph: Saved records · read only&#10;  - heading &quot;Investigation history&quot; [level=1]&#10;  - paragraph: Recorded evidence and supplied showcase data. Creating new investigations is pending.&#10;  - text: Creation pending&#10;  - article:&#10;    - text: completed Recorded M2 benchmark&#10;    - heading &quot;razorpay-vulnerable&quot; [level=2]:&#10;      - link &quot;razorpay-vulnerable&quot;:&#10;        - /url: /investigations/showcase-m2&#10;    - paragraph: Recorded M2 benchmark · recorded&#10;    - text: showcase-m2&#10;    - strong: &quot;10&quot;&#10;    - text: valid aggregate trials&#10;    - strong: &quot;10&quot;&#10;    - text: aggregate failures&#10;    - strong: &quot;1.0&quot;&#10;    - text: characterization p₀&#10;    - strong: VERIFIED&#10;    - text: historical verification&#10;    - link &quot;Inspect record&quot;:&#10;      - /url: /investigations/showcase-m2&#10;  - complementary:&#10;    - strong: Investigator status&#10;    - text: Autonomous hypothesis generation and reduction are pending. This page shows saved records only.&#10;- contentinfo: Duress Reproducible conditions. Portable evidence.">page = &lt;Page url='http://127.0.0.1:51301/investigations'&gt;
+
+    def test_workspace_navigation_registry_and_pending_features(page):
+        from playwright.sync_api import expect
+        errors = []
+        page.on('pageerror', lambda exc: errors.append(str(exc)))
+        page.goto('/')
+        expect(page.get_by_role('button', name='Investigation unavailable')).to_be_disabled()
+        expect(page.locator('#target-registry-list')).to_contain_text('razorpay-fixed')
+        expect(page.locator('#investigation-history')).to_contain_text('showcase-m2')
+        page.get_by_role('link', name='Targets', exact=True).click()
+        expect(page.get_by_role('heading', level=1)).to_contain_text('Targets')
+        expect(page.get_by_text('127.0.0.1', exact=False).first).to_be_visible()
+        page.get_by_role('link', name='Investigations', exact=True).click()
+&gt;       expect(page.get_by_text('Recorded benchmark', exact=False).first).to_be_visible()
+E       AssertionError: Locator expected to be visible
+E       Actual value: None
+E       Error: element(s) not found
+E       Call log:
+E         - Expect "to_be_visible" get_by_text("Recorded benchmark").first with timeout 5000ms
+E         - waiting for get_by_text("Recorded benchmark").first
+E
+E       Aria snapshot:
+E       - link "Skip to content":
+E         - /url: "#main"
+E       - banner:
+E         - link "Duress home":
+E           - /url: /
+E           - text: duress
+E         - paragraph: Failure analysis for webhook systems
+E         - navigation "Primary navigation":
+E           - link "Workbench":
+E             - /url: /
+E           - link "Targets":
+E             - /url: /targets
+E           - link "Investigations":
+E             - /url: /investigations
+E           - link "Failure DNA":
+E             - /url: /dna
+E       - main:
+E         - navigation "Breadcrumb":
+E           - link "Workbench":
+E             - /url: /
+E           - text: Investigations
+E         - paragraph: Saved records · read only
+E         - heading "Investigation history" [level=1]
+E         - paragraph: Recorded evidence and supplied showcase data. Creating new investigations is pending.
+E         - text: Creation pending
+E         - article:
+E           - text: completed Recorded M2 benchmark
+E           - heading "razorpay-vulnerable" [level=2]:
+E             - link "razorpay-vulnerable":
+E               - /url: /investigations/showcase-m2
+E           - paragraph: Recorded M2 benchmark · recorded
+E           - text: showcase-m2
+E           - strong: "10"
+E           - text: valid aggregate trials
+E           - strong: "10"
+E           - text: aggregate failures
+E           - strong: "1.0"
+E           - text: characterization p₀
+E           - strong: VERIFIED
+E           - text: historical verification
+E           - link "Inspect record":
+E             - /url: /investigations/showcase-m2
+E         - complementary:
+E           - strong: Investigator status
+E           - text: Autonomous hypothesis generation and reduction are pending. This page shows saved records only.
+E       - contentinfo: Duress Reproducible conditions. Portable evidence.
+
+tests/browser/test_product.py:86: AssertionError</failure></testcase><testcase classname="tests.browser.test_product" name="test_download_replay_and_fix_verification_use_actual_api" time="46.962" /><testcase classname="tests.browser.test_product" name="test_form_errors_tamper_rejection_and_token_stays_in_memory" time="2.034" /><testcase classname="tests.browser.test_product" name="test_axe_accessibility_mobile_and_keyboard[/]" time="1.460" /><testcase classname="tests.browser.test_product" name="test_axe_accessibility_mobile_and_keyboard[/investigations/showcase-m2]" time="1.542" /><testcase classname="tests.browser.test_product" name="test_axe_accessibility_mobile_and_keyboard[/dna/e8007dd56adae8ae]" time="1.451" /><testcase classname="tests.browser.test_product" name="test_empty_errors_and_escaping" time="0.881" /></testsuite></testsuites>

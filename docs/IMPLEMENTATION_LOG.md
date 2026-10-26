@@ -101,6 +101,23 @@ verify-fix; the API slice; `duress dna build|list`, `replay`, `verify-fix`,
 The DNA id is identical across independent builds and across the macOS host and
 the Linux container, which is the intended canonical-identity property.
 
+## M6 web product experience after M2 (upstream release snapshot: 4743a5e)
+
+This entry records the frontend release scope and evidence from the upstream workbench snapshot; its counts are not combined with the separate M3/M4 backend acceptance below.
+
+
+- Confirmed the clean checkout and remote `main` at `d08409c` before implementation. The pre-change fast gate passed: 198 tests, 3 deselected. The assignment was narrowed to frontend, ordinary API integration, documentation and release preparation; no unfinished engine, reducer or target changes are included.
+- Added the Jinja/HTMX presentation layer, read-only investigation records, bundled M2 showcase, and saved replay/verification result metadata. The existing M0–M2 execution services and targets remain unchanged.
+- Packaged only retained M2 DNA and measurement evidence. The showcase explicitly distinguishes aggregate/representative data from a full trial stream and from live execution.
+- Browser verification detected low-contrast muted text and navigation; correcting those colors is part of the web checkpoint. Final gate results and commit references follow below after execution.
+- Verified the product path with 7 passing Playwright tests and zero serious/critical axe issues on the three main pages. Docker startup, read-only smoke, actual portable replay/verification and 26 focused container tests passed.
+- Independent Luna review found a misleading rejected-import message and malformed DNA metadata handling; fixed both. Final presentation inspection also separated the showcase badge from portable JSON; 27 focused tests passed after that change.
+- The first broad post-change run had 222 passes and two failures in unchanged backend tests. Both passed unchanged in a focused diagnostic rerun. A serial broad rerun follows; the failed evidence is retained. No backend test assertions were relaxed.
+- Checkpoint `4743a5e` — evidence workbench, ordinary API record integration, showcase, reports, screenshots, browser tests and release tooling committed and pushed to `origin/main`; `git ls-remote` confirmed `4743a5e3ab611c8e2e6568006144af6b55456fb0` on the remote. A fresh clone from GitHub was prepared for the final environment check.
+- Final serial fast gate passed: 225 tests, 7 opt-in browser skips, no failures in 383.21 s. Both the failed broad run and the passing serial record are retained in the evidence directory. No original backend test or trusted execution file changed.
+- Verified a fresh GitHub clone of `4743a5e`: frozen install and 27 focused tests passed on Python 3.14.7. Rebuilt final Docker image: 27 focused tests passed on Python 3.12.15; public/API smoke again returned REPRODUCED and VERIFIED; sweep reported no remaining recorded processes. Final evidence is in `docs/measurements/web-final.json`.
+- At the M6 release snapshot, Render remained unverified. Live model execution, investigation creation and reduction were outside that frontend assignment; the separate backend M3/M4 acceptance below records later backend-branch work. No merged-branch acceptance result is stated here.
+
 ## M3/M4 interrupted-session recovery
 
 Work resumed in `/Users/santoshkumar/myprojects/Duress-core` on
@@ -261,3 +278,50 @@ passed. SHA-256 comparison verified all **12 committed measurement JSON files
 unchanged**, and the 31-file recovery archive still matches its recorded digest.
 Genuine hosted live inference and the five-run hosted comparison remain
 unverified; no local model weights or unrelated cleanup were used.
+
+### Documentation merge resolution (2026-10-26)
+
+The M6 workbench and saved-operation evidence remains scoped to the upstream frontend release (`4743a5e`, evidence tail `b30edc4`); M3/M4 decisions and acceptance remain scoped to the backend branch (`f68ceb7`). Keep the upstream web pages/templates and `GET /api/operations/{operation_id}` record lookup. `api_backend.install_backend_routes()` owns investigation list/start/detail, hypothesis/findings, reduction and differential APIs, including their investigation GET routes. The overlapping upstream investigation GET handlers must not compete with those backend routes; web pages use the backend reads, while saved-result pages retain the upstream `GET /api/operations/{operation_id}` lookup. This note records ownership only; it makes no merged-branch test or route-inventory claim. No measurement files were rewritten for this documentation resolution.
+
+
+### Combined merge verification (2026-10-27)
+
+The user authorized resolving PR #1 against upstream main `b30edc4`. All work
+remained in `Duress-core` on `feat/investigator-reduction`. The verified backend
+head `f68ceb7` remains recoverable in Git and in the local
+`refs/duress-recovery/pre-main-f68ceb7` ref; the original 31-file archive is
+unchanged. No primary-checkout edits or history rewrites were used.
+
+The five conflicts retained both ignore rules and documentation histories.
+`api_backend` owns the one investigation GET/POST route set; shared record
+readers include live and historical showcase records. Upstream web/report routes
+and saved replay/verify operation records remain available. Replay/verify
+responses retain outcome/preflight fields and the additive operation_id. The
+web adapter handles M3 nested hypotheses/citations/statuses and scenario trial
+rows alongside legacy records. No new UI start/reduction controls were added.
+
+Verification on the combined code:
+
+- Focused API/CLI/web/records/measurement-tool checks: **65 passed**, one
+  Starlette/httpx deprecation warning, **2.32 s**. This includes new regressions
+  for route uniqueness, a shared operation gate, saved response equality, and
+  invalid-local-record fallback behavior.
+- `env DURESS_RECORD_MEASUREMENTS=0 DURESS_BROWSER_TESTS=0 uv run pytest -q
+  -m "not slow" --basetemp=.recovery/merge-full`: **624 passed, 7 skipped,
+  3 deselected, 0 failed**, one deprecation warning, **742.76 s**. Browser checks
+  were skipped in this command because they were run separately below; the
+  three slow tests are the existing M0 measurement experiments.
+- `env DURESS_RECORD_MEASUREMENTS=0 DURESS_BROWSER_TESTS=1 uv run pytest -q
+  tests/browser --basetemp=.recovery/merge-browser`: **7 passed**, **46.65 s**.
+  These use the repository's local Playwright workflow and existing browser
+  installation, including actual replay/fix verification and accessibility.
+- `uv sync --python 3.12` and `uv pip check`: Python **3.12.12**, all **34**
+  installed packages compatible with the upstream Jinja/Playwright dependencies.
+- Independent Luna xhigh review found no functional integration blockers. The
+  index was subsequently confirmed to have no unresolved entries.
+
+Diff/marker checks pass. All **28** upstream/backend measurement files retain
+their pre-verification hashes; ordinary pytest did not rewrite historical
+evidence. The earlier 402/592 backend-only results remain scoped to `f68ceb7`;
+the counts above describe the merged tree. Hosted live inference remains
+unverified, as before.

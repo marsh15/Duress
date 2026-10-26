@@ -1,127 +1,108 @@
 # Duress
 
-Put your integrations under pressure. Keep the proof.
+**Put your integrations under pressure. Keep the proof.**
 
-**Status: M2 complete.** The repository contains the M0 experimental foundation,
-the M1 execution engine, and the M2 library layer: the full scenario registry
-(S1, S2, S3, S5, S6, S8, S9 and the seven-entry exhaustive set), portable
-Failure DNA with content-addressed identity, preflight, replay, verify-fix, an
-HTTP API, and the `duress dna build | list`, `replay` and `verify-fix` commands.
+Duress is a reliability workbench for developers maintaining event-driven integrations. It runs controlled deliveries against this repository’s synthetic payment-webhook targets, checks persisted business effects, and keeps a portable reproducer when an invariant breaks.
 
-The autonomous investigator (M3), concurrency-preserving reduction and
-`naive_fix` (M4), the web application (M5) and the final release checks (M6) are
-**not** implemented yet. Nothing in this README claims them.
+A successful HTTP response is an observation. The committed payment, order and fulfilment state determines the verdict.
 
-The approved architecture and milestone plan is `plan.md` (Revision 4, frozen).
-Measured results are in `docs/EVIDENCE.md`; implementation decisions are in
-`docs/DECISIONS.md`.
+![Duress evidence workbench](docs/screenshots/workbench.png)
 
-## Layout
+[Recorded evidence](docs/screenshots/recorded-evidence.png) · [Failure DNA view](docs/screenshots/failure-dna.png)
 
-```
-src/duress/
-  limits.py          every C.14 derived total in one place
-  models.py          schedules, attempts, observations, verdicts, signatures
-  semantics/         exec_v1.json and its canonical identity
-  runner.py          exec@1: ordered steps, group gate, retries, deadline
-  target.py          phased supervisor P1–P6, loopback guard, pidfiles
-  provider_stub.py   fixtures, latency, rendezvous, per-trial namespaces
-  invariants/        payments-ref-v1, six members with hashed definitions
-  expectations.py    effects, evidence and pass-condition vocabulary
-  oracle.py          evaluate_trial, C.6 precedence
-  aggregation.py     FAIL / PASS quota / INCONCLUSIVE
-  scenarios.py       S1, S2, S3, S5, S6, S8, S9; the seven-entry exhaustive set
-  operations.py      trial loop, evidence retention, candidate early stop
-  dna.py             characterisation, DNA identity, reconstruction
-  preflight.py       eight ordered rejection checks before any target starts
-  replay.py          REPRODUCED / NOT_REPRODUCED / DIFFERENT_FAILURE
-  verify.py          control-calibrated candidate sizing and the statement
-  services.py        the one execution path shared by CLI and API
-  api.py             health, targets, DNA, replay, verify-fix, admission control
-  store.py           JSON writes, DNA store, pidfile sweep
-  cli.py             targets, run, dna, replay, verify-fix, sweep, serve
-targets/razorpay_ref/  vulnerable, fixed, fixed_2w, profile-declared launch commands
-targets/fixture_modes/ eight oracle controls (no_sig_check, ack_without_effect, ...)
-tests/m0/              independent M0 harness and E1–E6
-tests/unit/            exec@1, limits, invariants, oracle, aggregation, phases
-tests/integration/     deadline, isolation, matrix, controls, E8, M0 agreement
-scripts/               m0_gate.sh, m0_evidence.py, m1_evidence.py,
-                       m2_evidence.py, portability.sh, smoke.sh
-```
+## What works today
 
-## Run the tests
+- A server-rendered **Jinja + HTMX web application**: workbench, target profiles, investigation records, Failure DNA library and detail, and saved replay and verification results.
+- An explicitly labelled **recorded M2 showcase**, with the original artifact, delivery sequence, release conditions, invariant violation, and historical vulnerable/fixed comparison. Browsing it starts no experiment.
+- **Portable DNA download and import/replay**, preflight integrity checks, and real fix verification through the existing API and deterministic services.
+- Source-grounded investigations through the CLI/API in cached, exhaustive or configured live mode, with execution-based hypothesis outcomes and persisted progress.
+- Failure reduction with identity/concurrency preservation and independent replay revalidation, plus the synthetic `naive_fix` differential target.
+- A CLI for scenario execution, investigation, DNA creation, reduction, differential evaluation, replay, fix verification, cleanup, and standalone HTML reports.
+- The M0–M2 execution foundation: isolated target processes, the closed scenario registry, complete invariant packs, and deterministic verdict aggregation.
+
+The web interface still labels its investigation-creation and reduction controls as unavailable; use the CLI/API for those M3/M4 capabilities. Cached responses are explicitly authored fixtures, and genuine hosted inference remains unverified. The historical M2 showcase remains separate from new investigations. See the [backend handoff](docs/BACKEND_HANDOFF.md) for schemas and the [implementation log](docs/IMPLEMENTATION_LOG.md) for milestone-specific evidence.
+
+## Quickstart
+
+Requires Python 3.12+, [uv](https://docs.astral.sh/uv/), and macOS or Linux. Work from the repository checkout; bundled target profiles are part of the application.
 
 ```bash
-uv sync
-uv run pytest -q -m "not slow"        # fast suite (141 tests at the M1 checkpoint)
-scripts/m0_gate.sh                    # M0 gate + measured experiments + EVIDENCE.md
-scripts/m0_gate.sh --gates-only       # M0 gate only
-uv run python scripts/m1_evidence.py  # run the fast suite and record M1 evidence
-uv run python scripts/m2_evidence.py --docker  # M2 acceptance + container smoke
-scripts/portability.sh                # artifact-only replay in a clean home
+git clone https://github.com/marsh15/Duress.git
+cd Duress
+uv sync --frozen
+uv run duress serve --port 8000
 ```
 
-The M0 gate fails if its files do not collect exactly four tests, if the target
-suite fails, if a gate experiment fails, or if pytest exits 4/5.
+Open **http://127.0.0.1:8000**. Inspect the recorded benchmark, open its Failure DNA, download it, then use **Replay** or **Verify fix** to execute the existing local services. Results appear inline and have a saved result page. No external provider or model credentials are needed.
 
-## Use the engine
+To replay a file, open the **Failure DNA** library and choose **Import portable JSON**. An import is checked before execution and is not silently added to the workspace. Target selectors accept only registered local implementations.
+
+## CLI
 
 ```bash
 uv run duress targets
 uv run duress run razorpay-fixed --scenario S3 --copies 3 --fault rendezvous
-uv run duress run razorpay-vulnerable --scenario S3 --copies 3 --fault rendezvous
-uv run duress run fixture-ack_without_effect --scenario S1 --json
-uv run duress sweep
-
-# Failure DNA: characterise a real failure, replay it, verify a candidate
 uv run duress dna build razorpay-vulnerable --scenario S3 --copies 2
 uv run duress dna list
+uv run duress investigate razorpay-vulnerable --mode cached --json
+uv run duress reduce <dna_id> --json
+uv run duress differential --policy explore --json
 uv run duress replay <dna_id>
-uv run duress verify-fix <dna_id>
-uv run duress serve --port 8000
+uv run duress verify-fix <dna_id> --candidate razorpay-fixed
+uv run duress report showcase --output /tmp/duress-report.html
+uv run duress sweep
 ```
 
-Exit codes follow C.13: `0` PASS / NOT_REPRODUCED / VERIFIED, `1` FAIL /
-REPRODUCED / DIFFERENT_FAILURE / NOT_VERIFIED, `2` INCONCLUSIVE, `3` usage,
-`4` REJECTED. `--json` prints the full `ScenarioResult`, or the replay/verify
-outcome.
+`run`, `replay` and `verify-fix` support `--json`. Exit codes: `0` PASS / NOT_REPRODUCED / VERIFIED; `1` FAIL / REPRODUCED / DIFFERENT_FAILURE / NOT_VERIFIED; `2` INCONCLUSIVE; `3` usage error; `4` REJECTED. A reproduced defect deliberately returns a nonzero exit code.
 
-A DNA is portable: `scripts/portability.sh` builds one in one home, copies only
-the JSON into a second home, and replays and verifies it there. The same DNA id
-is produced on macOS and Linux because the reproducer is canonical JSON.
+`report` exports an existing record without executing it. The bundled showcase is a read-only record assembled from retained M2 evidence, not an autonomous investigation.
 
-Each engine trial gets its own temporary directory, database, port, webhook
-secret, provider namespace and instance id. The target is spawned in a new
-session and process group with the command declared in its `profile.toml`
-(`razorpay_ref.serve` for the reference target, never stock `uvicorn`). State is
-read from a copy of `db`/`-wal`/`-shm` only after `killpg(pgid, 0)` confirms the
-group is gone. A wrong health instance, a stale provider call, or an
-unconfirmed kill makes the trial INCONCLUSIVE and aborts the operation.
+## How it works
 
-## The reference target
+The web application and CLI call the same service layer. Every trial gets a fresh database, ephemeral port, signing secret, provider namespace, instance identity and process group. Managed targets bind only to `127.0.0.1`. The supervisor confirms process-group termination by **process-table inspection** before copying SQLite state for the oracle; signal return codes are not proof of termination.
+
+Failure DNA embeds the execution semantics, complete invariant pack, expectation, fixtures, roles and schedule. Preflight hashes the **loaded reproducer mapping** before execution. Replay regenerates signatures. Verification re-establishes the control failure before sizing and running the candidate trials.
+
+Read the [architecture](docs/ARCHITECTURE.md), [artifact contract](docs/FAILURE_DNA.md), [engineering decisions](docs/DECISIONS.md), and [executed evidence](docs/EVIDENCE.md). Detailed history is in the [implementation log](docs/IMPLEMENTATION_LOG.md).
+
+## Verification
 
 ```bash
-PYTHONPATH=targets python -m razorpay_ref init-db \
-  --db /tmp/app.db --seed targets/razorpay_ref/seed.json --variant fixed
-
-PYTHONPATH=targets python -m razorpay_ref.serve --variant fixed --port 8001
+uv run pytest -q -m 'not slow and not browser'
+uv run playwright install chromium
+DURESS_BROWSER_TESTS=1 uv run pytest -q tests/browser
+scripts/smoke.sh http://127.0.0.1:8000
+scripts/smoke.sh http://127.0.0.1:8000 --dna showcase/dna/e8007dd56adae8ae.json
 ```
 
-Environment: `DATABASE_PATH`, `PROVIDER_BASE_URL`, `WEBHOOK_SECRET`,
-`DURESS_INSTANCE`. Routes: `GET /healthz` and `POST /webhooks/razorpay`
-(`X-Razorpay-Signature` over the raw body, `X-Razorpay-Event-Id`).
+Browser coverage includes navigation, mobile layouts, keyboard access, axe checks, artifact export, tamper rejection, and real replay/fix verification. Exact commands, counts and limitations belong in [EVIDENCE.md](docs/EVIDENCE.md).
 
-The vulnerable variant is intentionally defective. Do not reuse it outside the
-benchmark. The fixture-mode target exists only to exercise the oracle's positive
-controls and is not a realistic integration.
+Record new measurements explicitly; ordinary test runs do not rewrite committed measurements:
 
-## Scope and honesty
+```bash
+DURESS_RECORD_MEASUREMENTS=1 uv run python scripts/measure.py --run fast
+uv run python scripts/measure.py --render > /tmp/duress-evidence.md
+```
 
-- PASS and FAIL are bounded empirical statements about the trials that ran, not
-  proofs.
-- The reference defect is a seeded benchmark. E5 measured a high black-box rate
-  for this specific handler; it is not a general prediction.
-- Duress stores JSON files and uses SQLite for target state.
-- Managed targets bind `127.0.0.1` only. There is no external-target support.
-- The container currently runs the M0 gate; the M6 release step will add the
-  hosted web service.
+## Docker and deployment
+
+```bash
+docker build -t duress:web .
+docker run --rm -p 8000:8000 -e PORT=8000 duress:web
+```
+
+The public application serves on `0.0.0.0:$PORT`; managed reference targets remain loopback-only. [render.yaml](render.yaml) describes a Render Docker service. **Hosted deployment is not verified.** See the [operations guide](docs/OPERATIONS.md) for local and container smoke checks.
+
+| Variable | Purpose |
+|---|---|
+| `DURESS_ROOT` | Checkout root containing target profiles; set to `/app` in Docker |
+| `DURESS_HOME` | Runtime JSON, evidence and pidfiles; defaults to `.duress/` |
+| `DURESS_DEMO_TOKEN` | When set, replay and verification require `X-Duress-Token` or bearer authorization |
+| `DURESS_HOSTED` | Marks the hosted deployment in health metadata |
+| `PORT` | Container public listening port; defaults to `8000` |
+
+The browser keeps an entered access token in memory only. Hosted runtime data is **ephemeral** and disappears on restart; download DNA you want to retain. The committed showcase is bundled into the image. The existing API allows one operation at a time and applies request quotas.
+
+## Boundaries
+
+The reference defect is a seeded benchmark, not a discovery about a third-party integration. Experiments are restricted to bundled, locally controlled targets. PASS and VERIFIED are bounded empirical statements, not proofs of correctness. DNA digests detect alteration, not authorship. This is a single-workspace developer application, not a multi-user service; records and results are publicly readable when you expose the server. Do not store sensitive production data in the public demo.

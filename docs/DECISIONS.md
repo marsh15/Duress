@@ -415,9 +415,17 @@ Investigations persist atomic progress records and expose queued/running/
 completed/failed separately from PASS/FAIL/INCONCLUSIVE. `api_backend.py`
 registers the M3/M4 routes once inside the existing application, sharing its
 workspace, rate limiter and operation gate. M2 replay and verify-fix endpoints
-retain their contracts. The frontend checkout has overlapping investigation
-GET routes; `BACKEND_HANDOFF.md` specifies a single registration and the minimal
-merge resolution. It was inspected read-only and was not modified or merged.
+retain their contracts. The upstream web checkout also defines read-only investigation record routes.
+For this merge, `api_backend.install_backend_routes()` owns the investigation
+list/start/detail, hypothesis/findings, reduction and differential APIs. Keep the
+upstream web pages and templates plus `GET /api/operations/{operation_id}`; do not
+register the upstream `GET /api/investigations` or
+`GET /api/investigations/{investigation_id}` handlers alongside the backend
+handlers. The web pages use those backend-owned investigation reads; saved-result
+pages retain the upstream `GET /api/operations/{operation_id}` lookup.
+`BACKEND_HANDOFF.md` records the route reconciliation details. This decision
+records route ownership; the in-progress API integration is not claimed as
+complete here.
 
 ## M4 — bounded reduction and differential evidence
 
@@ -499,3 +507,28 @@ runner starts also releases admission and closes the unstarted coroutine. On
 startup, stale queued/running records become failed with interrupted_by_restart.
 Completed records stay unchanged. Lifecycle tests cover all three operation
 types and startup reconciliation. Durable resumption is outside these milestones.
+
+## Web application release (M6 snapshot at upstream commit 4743a5e)
+
+The following decisions describe the frontend release snapshot before the M3/M4 backend branch was integrated. Statements that investigation creation or reduction were pending are historical release-scope statements; the backend decisions above document their later implementation and acceptance.
+
+
+### D-WEB-1 — Presentation uses the existing execution boundary
+
+The web application renders evidence and calls the existing replay and verification API. It adds read-only record endpoints and stores returned operation results for permalinks. It does not introduce another execution path. Autonomous investigation creation and reduction remain unavailable, with explicit pending states, because those backends are not part of this release.
+
+### D-WEB-2 — A showcase retains the granularity of its source evidence
+
+The M2 DNA and measurement output contain a characterization aggregate and representative observations, not a complete saved investigation stream. The showcase therefore displays those aggregates, delivery observations and a labelled historical comparison. It supplies no invented trial rows, hypothesis citations or model findings. The packaging script validates the artifact identity and checks that the retained verification output supports the comparison counts.
+
+### D-WEB-3 — Local assets and autoescaped records
+
+Jinja and vendored HTMX fit the frozen architecture. A small JavaScript file submits JSON to the existing API and creates text nodes for returned values. Fonts use the system stack. CSS, JavaScript and HTMX are local, so browsing recorded evidence has no external asset dependency. Jinja autoescaping and its JSON encoder protect presentation of record strings. Browser testing found insufficient muted-text contrast; the palette was corrected and is checked with vendored, test-only axe-core.
+
+### D-WEB-4 — Saved results are observations, not another verdict model
+
+An operation record retains the exact response from the existing service together with a timestamp, operation kind and target context. Result pages display that payload without recalculating PASS, FAIL or VERIFIED. These records share the runtime filesystem and its ephemeral-hosting limitation. Exported DNA remains the portable reproducer; an operation permalink is local to its workspace.
+
+### D-WEB-5 — UI labels never become portable artifact fields
+
+Final inspection caught a showcase label being attached to the DNA mapping used by the page. Although downloads remained unchanged, copying the displayed JSON could include an unsupported extra field. The label now lives exclusively in the view context. A regression compares embedded JSON with the actual download and validates the document schema. The reproducer and existing preflight logic were not changed.

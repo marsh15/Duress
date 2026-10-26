@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Record not found · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Not found</span></nav>
+<section class="empty-state not-found-state" aria-labelledby="not-found-title">
+  <span aria-hidden="true">—</span>
+  <h1 id="not-found-title">{{ resource|title }} record not found</h1>
+  <p>This saved record is unavailable in the current workspace.</p>
+  <a class="button button-secondary" href="/">Return to workbench</a>
+</section>
+{% endblock %}

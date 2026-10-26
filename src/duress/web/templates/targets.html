@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Targets · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Targets</span></nav>
+<header class="page-heading"><div><p class="eyebrow">Read-only profile registry</p><h1>Targets</h1><p class="heading-detail">Declared applications and execution variants available to Duress.</p></div></header>
+<aside class="notice notice-cyan target-bind-note"><strong>Managed bind address</strong><span>Duress-managed target servers bind to 127.0.0.1. Target profiles remain read-only in this view.</span></aside>
+{% if targets %}
+<div class="target-grid">
+  {% for target in targets %}
+  <article class="target-record">
+    <div class="target-record-head"><span class="target-dot" aria-hidden="true"></span><span class="target-variant">{{ target.variant }}</span></div>
+    <h2>{{ target.target_id }}</h2>
+    <p class="target-domain">{{ target.domain }}</p>
+    <dl class="target-facts">
+      <div><dt>Profile</dt><dd>{{ target.profile }}</dd></div>
+      <div><dt>Contract</dt><dd>v{{ target.contract_version }}</dd></div>
+      <div><dt>Workers</dt><dd>{{ target.workers }}</dd></div>
+    </dl>
+    <p class="target-config-note">Profile values are shown read-only. Commands, paths, and signing references stay in the local configuration.</p>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><span aria-hidden="true">—</span><h2>No target profiles found</h2><p>Duress could not read a target registry from this workspace.</p></div>
+{% endif %}
+{% endblock %}

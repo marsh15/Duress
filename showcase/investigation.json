@@ -1,0 +1,196 @@
+{
+  "business_state": {
+    "baseline": {
+      "fulfilments": [],
+      "orders": [
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "order_A",
+          "status": "created"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "order_B",
+          "status": "created"
+        }
+      ],
+      "payments": [
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_A1",
+          "order_id": "order_A",
+          "status": "authorized"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_A2",
+          "order_id": "order_A",
+          "status": "authorized"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_B1",
+          "order_id": "order_B",
+          "status": "authorized"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_B2",
+          "order_id": "order_B",
+          "status": "authorized"
+        }
+      ]
+    },
+    "note": "Retained M2 representative SQLite snapshot, read without starting a new experiment.",
+    "observed": {
+      "fulfilments": [
+        {
+          "amount": 5000,
+          "created_at": "2026-10-26T13:15:56.160137+00:00",
+          "id": 1,
+          "order_id": "order_A",
+          "payment_id": "pay_A1"
+        },
+        {
+          "amount": 5000,
+          "created_at": "2026-10-26T13:15:56.165426+00:00",
+          "id": 2,
+          "order_id": "order_A",
+          "payment_id": "pay_A1"
+        }
+      ],
+      "orders": [
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "order_A",
+          "status": "fulfilled"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "order_B",
+          "status": "created"
+        }
+      ],
+      "payments": [
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_A1",
+          "order_id": "order_A",
+          "status": "captured"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_A2",
+          "order_id": "order_A",
+          "status": "authorized"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_B1",
+          "order_id": "order_B",
+          "status": "authorized"
+        },
+        {
+          "amount": 5000,
+          "currency": "INR",
+          "id": "pay_B2",
+          "order_id": "order_B",
+          "status": "authorized"
+        }
+      ]
+    },
+    "snapshot_sha256": "dd18dd44dddd630523922d6166be6d0cd7d6efe6587f780f07dc761b6a12126b",
+    "source": ".duress/evidence/t441854fca615/snapshot/app.db",
+    "trial_id": "t441854fca615"
+  },
+  "comparison": {
+    "candidate_target": "razorpay-fixed",
+    "candidate_valid": 20,
+    "control_same_signature_failures": 5,
+    "control_target": "razorpay-vulnerable",
+    "control_valid": 5,
+    "note": "Historical M2 portability verification. Counts are transcribed from the retained command output; this page does not execute a verification.",
+    "outcome": "VERIFIED",
+    "source": "docs/measurements/m2.json: portability.tail"
+  },
+  "created_at": "2026-10-26T13:16:04+00:00",
+  "dna_ids": [
+    "e8007dd56adae8ae"
+  ],
+  "errors": [],
+  "events": [
+    {
+      "message": "Recorded 10 failures in 10 valid trials of S3[copies=2,fault=rendezvous,latency_ms=200].",
+      "phase": "Characterization",
+      "scenario_id": "S3[copies=2,fault=rendezvous,latency_ms=200]"
+    },
+    {
+      "message": "The retained DNA records two processed responses and an INV-1 duplicate_fulfilment violation after clean settlement.",
+      "phase": "Representative trial",
+      "trial_id": "t441854fca615"
+    },
+    {
+      "message": "M2 portability command recorded REPRODUCED, followed by VERIFIED against razorpay-fixed. See the retained measurement output.",
+      "phase": "Portable replay"
+    }
+  ],
+  "explanation": "Recorded synthetic benchmark from M2, not a live or autonomous investigation. The complete per-trial investigation stream was not retained: only the characterization aggregate, representative DNA observations and command output are shown. Source-grounded AI investigation and reduction remain pending.",
+  "hypotheses": [],
+  "investigation_id": "showcase-m2",
+  "mode_effective": "recorded",
+  "mode_requested": "recorded",
+  "observed_attempts": [
+    {
+      "attempt": 1,
+      "body_scope": null,
+      "body_status": "processed",
+      "delivery_id": "d1",
+      "ended_s": 0.4552,
+      "outcome": "response",
+      "started_s": 0.1991,
+      "status_code": 200
+    },
+    {
+      "attempt": 1,
+      "body_scope": null,
+      "body_status": "processed",
+      "delivery_id": "d2",
+      "ended_s": 0.4486,
+      "outcome": "response",
+      "started_s": 0.205,
+      "status_code": 200
+    }
+  ],
+  "phase": "Recorded M2 benchmark",
+  "record_type": "recorded_m2_evidence",
+  "recorded_summary": {
+    "fail": 10,
+    "p0": 1.0,
+    "release_conditions": {
+      "parties": 10
+    },
+    "trial_policy": "characterize",
+    "valid": 10
+  },
+  "scenarios": [],
+  "showcase": true,
+  "source_evidence": [
+    "docs/measurements/m2.json",
+    "docs/EVIDENCE.md",
+    "showcase/dna/e8007dd56adae8ae.json"
+  ],
+  "status": "completed",
+  "target_id": "razorpay-vulnerable",
+  "trials": []
+}

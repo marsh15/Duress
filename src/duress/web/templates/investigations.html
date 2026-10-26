@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Investigation history · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Investigations</span></nav>
+<header class="page-heading"><div><p class="eyebrow">Saved records · read only</p><h1>Investigation history</h1><p class="heading-detail">Recorded evidence and supplied showcase data. Creating new investigations is pending.</p></div><span class="pending-mark">Creation pending</span></header>
+{% if records %}
+<div class="history-list">
+  {% for record in records %}
+  {% set record_id = record.investigation_id|default('unknown') %}
+  {% set summary = record.recorded_summary|default({}) %}
+  {% set comparison = record.comparison|default({}) %}
+  <article class="history-record{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %} history-record-showcase{% endif %}">
+    <div class="history-record-main">
+      <div class="history-record-head"><span class="state-chip state-{{ record.status|default('recorded')|lower }}">{{ record.status|default('recorded') }}</span>{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %}<span class="recorded-label"><span aria-hidden="true">●</span> Recorded M2 benchmark</span>{% endif %}</div>
+      <h2><a href="/investigations/{{ record_id }}">{{ record.target_id|default('Target not recorded') }}</a></h2>
+      <p>{{ record.phase|default('Investigation record') }} · {{ record.mode_effective|default('mode not recorded') }}</p>
+      <span class="record-id">{{ record_id }}</span>
+    </div>
+    <div class="history-record-stats">
+      {% if summary.valid is defined %}<div><strong>{{ summary.valid }}</strong><span>valid aggregate trials</span></div>{% endif %}
+      {% if summary.fail is defined %}<div><strong>{{ summary.fail }}</strong><span>aggregate failures</span></div>{% endif %}
+      {% if summary.p0 is defined %}<div><strong>{{ summary.p0 }}</strong><span>characterization p₀</span></div>{% endif %}
+      {% if comparison.outcome %}<div><strong>{{ comparison.outcome }}</strong><span>historical verification</span></div>{% endif %}
+    </div>
+    <a class="history-open" href="/investigations/{{ record_id }}">Inspect record</a>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><span aria-hidden="true">—</span><h2>No investigation records yet</h2><p>New investigation creation is pending. The recorded M2 showcase will appear here when supplied.</p><a class="button button-secondary" href="/">Return to workbench</a></div>
+{% endif %}
+<aside class="notice notice-cyan history-note"><strong>Investigator status</strong><span>Autonomous hypothesis generation and reduction are pending. This page shows saved records only.</span></aside>
+{% endblock %}

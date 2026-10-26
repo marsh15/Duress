@@ -15,11 +15,12 @@ fresh isolated process groups. This document does not request an M5 UI change.
 | GET | `/api/targets` | `{targets: [{target_id, profile, variant, contract_version, workers}]}` |
 | GET | `/api/dna` | `{items: [...]}` DNA index |
 | GET | `/api/dna/{dna_id}` | Complete Failure DNA v1 document |
+| GET | `/api/operations/{operation_id}` | Saved replay/verify service payload and presentation metadata |
 | POST | `/api/dna/{dna_id}/replay` | `{target_id?: str, policy?: "replay"\|"explore"}`; synchronous `{outcome: ReplayOutcome, preflight}` |
 | POST | `/api/dna/replay` | `{dna: object, target_id?: str}`; synchronous submitted-artifact replay |
 | POST | `/api/dna/{dna_id}/verify-fix` | `{vulnerable_target_id?: str, candidate_target_id?: str}`; synchronous VerifyOutcome |
 | POST | `/api/investigations` | InvestigationRequest; 202 InvestigationAccepted |
-| GET | `/api/investigations` | `{items: [InvestigationSummary], modes: ["live", "cached", "exhaustive"]}` |
+| GET | `/api/investigations` | `{items: [InvestigationSummary], modes: ["live", "cached", "exhaustive"], creation_available: true}` |
 | GET | `/api/investigations/{investigation_id}` | Full persisted InvestigationRecord |
 | GET | `/api/investigations/{investigation_id}/hypotheses` | `{investigation_id, status, mode_effective, fallback_reason, usable, rejected, hypotheses}` |
 | GET | `/api/investigations/{investigation_id}/findings` | `{investigation_id, status, verdict, findings, dna_ids, reductions, explanation, explanation_source}` |
@@ -166,31 +167,30 @@ CLI equivalents: `duress investigate razorpay-vulnerable --mode cached --json`,
 are 1 for disagreements, 2 for inconclusive cells without a disagreement, and
 0 when all compared cells agree and none is inconclusive.
 
-## Frontend conflict and minimal merge resolution
+## Resolved frontend integration
 
-Read-only inspection of the active frontend checkout on 2026-10-26 found
-`GET /api/investigations` and `GET /api/investigations/{investigation_id}` defined
-inside `api.py`, backed by `records.investigation_index` and
-`records.load_investigation_record`. Its list response includes
-`creation_available: false`; it also adds `/api/operations/{operation_id}` and
-changes replay/verify workflows. This branch installs investigation GET/POST
-routes from `api_backend.py`. Keeping both GET handlers registers duplicates;
-FastAPI route order can make one implementation unreachable while OpenAPI
-shows another contract.
+On explicit user request, upstream main `b30edc4` was merged into the backend
+feature branch in `Duress-core`. The separate primary checkout was not changed.
+The five conflicting files retained both intents and historical evidence.
 
-Recommended merge: retain one `create_app`, one workspace/gate/admission set,
-and one call to `install_backend_routes`. Remove only the frontend's duplicate
-investigation API GET registrations; retain its page/template routes. Put
-showcase-record compatibility in a shared retrieval adapter if needed, then
-make both page rendering and the backend GET routes use it. Update frontend
-consumers to the backend's actual hypothesis/result schema and 202 status URLs;
-replace the stale `creation_available: false` flag with real capability data if
-the UI needs that field. Preserve the existing M2 replay/verify HTTP contracts
-or deliberately version/adapt them during frontend integration. Do not register
-a second operation gate or a second background runner for the same start route.
-The frontend's operation IDs are distinct from investigation/reduction IDs and
-must not be substituted for them accidentally. No frontend branch was merged
-or modified during backend delivery.
+There is one `create_app`, workspace factory, rate limiter, operation gate and
+`install_backend_routes` call. Backend routes own investigation list/start/detail,
+including GET; the duplicate upstream GET handlers were removed. Shared readers
+in `records.py` provide local records and historical showcase fallback without
+masking an invalid or symlinked local record. The index includes both record
+sources and advertises `creation_available: true`. The existing web adapter
+reads M3 nested hypotheses/citations/statuses and scenario trial rows, while
+retaining legacy flat records and the historical M2 showcase. No new web start
+or reduction controls were added.
+
+Upstream page/static/report routes and saved operation lookups remain installed.
+Replay and verify responses preserve their previous outcome/preflight fields,
+with the upstream additive `operation_id` for result permalinks. Operation IDs
+remain distinct from investigation/reduction IDs. The backend lifespan still
+owns cancellation cleanup and restart reconciliation. Focused merge tests check
+route uniqueness, shared admission, showcase browsing, saved payload equality,
+and rendering of both legacy and current records. Combined verification results
+are recorded in `IMPLEMENTATION_LOG.md`.
 
 ## Integration prerequisites and limits
 

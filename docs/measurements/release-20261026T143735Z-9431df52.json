@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "20261026T143735Z-9431df52",
+  "generated_at": "2026-10-26T14:46:24+00:00",
+  "recorded": true,
+  "environment": {
+    "worktree_dirty": true,
+    "source_tree_sha256": "05a6ce15e1f3b188d8e20396c05c65275b7cfdbd63f8fecc63b8c655e695ad14",
+    "python": "3.12.14",
+    "python_implementation": "CPython",
+    "sqlite": "3.53.1",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "uv": "uv 0.12.19 (Homebrew 2026-09-24 aarch64-apple-darwin)",
+    "packages": {
+      "pytest": "9.1.1",
+      "fastapi": "0.162.0",
+      "httpx": "0.28.1",
+      "pydantic": "2.14.1",
+      "uvicorn": "0.54.0"
+    },
+    "git_revision": "d08409c510be35efce05dd52b94c202b95134508"
+  },
+  "suites": [
+    {
+      "name": "fast",
+      "started_at": "2026-10-26T14:37:35+00:00",
+      "command": "/opt/homebrew/bin/uv run pytest -q -m 'not slow' --junitxml=/Users/santoshkumar/myprojects/Duress/docs/measurements/release-runs/20261026T143735Z-9431df52/01-fast/junit.xml",
+      "exit_code": 1,
+      "seconds": 528.72,
+      "counts": {
+        "collected": 231,
+        "passed": 222,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 7
+      },
+      "junit_xml": "docs/measurements/release-runs/20261026T143735Z-9431df52/01-fast/junit.xml",
+      "failure_output": ".......................sssssss.......................................... [ 31%]\n.........F.............................................................F [ 62%]\n........................................................................ [ 93%]\n...............                                                          [100%]\n=================================== FAILURES ===================================\n______________ test_s9_fixed_second_payment_is_an_order_duplicate ______________\n\nregistry = <duress.profiles.ProfileRegistry object at 0x1087388c0>\nstub = <duress.provider_stub.StubServer object at 0x1089d8c80>\ntmp_path = PosixPath('/private/var/folders/4_/3wf75f591xx3p6wxw2k2jjc00000gn/T/pytest-of-santoshkumar/pytest-129/test_s9_fixed_second_payment_i0')\n\n    @pytest.mark.asyncio\n    async def test_s9_fixed_second_payment_is_an_order_duplicate(registry, stub, tmp_path):\n        scenario = built(registry, \"razorpay-fixed\", \"S9\")\n        result = await run_built(\n            registry, stub, tmp_path / \"s9f\", \"razorpay-fixed\", scenario, policy=\"matrix\"\n        )\n        assert result.result.status == \"PASS\"\n        assert result.result.valid == 20\n        for observation in result.observations:\n            rows = observation.snapshot.rows(\"fulfilments\")\n>           assert len(rows) == 1\nE           assert 0 == 1\nE            +  where 0 = len([])\n\ntests/integration/test_matrix_m2.py:55: AssertionError\n_____ test_c10_rendezvous_releases_by_parties_then_timeout_then_not_at_all _____\n\nstub = <duress.provider_stub.StubServer object at 0x1089d8c80>\n\n    @pytest.mark.asyncio\n    async def test_c10_rendezvous_releases_by_parties_then_timeout_then_not_at_all(stub):\n        trial_id = \"rv-\" + uuid.uuid4().hex[:8]\n        stub.create_namespace(\n            trial_id,\n            {\"pay_A1\": {\"id\": \"pay_A1\", \"order_id\": \"order_A\", \"amount\": 5000, \"currency\": \"INR\", \"status\": \"captured\"}},\n            default_rendezvous=RendezvousRule(parties=2, timeout_ms=1000),\n        )\n        async with httpx.AsyncClient() as client:\n            await asyncio.gather(\n                client.get(f\"{stub.base_url}/t/{trial_id}/v1/payments/pay_A1\"),\n                client.get(f\"{stub.base_url}/t/{trial_id}/v1/payments/pay_A1\"),\n            )\n        stats = stub.stats(trial_id)\n        assert stats[\"released_by\"] == \"parties\"\n        assert stats[\"arrivals\"] == 2\n        started = time.monotonic()\n        async with httpx.AsyncClient() as client:\n            await client.get(f\"{stub.base_url}/t/{trial_id}/v1/payments/pay_A1\")\n>       assert time.monotonic() - started < 0.05  # later calls are not held\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       assert (157264.1615025 - 157264.083029166) < 0.05\nE        +  where 157264.1615025 = <built-in function monotonic>()\nE        +    where <built-in function monotonic> = time.monotonic\n\ntests/unit/test_exec_semantics.py:245: AssertionError\n=============================== warnings summary ===============================\n.venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /Users/santoshkumar/myprojects/Duress/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nSKIPPED [1] tests/browser/test_product.py:74: opt in with DURESS_BROWSER_TESTS=1\nSKIPPED [1] tests/browser/test_product.py:94: opt in with DURESS_BROWSER_TESTS=1\nSKIPPED [1] tests/browser/test_product.py:123: opt in with DURESS_BROWSER_TESTS=1\nSKIPPED [3] tests/browser/test_product.py:145: opt in with DURESS_BROWSER_TESTS=1\nSKIPPED [1] tests/browser/test_product.py:161: opt in with DURESS_BROWSER_TESTS=1\nFAILED tests/integration/test_matrix_m2.py::test_s9_fixed_second_payment_is_an_order_duplicate\nFAILED tests/unit/test_exec_semantics.py::test_c10_rendezvous_releases_by_parties_then_timeout_then_not_at_all\n2 failed, 222 passed, 7 skipped, 3 deselected, 1 warning in 519.07s (0:08:39)",
+      "junit_note": "Traceback trailing spaces normalized for Git; recorded test outcomes and assertion text preserved."
+    }
+  ],
+  "record_path": "docs/measurements/release-20261026T143735Z-9431df52.json"
+}

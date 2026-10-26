@@ -55,6 +55,8 @@ def test_startup_marks_stale_operations_failed_without_resuming_them(tmp_path, m
     with TestClient(create_app(Settings(root=ROOT))):
         pass
     for path in tmp_path.glob("*/*.json"):
+        if path.parent.name not in {"investigations", "reductions", "differentials"}:
+            continue
         record = json.loads(path.read_text())
         if path.stem == "old-completed":
             assert record["status"] == "completed"

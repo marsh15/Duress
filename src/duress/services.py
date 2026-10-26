@@ -270,44 +270,24 @@ async def investigate(
 
 
 def load_investigation(workspace: Workspace, investigation_id: str) -> dict[str, Any]:
-    from .orchestrator import load_investigation as load
+    from .records import load_investigation_record
 
-    return load(workspace.home, investigation_id)
+    return load_investigation_record(workspace, investigation_id)
 
 
 def investigation_list(workspace: Workspace) -> list[dict[str, Any]]:
-    from .store import read_json
+    from .records import investigation_index
 
     workspace.prepare()
-    items = []
-    for path in sorted((workspace.home / "investigations").glob("*.json")):
-        try:
-            record = read_json(path)
-        except (OSError, ValueError):
-            continue
-        if not isinstance(record, dict) or record.get("investigation_id") != path.stem:
-            continue
-        items.append(
-            {
-                key: record.get(key)
-                for key in (
-                    "investigation_id",
-                    "record_type",
-                    "created_at",
-                    "updated_at",
-                    "status",
-                    "phase",
-                    "target_id",
-                    "mode_requested",
-                    "mode_effective",
-                    "fallback_reason",
-                    "verdict",
-                    "dna_ids",
-                    "trials_used",
-                )
-            }
-        )
-    return sorted(items, key=lambda item: str(item.get("created_at") or ""), reverse=True)
+    keys = (
+        "investigation_id", "record_type", "created_at", "updated_at", "status",
+        "phase", "target_id", "mode_requested", "mode_effective", "fallback_reason",
+        "verdict", "dna_ids", "trials_used", "showcase",
+    )
+    return [
+        {key: record.get(key) for key in keys}
+        for record in investigation_index(workspace)
+    ]
 
 
 # --------------------------------------------------------------------------- #

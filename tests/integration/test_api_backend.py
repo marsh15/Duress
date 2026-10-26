@@ -113,7 +113,9 @@ def test_investigation_record_hypotheses_and_findings(fake_investigate):
         assert findings["dna_ids"] == ["abc"]
         assert findings["verdict"] == "FAIL"
         index = http.get("/api/investigations").json()["items"]
-        assert [item["investigation_id"] for item in index] == [investigation_id]
+        assert {item["investigation_id"] for item in index} == {investigation_id, "showcase-m2"}
+        assert len(index) == 2
+        assert index[0]["investigation_id"] == investigation_id
     assert fake_investigate[0]["reduce"] is True
 
 
