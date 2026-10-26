@@ -23,6 +23,8 @@
     if (response.status === 429) return "The operation limit has been reached. Wait before starting another run.";
     if (response.status === 413) return "The submitted artifact is too large to replay.";
     const detail = payload && payload.detail;
+    if (Array.isArray(detail)) return detail.map((item) => `${(item.loc || []).join(" · ")}: ${item.msg || "invalid value"}`).join("; ");
+    if (response.status === 404) return "This artifact or record is unavailable. It may have expired after a restart. Reload the library and choose an available record.";
     return detail ? `The API could not complete this action (${detail}).` : `The API returned ${response.status}.`;
   }
 

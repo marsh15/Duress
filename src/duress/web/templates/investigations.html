@@ -1,33 +1,89 @@
 {% extends "base.html" %}
-{% block title %}Investigation history · Duress{% endblock %}
+{% block title %}Investigations · Duress{% endblock %}
 {% block content %}
 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Investigations</span></nav>
-<header class="page-heading"><div><p class="eyebrow">Saved records · read only</p><h1>Investigation history</h1><p class="heading-detail">Recorded evidence and supplied showcase data. Creating new investigations is pending.</p></div><span class="pending-mark">Creation pending</span></header>
-{% if records %}
-<div class="history-list">
-  {% for record in records %}
-  {% set record_id = record.investigation_id|default('unknown') %}
-  {% set summary = record.recorded_summary|default({}) %}
-  {% set comparison = record.comparison|default({}) %}
-  <article class="history-record{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %} history-record-showcase{% endif %}">
-    <div class="history-record-main">
-      <div class="history-record-head"><span class="state-chip state-{{ record.status|default('recorded')|lower }}">{{ record.status|default('recorded') }}</span>{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %}<span class="recorded-label"><span aria-hidden="true">●</span> Recorded M2 benchmark</span>{% endif %}</div>
-      <h2><a href="/investigations/{{ record_id }}">{{ record.target_id|default('Target not recorded') }}</a></h2>
-      <p>{{ record.phase|default('Investigation record') }} · {{ record.mode_effective|default('mode not recorded') }}</p>
-      <span class="record-id">{{ record_id }}</span>
-    </div>
-    <div class="history-record-stats">
-      {% if summary.valid is defined %}<div><strong>{{ summary.valid }}</strong><span>valid aggregate trials</span></div>{% endif %}
-      {% if summary.fail is defined %}<div><strong>{{ summary.fail }}</strong><span>aggregate failures</span></div>{% endif %}
-      {% if summary.p0 is defined %}<div><strong>{{ summary.p0 }}</strong><span>characterization p₀</span></div>{% endif %}
-      {% if comparison.outcome %}<div><strong>{{ comparison.outcome }}</strong><span>historical verification</span></div>{% endif %}
-    </div>
-    <a class="history-open" href="/investigations/{{ record_id }}">Inspect record</a>
-  </article>
-  {% endfor %}
-</div>
-{% else %}
-<div class="empty-state"><span aria-hidden="true">—</span><h2>No investigation records yet</h2><p>New investigation creation is pending. The recorded M2 showcase will appear here when supplied.</p><a class="button button-secondary" href="/">Return to workbench</a></div>
-{% endif %}
-<aside class="notice notice-cyan history-note"><strong>Investigator status</strong><span>Autonomous hypothesis generation and reduction are pending. This page shows saved records only.</span></aside>
+{% set caps = capabilities|default({}) %}
+{% set target_list = caps.targets|default([]) %}
+{% set preferred_target = target_list|selectattr('target_id', 'equalto', 'razorpay-vulnerable')|list %}
+{% if preferred_target %}{% set preferred_target_id = 'razorpay-vulnerable' %}{% elif target_list %}{% set preferred_target_id = target_list[0].target_id|default(target_list[0].get('target_id', '')) %}{% else %}{% set preferred_target_id = '' %}{% endif %}
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Source-grounded exploration · saved evidence</p>
+    <h1>Investigations</h1>
+    <p class="heading-detail">Choose a target and investigation mode. Each run is persisted as it progresses and can be reopened from history.</p>
+  </div>
+</header>
+
+<section id="new-investigation" class="workbench-panel" aria-labelledby="create-investigation-title">
+  <div class="panel-topline">
+    <div><p class="panel-kicker">New run</p><h2 id="create-investigation-title">Start an investigation</h2></div>
+    <span class="live-mark"><span aria-hidden="true"></span>Async · persisted progress</span>
+  </div>
+  <form id="investigation-create-form" class="stack-form" novalidate>
+    <label for="investigation-target">Target</label>
+    <select id="investigation-target" name="target_id" required{% if not target_list %} disabled{% endif %}>
+      {% for target in target_list %}
+      {% set target_id = target.target_id|default(target.get('target_id', '')) %}
+      {% if target_id %}<option value="{{ target_id }}"{% if target_id == preferred_target_id %} selected{% endif %}>{{ target_id }}{% if target.variant|default(target.get('variant', '')) %} · {{ target.variant|default(target.get('variant', '')) }}{% endif %}</option>{% endif %}
+      {% endfor %}
+      {% if not target_list %}<option value="">No targets available</option>{% endif %}
+    </select>
+    {% if not target_list %}<p class="field-help">No target profiles are available in this workspace, so a run cannot be started.</p>{% endif %}
+
+    <label for="investigation-mode">Investigation mode</label>
+    <select id="investigation-mode" name="mode">
+      <option value="cached" selected>Cached · fast, with exhaustive fallback</option>
+      <option value="exhaustive">Exhaustive · run the complete scenario set</option>
+      {% if caps.live_available|default(false) %}
+      <option value="live">Live · ask the configured provider, then execute scenarios</option>
+      {% else %}
+      <option value="live" disabled>Live · provider is not configured</option>
+      {% endif %}
+    </select>
+    <p class="field-help">Cached mode uses a matching cached response when available. Committed fixtures are authored responses and are labelled as such; a cache miss or stale fixture falls back to the exhaustive scenario set. Exhaustive mode skips hypothesis generation and executes that set directly.</p>
+    {% if not caps.live_available|default(false) %}
+    <aside class="notice notice-cyan" aria-label="Live mode configuration"><strong>Live mode unavailable</strong><span>Configure the live model provider on the server to enable live inference. Cached and exhaustive runs remain available according to this server's access policy.</span></aside>
+    {% endif %}
+
+    <details class="token-disclosure">
+      <summary>Access token <span>optional for local cached runs</span></summary>
+      <label class="visually-hidden" for="api-token">Access token</label>
+      <input id="api-token" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Optional token for this session">
+      <p class="field-help">Kept in page memory only and cleared when you leave or reload. Hosted workspaces may require a token for exhaustive or live runs.</p>
+    </details>
+
+    <button class="button button-primary" type="submit"{% if not target_list %} disabled{% endif %}>Start investigation</button>
+    <p id="investigation-create-message" class="form-message" role="status" aria-live="polite"></p>
+  </form>
+  <p class="panel-footnote">HTTP 202 means the run was accepted and queued. It does not mean the investigation completed or found a failure.</p>
+</section>
+
+<section class="records-section" aria-labelledby="history-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">Persisted workspace records</p><h2 id="history-title">Investigation history</h2></div>
+    <span class="section-count">{{ records|length }} records</span>
+  </div>
+  {% if records %}
+  <div class="history-list">
+    {% for record in records %}
+    {% set record_id = record.investigation_id|default('unknown') %}
+    <article class="history-record{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %} history-record-showcase{% endif %}">
+      <div class="history-record-main">
+        <div class="history-record-head"><span class="state-chip state-{{ record.status|default('recorded')|lower }}">{{ record.status|default('recorded') }}</span>{% if record.phase %}<span class="recorded-label">{{ record.phase|replace('_', ' ')|title }}</span>{% endif %}{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %}<span class="recorded-label"><span aria-hidden="true">●</span> Recorded M2 benchmark</span>{% endif %}</div>
+        <h3><a href="/investigations/{{ record_id }}">{{ record.target_id|default('Target not recorded') }}</a></h3>
+        <p>Requested {{ record.mode_requested|default('mode not recorded') }}{% if record.mode_effective %} · effective {{ record.mode_effective }}{% endif %}{% if record.fallback_reason %} · fallback {{ record.fallback_reason|replace('_', ' ') }}{% endif %}</p>
+        <span class="record-id">{{ record_id }}</span>
+      </div>
+      <div class="history-record-stats">
+        <div><strong>{{ record.verdict or '—' }}</strong><span>business verdict{% if not record.verdict %} · unresolved{% endif %}</span></div>
+        {% if record.trials_used is defined %}<div><strong>{{ record.trials_used }}</strong><span>trials used</span></div>{% endif %}
+      </div>
+      <a class="history-open" href="/investigations/{{ record_id }}">Inspect record</a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state"><span aria-hidden="true">—</span><h2>No investigation records yet</h2><p>Start a run above. Its queued record will appear here and remain available while it executes.</p></div>
+  {% endif %}
+</section>
 {% endblock %}

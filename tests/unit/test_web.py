@@ -74,6 +74,75 @@ def _investigation(*, status: str = "completed") -> dict:
     }
 
 
+def _m3_investigation() -> dict:
+    document = _investigation()
+    document["hypotheses"] = [
+        {
+            "draft": {
+                "id": "H1",
+                "title": "Duplicate payment fulfilment",
+                "mechanism": "The handler checks before recording the payment.",
+                "mechanism_kind": "check_then_act_race",
+                "citations": [
+                    {
+                        "file": "src/handler.py",
+                        "line_start": 18,
+                        "line_end": 21,
+                        "quote": "if payment_exists(payment_id): return duplicate",
+                    }
+                ],
+                "predicted_failure": {
+                    "check": "INV-1@1",
+                    "kind": "duplicate_fulfilment",
+                    "role": "order:A",
+                },
+                "scenarios": [{"template_id": "S3", "params": {"fault": "rendezvous"}}],
+            },
+            "status": {
+                "citation": "valid",
+                "citation_errors": [],
+                "structure": "pass",
+                "structure_detail": "check then act race found",
+                "linkage": "valid",
+                "linkage_errors": [],
+                "outcome": "confirmed",
+                "outcome_detail": "predicted failure observed",
+            },
+            "usable": True,
+            "scenario_ids": ["S3-rendezvous"],
+            "scenario_specs": [],
+            "source": "model",
+        }
+    ]
+    document["scenarios"] = [
+        {
+            "template_id": "S3",
+            "scenario_id": "S3-rendezvous",
+            "params": {"fault": "rendezvous"},
+            "selected_by": "hypothesis",
+            "status": "done",
+            "result": {"status": "FAIL", "valid": 1, "fail": 1, "inconclusive": 0, "trials": 1},
+            "trials": [
+                {
+                    "trial_id": "m3-trial-001",
+                    "status": "FAIL",
+                    "reasons": ["duplicate_fulfilment"],
+                    "signature": {
+                        "check": "INV-1@1",
+                        "kind": "duplicate_fulfilment",
+                        "roles": ["order:A"],
+                    },
+                    "settlement": "clean",
+                    "released_by": "parties",
+                    "duration_s": 1.23,
+                }
+            ],
+        }
+    ]
+    document["trials"] = []
+    return document
+
+
 def _dna() -> dict:
     original_schedule = {
         "events": [],
@@ -148,8 +217,9 @@ def test_home_and_recorded_showcase_links(tmp_path: Path) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "Investigation creation" in response.text
-    assert "Investigation unavailable" in response.text
-    assert "pending" in response.text
+    assert 'href="/investigations#new-investigation"' in response.text
+    assert "New investigation" in response.text
+    assert "Investigation unavailable" not in response.text
     assert "Recorded benchmark" in response.text
     assert "/investigations/run-01" in response.text
     assert "/dna/dna-001" in response.text
@@ -186,6 +256,25 @@ def test_investigation_page_renders_citations_counts_and_trial_timeline(tmp_path
     assert "Portable Failure DNA" in response.text
 
 
+def test_m3_investigation_page_renders_nested_hypothesis_and_scenario_trial(tmp_path: Path) -> None:
+    client = _client(tmp_path, showcase=False)
+    (tmp_path / ".duress" / "investigations" / "run-01.json").write_text(
+        json.dumps(_m3_investigation())
+    )
+
+    response = client.get("/investigations/run-01")
+
+    assert response.status_code == 200
+    assert "Confirmed finding" in response.text
+    assert "Citation</dt><dd>valid</dd>" in response.text
+    assert "src/handler.py" in response.text
+    assert "lines 18–21" in response.text
+    assert "m3-trial-001" in response.text
+    assert "S3-rendezvous" in response.text
+    assert "INV-1@1" in response.text
+    assert "duplicate_fulfilment" in response.text
+
+
 def test_running_investigation_progress_fragment_polls_until_terminal(tmp_path: Path) -> None:
     client = _client(tmp_path, showcase=False)
     (tmp_path / ".duress" / "investigations" / "run-01.json").write_text(
@@ -214,8 +303,10 @@ def test_dna_page_shows_intents_release_violations_and_reduction(tmp_path: Path)
     assert "3 deliveries" in response.text
     assert "2 deliveries" in response.text
     assert "Verify a fix" in response.text
-    assert "Reduction unavailable" in response.text
-    assert "disabled" in response.text
+    assert 'id="reduce-dna-form"' in response.text
+    assert "Start bounded reduction" in response.text
+    assert "Reduction unavailable" not in response.text
+    assert '<button class="button button-primary" type="submit">Start bounded reduction</button>' in response.text
     assert "Import portable JSON" in response.text
     assert "/dna/dna-001/download" in response.text
 

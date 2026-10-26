@@ -2,102 +2,126 @@
 
 **Put your integrations under pressure. Keep the proof.**
 
-Duress is a reliability workbench for developers maintaining event-driven integrations. It runs controlled deliveries against this repository’s synthetic payment-webhook targets, checks persisted business effects, and keeps a portable reproducer when an invariant breaks.
+Duress is an autonomous reliability investigator for event-driven integrations, demonstrated against controlled synthetic payment-webhook targets. It constructs bounded experiments, inspects committed business state through an independent oracle, and preserves observed failures as portable **Failure DNA**.
 
-A successful HTTP response is an observation. The committed payment, order and fulfilment state determines the verdict.
+An HTTP acknowledgment can hide duplicate fulfilments, missing business effects, and incorrect state transitions. Duress checks the payment, order, and fulfilment rows after the target has settled.
 
-![Duress evidence workbench](docs/screenshots/workbench.png)
+![Duress workbench](docs/screenshots/workbench.png)
 
-[Recorded evidence](docs/screenshots/recorded-evidence.png) · [Failure DNA view](docs/screenshots/failure-dna.png)
+[Executed investigation](docs/screenshots/investigation.png) · [Business-state evidence](docs/screenshots/business-state.png) · [Comparison](docs/screenshots/comparison.png) · [Accepted reduction](docs/screenshots/accepted-reduction.png) · [Silent walkthrough](docs/screenshots/duress-walkthrough.webm) · [Demo outline](docs/DEMO.md)
 
-## What works today
+## From investigation to proof
 
-- A server-rendered **Jinja + HTMX web application**: workbench, target profiles, investigation records, Failure DNA library and detail, and saved replay and verification results.
-- An explicitly labelled **recorded M2 showcase**, with the original artifact, delivery sequence, release conditions, invariant violation, and historical vulnerable/fixed comparison. Browsing it starts no experiment.
-- **Portable DNA download and import/replay**, preflight integrity checks, and real fix verification through the existing API and deterministic services.
-- A CLI for scenario execution, DNA creation, replay, fix verification, cleanup, and standalone HTML reports.
-- The M0–M2 execution foundation: isolated target processes, the closed scenario registry, complete invariant packs, and deterministic verdict aggregation.
+1. **Investigate:** choose a registered target and cached, exhaustive, or configured live mode. Follow persisted execution progress, validated source citations, hypotheses, and actual findings.
+2. **Inspect:** see parameterized scenarios, delivery ordering, concurrency groups, injected faults, trial validity, invariant violations, and retained SQLite state.
+3. **Carry:** download an integrity-checked Failure DNA artifact containing the schedule, fixtures, expectations, invariant pack, and versioned execution semantics.
+4. **Replay and verify:** reproduce the failure in fresh isolated processes, then compare a candidate against the original vulnerable control. Saved operation pages retain the actual results.
+5. **Reduce and compare:** test bounded delivery removals with independent replay revalidation, or compare vulnerable, naive-fix, and corrected implementations across S3/S5/S9.
 
-**Pending:** autonomous source-grounded investigation, live/cached model support, failure reduction and `naive_fix`. The interface labels investigation creation and reduction as unavailable. It does not manufacture model findings or live results. The current release adds the product experience around M0–M2; it does not claim completion of M3–M6 in the [frozen plan](plan.md).
+The bundled M2 showcase is explicitly historical. Browsing it starts no experiment. New investigations have their own persisted records and evidence.
 
 ## Quickstart
 
-Requires Python 3.12+, [uv](https://docs.astral.sh/uv/), and macOS or Linux. Work from the repository checkout; bundled target profiles are part of the application.
+Requires Python **3.12**, [uv](https://docs.astral.sh/uv/), and macOS or Linux. Bundled target profiles are part of the application; run from the checkout.
 
 ```bash
 git clone https://github.com/marsh15/Duress.git
 cd Duress
-uv sync --frozen
-uv run duress serve --port 8000
+uv sync --locked --python 3.12
+uv run --python 3.12 duress serve --port 8000
 ```
 
-Open **http://127.0.0.1:8000**. Inspect the recorded benchmark, open its Failure DNA, download it, then use **Replay** or **Verify fix** to execute the existing local services. Results appear inline and have a saved result page. No external provider or model credentials are needed.
+Open **http://127.0.0.1:8000** and choose **New investigation**. Select `razorpay-vulnerable` and **Cached**, then start the run. Open its generated DNA to replay, verify `razorpay-fixed`, or start a reduction. **Compare fixes** runs the registered S3/S5/S9 comparison. No provider credentials are needed for cached or exhaustive execution.
 
-To replay a file, open the **Failure DNA** library and choose **Import portable JSON**. An import is checked before execution and is not silently added to the workspace. Target selectors accept only registered local implementations.
+An HTTP `202` means admission, not completion. Progress pages distinguish queued/running/completed/failed lifecycle states from PASS/FAIL/INCONCLUSIVE business verdicts. Navigation away from the page does not cancel an admitted operation. Interrupted work is marked failed on restart.
 
-## CLI
+| Mode | What it does | Limitation |
+|---|---|---|
+| Cached | Uses a matching cached response, validates citations, then executes selected scenarios | Bundled responses are **authored fixtures**, not genuine hosted inference; a miss falls back to exhaustive execution |
+| Exhaustive | Executes the seven registered investigation scenarios without model proposals | Bounded coverage, not every possible integration behavior |
+| Live | Calls the configured OpenAI-compatible provider, validates proposals, then executes scenarios | Requires server configuration; genuine hosted inference remains unverified in this release |
+
+With `DURESS_DEMO_TOKEN` set, writes require that token; cached investigation admission remains anonymously available under the existing policy. The browser keeps entered tokens in page memory only. The API allows one operation at a time and applies quotas.
+
+## A reproducible example
 
 ```bash
-uv run duress targets
-uv run duress run razorpay-fixed --scenario S3 --copies 3 --fault rendezvous
-uv run duress dna build razorpay-vulnerable --scenario S3 --copies 2
-uv run duress dna list
-uv run duress replay <dna_id>
-uv run duress verify-fix <dna_id> --candidate razorpay-fixed
-uv run duress report showcase --output /tmp/duress-report.html
-uv run duress sweep
+uv run --python 3.12 duress run razorpay-fixed --scenario S1 --json
+uv run --python 3.12 duress investigate razorpay-vulnerable --mode cached --json
+uv run --python 3.12 duress dna list
+uv run --python 3.12 duress replay <dna_id> --json
+uv run --python 3.12 duress verify-fix <dna_id> --candidate razorpay-fixed --json
+uv run --python 3.12 duress reduce <dna_id> --json
+uv run --python 3.12 duress differential --policy explore --json
 ```
 
-`run`, `replay` and `verify-fix` support `--json`. Exit codes: `0` PASS / NOT_REPRODUCED / VERIFIED; `1` FAIL / REPRODUCED / DIFFERENT_FAILURE / NOT_VERIFIED; `2` INCONCLUSIVE; `3` usage error; `4` REJECTED. A reproduced defect deliberately returns a nonzero exit code.
+The seeded vulnerable handler performs a genuine non-atomic check/await/write. Concurrent deliveries can both pass the check and create duplicate fulfilment rows. The corrected handler uses a transaction and uniqueness guarantees. The intentionally incomplete naive fix deduplicates event IDs: it withstands repeated deliveries of one event but still fails the S5 cross-event business invariant.
 
-`report` exports an existing record without executing it. The bundled showcase is a read-only record assembled from retained M2 evidence, not an autonomous investigation.
+A reproduced defect deliberately returns exit code `1`. CLI results use `0` for PASS/NOT_REPRODUCED/VERIFIED, `1` for FAIL/REPRODUCED/DIFFERENT_FAILURE/NOT_VERIFIED, `2` for INCONCLUSIVE, `3` for usage errors, and `4` for REJECTED. Reduction and differential have their documented outcome-specific exit rules in the [backend handoff](docs/BACKEND_HANDOFF.md).
 
-## How it works
+`duress report <investigation_id> --output report.html` exports a stored record without execution. `duress sweep` checks retained managed-target pidfiles.
 
-The web application and CLI call the same service layer. Every trial gets a fresh database, ephemeral port, signing secret, provider namespace, instance identity and process group. Managed targets bind only to `127.0.0.1`. The supervisor confirms process-group termination by **process-table inspection** before copying SQLite state for the oracle; signal return codes are not proof of termination.
+## The trust boundary
 
-Failure DNA embeds the execution semantics, complete invariant pack, expectation, fixtures, roles and schedule. Preflight hashes the **loaded reproducer mapping** before execution. Replay regenerates signatures. Verification re-establishes the control failure before sizing and running the candidate trials.
+The model proposes **source-grounded hypotheses and scenario selections**. Citation and structural checks assess those proposals. Deterministic execution and independent business invariants establish findings; a model cannot declare a test passed or manufacture an observation.
 
-Read the [architecture](docs/ARCHITECTURE.md), [artifact contract](docs/FAILURE_DNA.md), [engineering decisions](docs/DECISIONS.md), and [executed evidence](docs/EVIDENCE.md). Detailed history is in the [implementation log](docs/IMPLEMENTATION_LOG.md).
+The CLI, API, and Jinja/HTMX web application call one service layer and one trusted engine. Every trial gets a fresh database, ephemeral port, signing secret, provider namespace, instance identity, and process group. Managed targets bind only to loopback. The supervisor confirms process termination through process-table inspection before copying SQLite state; a signal result, including `EPERM`, is not proof of exit.
 
-## Verification
+Six business invariants and scenario-specific expectations evaluate the settled state. Incomplete or invalid trials cannot silently become PASS. Parameterized scenario IDs remain distinct, and hypotheses omitted by a trial cap remain unexecuted.
+
+## Failure DNA and bounded claims
+
+Failure DNA is a versioned, content-addressed reproducer. Preflight verifies the digest against the **loaded reproducer mapping**, checks compatibility and complete invariant definitions, and refuses tampered or incompatible artifacts before execution. Replay regenerates runtime signatures. Downloading or rendering an artifact does not rewrite it.
+
+Fix verification first re-establishes the vulnerable control, then sizes a candidate trial count from its observed failure rate. **VERIFIED is conditional empirical evidence for that reproducer**, not universal correctness or a mathematical proof.
+
+Reduction preserves relevant roles, ordering, concurrency, faults, expectations, and release conditions. A smaller candidate becomes primary only after independent replay revalidation. Rendezvous schedules may admit no removal; that is a valid NOT_REDUCED result. Claims never establish global minimality. Derived artifacts have separate identities, while originals remain available.
+
+## Verification and evidence
 
 ```bash
-uv run pytest -q -m 'not slow and not browser'
-uv run playwright install chromium
-DURESS_BROWSER_TESTS=1 uv run pytest -q tests/browser
+DURESS_RECORD_MEASUREMENTS=0 uv run --python 3.12 pytest -q -m 'not slow and not browser'
+uv run --python 3.12 playwright install chromium
+DURESS_BROWSER_TESTS=1 uv run --python 3.12 pytest -q tests/browser
 scripts/smoke.sh http://127.0.0.1:8000
 scripts/smoke.sh http://127.0.0.1:8000 --dna showcase/dna/e8007dd56adae8ae.json
+UV_PYTHON=3.12 scripts/portability.sh
 ```
 
-Browser coverage includes navigation, mobile layouts, keyboard access, axe checks, artifact export, tamper rejection, and real replay/fix verification. Exact commands, counts and limitations belong in [EVIDENCE.md](docs/EVIDENCE.md).
+Release gates recorded 666 passing broad Python tests, three passing slow experiments, the ten browser scenarios (including documented targeted reruns), and 79 passing final focused cases in both the clean Python 3.12 checkout and Linux container. Exact scope and failed development attempts remain in the evidence.
 
-Record new measurements explicitly; ordinary test runs do not rewrite committed measurements:
+Browser checks exercise real local services, including investigation creation, persisted progress, business-state evidence, DNA export, replay, verification, reduction, differential comparison, tamper rejection, keyboard navigation, responsive layouts, and axe accessibility checks.
 
-```bash
-DURESS_RECORD_MEASUREMENTS=1 uv run python scripts/measure.py --run fast
-uv run python scripts/measure.py --render > /tmp/duress-evidence.md
-```
+[New release records](docs/release/2026-10-27/) retain a real 30-trial cached investigation (FAIL), 10/10 replay reproduction, a 5/5 vulnerable control and 20 zero-failure corrected trials, a truthful NOT_REDUCED result, and a 9/9 agreeing 45-trial differential matrix. A separate latency experiment also produced an accepted 3→2 reduction whose downloaded artifact independently reproduced in 10/10 valid trials. These are bounded local observations, with authored fixture provenance. [Executed evidence](docs/EVIDENCE.md) records actual commands, counts, environment, and failures. [Runtime verification](docs/FINAL_RUNTIME.md) records Docker and artifact-only portability checks. Historical M0–M4 measurements remain unchanged and distinct from new integrated runs.
 
-## Docker and deployment
+Ordinary pytest does not overwrite historical measurements. Intentional new measurements use `DURESS_RECORD_MEASUREMENTS=1 uv run python scripts/measure.py --run fast`; `--render` reads retained evidence without execution.
+
+## Docker and Render
 
 ```bash
 docker build -t duress:web .
 docker run --rm -p 8000:8000 -e PORT=8000 duress:web
 ```
 
-The public application serves on `0.0.0.0:$PORT`; managed reference targets remain loopback-only. [render.yaml](render.yaml) describes a Render Docker service. **Hosted deployment is not verified.** See the [operations guide](docs/OPERATIONS.md) for local and container smoke checks.
+The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [render.yaml](render.yaml) defines the intended Render Docker service and health check. **No public deployment is claimed:** authenticated Render access was unavailable. See the [operations guide](docs/OPERATIONS.md) for deployment, storage, limits, and smoke checks.
 
 | Variable | Purpose |
 |---|---|
-| `DURESS_ROOT` | Checkout root containing target profiles; set to `/app` in Docker |
-| `DURESS_HOME` | Runtime JSON, evidence and pidfiles; defaults to `.duress/` |
-| `DURESS_DEMO_TOKEN` | When set, replay and verification require `X-Duress-Token` or bearer authorization |
-| `DURESS_HOSTED` | Marks the hosted deployment in health metadata |
+| `DURESS_ROOT` | Checkout root containing target profiles; `/app` in Docker |
+| `DURESS_HOME` | Runtime records, evidence, and pidfiles; defaults to `.duress/` |
+| `DURESS_DEMO_TOKEN` | Protects write operations via `X-Duress-Token` or bearer authorization, subject to cached-mode admission policy |
+| `DURESS_HOSTED` | Hosted metadata in `/api/health` |
 | `PORT` | Container public listening port; defaults to `8000` |
+| `DURESS_LLM_BASE_URL` | OpenAI-compatible API base URL, including its API version prefix where needed |
+| `DURESS_LLM_MODEL` | Provider model identifier for live mode |
+| `DURESS_LLM_API_KEY` | Runtime provider API key when required |
 
-The browser keeps an entered access token in memory only. Hosted runtime data is **ephemeral** and disappears on restart; download DNA you want to retain. The committed showcase is bundled into the image. The existing API allows one operation at a time and applies request quotas.
+## Stack, scope, and limitations
 
-## Boundaries
+Python 3.12, FastAPI, Pydantic, SQLite, HTTPX, Typer, Jinja, HTMX, pytest, and Playwright. Assets are bundled and require no CDN.
 
-The reference defect is a seeded benchmark, not a discovery about a third-party integration. Experiments are restricted to bundled, locally controlled targets. PASS and VERIFIED are bounded empirical statements, not proofs of correctness. DNA digests detect alteration, not authorship. This is a single-workspace developer application, not a multi-user service; records and results are publicly readable when you expose the server. Do not store sensitive production data in the public demo.
+This demonstrates a controlled synthetic integration contract, not arbitrary production targets or a finding about Razorpay. Fault-controlled experiments are labelled separately from fault-free observations. Digests detect alteration, not authorship. The application is a single-workspace developer tool; reads are public if exposed. Use one API worker because admission and background tasks are process-local. Hosted storage is ephemeral; download artifacts to retain them across redeploys.
+
+Genuine hosted inference, the multi-run hosted live-versus-exhaustive comparison, and Render capacity remain unverified. Cached and exhaustive modes remain fully usable. No local model weights are required or downloaded.
+
+[Architecture](docs/ARCHITECTURE.md) · [Artifact contract](docs/FAILURE_DNA.md) · [Decisions](docs/DECISIONS.md) · [Implementation history](docs/IMPLEMENTATION_LOG.md) · [Backend/API contract](docs/BACKEND_HANDOFF.md)

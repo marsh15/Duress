@@ -1,9 +1,10 @@
 """SQLite schema for the reference integration.
 
-Both variants share the same tables. The fixed variant adds the two UNIQUE
+All variants share the same core tables. The fixed variant adds the two UNIQUE
 constraints on ``fulfilments`` that make single fulfilment a database-level
 guarantee rather than an application-level convention. The vulnerable variant
-intentionally omits them (M0 defect D-1).
+intentionally omits them (M0 defect D-1). The naive_fix variant is the vulnerable
+schema plus a ``webhook_events`` table keyed by event id, and nothing else.
 """
 
 VULNERABLE_SCHEMA = """
@@ -64,7 +65,17 @@ CREATE INDEX idx_fulfilments_order   ON fulfilments(order_id);
 CREATE INDEX idx_fulfilments_payment ON fulfilments(payment_id);
 """
 
-SCHEMAS = {"vulnerable": VULNERABLE_SCHEMA, "fixed": FIXED_SCHEMA}
+NAIVE_FIX_SCHEMA = (
+    VULNERABLE_SCHEMA
+    + """
+CREATE TABLE webhook_events (
+    event_id    TEXT PRIMARY KEY,
+    received_at TEXT NOT NULL
+);
+"""
+)
+
+SCHEMAS = {"vulnerable": VULNERABLE_SCHEMA, "fixed": FIXED_SCHEMA, "naive_fix": NAIVE_FIX_SCHEMA}
 VARIANTS = tuple(SCHEMAS)
 
 

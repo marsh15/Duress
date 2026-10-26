@@ -24,5 +24,5 @@
   {% if view.statement %}<blockquote class="verification-statement"><p>{{ view.statement }}</p><footer>Historical or returned verification statement</footer></blockquote>{% endif %}
 </section>
 
-<details class="artifact-json"><summary>Inspect complete operation record</summary><pre><code>{{ view.payload|tojson(indent=2) }}</code></pre></details>
+<details class="artifact-json"><summary>Inspect complete operation record</summary><pre tabindex="0"><code>{{ view.payload|tojson(indent=2) }}</code></pre></details>
 {% endblock %}

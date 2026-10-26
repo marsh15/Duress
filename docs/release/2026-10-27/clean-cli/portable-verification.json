@@ -1,0 +1,30 @@
+{
+  "outcome": "VERIFIED",
+  "reason": null,
+  "dna_id": "0edb63c480dbc29b",
+  "vulnerable_target_id": "razorpay-vulnerable",
+  "candidate_target_id": "razorpay-fixed",
+  "statement": "The failure reproduced in 5/5 valid control trials on razorpay-vulnerable. It was not observed in 20 valid trials on razorpay-fixed under the same DNA conditions. If razorpay-fixed still failed independently with per-trial probability 0.9900, the chance of seeing no failures in 20 valid trials would be (1-0.9900)^20 = 1.00e-40 <= 1%. Under the same independence assumption, about 0.150 is an approximate 95% upper bound on razorpay-fixed's per-trial failure probability for this reproducer. This does not establish correctness for other schedules, loads or environments.",
+  "control": {
+    "valid": 5,
+    "fail": 5,
+    "inconclusive": 0,
+    "trials": 5,
+    "same_signature_failures": 5,
+    "p_hat": 1.0,
+    "p0": 1.0,
+    "required_valid": 5,
+    "reason": null
+  },
+  "candidate": {
+    "valid": 20,
+    "fail": 0,
+    "inconclusive": 0,
+    "trials": 20,
+    "same_signature_failures": 0,
+    "other_failures": 0,
+    "required_valid": 20,
+    "budget_exhausted": false,
+    "reason": null
+  }
+}

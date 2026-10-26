@@ -1,0 +1,136 @@
+#0 building with "orbstack" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 626B 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 ...
+
+#3 [internal] load metadata for ghcr.io/astral-sh/uv:0.12.19
+#3 DONE 0.9s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 DONE 1.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 140B done
+#4 DONE 0.0s
+
+#5 FROM ghcr.io/astral-sh/uv:0.12.19@sha256:04d046b13e60d6bcec73cbc5e1cad25d680dea90c8573340950a0ac2d1aef424
+#5 resolve ghcr.io/astral-sh/uv:0.12.19@sha256:04d046b13e60d6bcec73cbc5e1cad25d680dea90c8573340950a0ac2d1aef424 0.0s done
+#5 DONE 0.0s
+
+#6 [stage-0 1/7] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#6 resolve docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 36.20kB 0.0s done
+#7 DONE 0.0s
+
+#5 FROM ghcr.io/astral-sh/uv:0.12.19@sha256:04d046b13e60d6bcec73cbc5e1cad25d680dea90c8573340950a0ac2d1aef424
+#5 sha256:f10633f532e3165bbdcff02b4f1ea01aaff38568f56e2f267e255247bd1f6888 0B / 98B 0.2s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 0B / 22.24MB 0.2s
+#5 sha256:f10633f532e3165bbdcff02b4f1ea01aaff38568f56e2f267e255247bd1f6888 98B / 98B 0.6s done
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 2.10MB / 22.24MB 1.4s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 4.19MB / 22.24MB 1.5s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 6.29MB / 22.24MB 1.8s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 8.39MB / 22.24MB 2.6s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 10.49MB / 22.24MB 3.5s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 12.58MB / 22.24MB 4.2s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 14.68MB / 22.24MB 4.7s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 16.78MB / 22.24MB 5.1s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 18.87MB / 22.24MB 5.6s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 20.97MB / 22.24MB 5.9s
+#5 sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 22.24MB / 22.24MB 6.3s done
+#5 extracting sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00
+#5 extracting sha256:add291d7adc1edf47af06a937ab5dce60a2485ced5c7094ba09a1e9f6e2d2c00 0.3s done
+#5 DONE 6.7s
+
+#5 FROM ghcr.io/astral-sh/uv:0.12.19@sha256:04d046b13e60d6bcec73cbc5e1cad25d680dea90c8573340950a0ac2d1aef424
+#5 extracting sha256:f10633f532e3165bbdcff02b4f1ea01aaff38568f56e2f267e255247bd1f6888 0.0s done
+#5 DONE 6.8s
+
+#6 [stage-0 1/7] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#6 CACHED
+
+#8 [stage-0 2/7] COPY --from=ghcr.io/astral-sh/uv:0.12.19 /uv /uvx /bin/
+#8 DONE 3.4s
+
+#9 [stage-0 3/7] WORKDIR /app
+#9 DONE 0.1s
+
+#10 [stage-0 4/7] COPY pyproject.toml uv.lock ./
+#10 DONE 0.1s
+
+#11 [stage-0 5/7] RUN uv sync --frozen --no-install-project
+#11 0.450 Using CPython 3.12.15 interpreter at: /usr/local/bin/python3
+#11 0.450 Creating virtual environment at: .venv
+#11 0.684 Downloading pygments (1.2MiB)
+#11 0.684 Downloading pydantic-core (2.0MiB)
+#11 0.686 Downloading playwright (45.9MiB)
+#11 1.842  Downloaded pygments
+#11 2.621  Downloaded pydantic-core
+#11 12.37  Downloaded playwright
+#11 12.37 Prepared 33 packages in 11.91s
+#11 12.88 Installed 33 packages in 512ms
+#11 14.09 Bytecode compiled 1231 files in 1.20s
+#11 14.09  + annotated-doc==0.0.5
+#11 14.09  + annotated-types==0.8.0
+#11 14.09  + anyio==4.15.1
+#11 14.09  + certifi==2026.10.23
+#11 14.09  + click==8.5.0
+#11 14.09  + fastapi==0.162.0
+#11 14.09  + greenlet==3.5.6
+#11 14.09  + h11==0.16.0
+#11 14.09  + httpcore==1.0.9
+#11 14.09  + httpx==0.28.1
+#11 14.09  + idna==3.20
+#11 14.09  + iniconfig==2.3.1
+#11 14.09  + jinja2==3.1.6
+#11 14.09  + markdown-it-py==4.2.0
+#11 14.09  + markupsafe==3.0.4
+#11 14.09  + mdurl==0.1.2
+#11 14.09  + opentelemetry-api==1.45.1
+#11 14.09  + packaging==26.3
+#11 14.09  + playwright==1.64.1
+#11 14.09  + pluggy==1.7.0
+#11 14.09  + pydantic==2.14.1
+#11 14.09  + pydantic-core==2.50.1
+#11 14.09  + pyee==14.0.0
+#11 14.09  + pygments==2.21.0
+#11 14.09  + pytest==9.1.1
+#11 14.09  + pytest-asyncio==1.4.1
+#11 14.09  + rich==15.0.0
+#11 14.09  + shellingham==1.5.4
+#11 14.09  + starlette==1.10.0
+#11 14.09  + typer==0.27.3
+#11 14.09  + typing-extensions==4.16.0
+#11 14.09  + typing-inspection==0.4.4
+#11 14.09  + uvicorn==0.54.0
+#11 DONE 14.3s
+
+#12 [stage-0 6/7] COPY . .
+#12 DONE 0.2s
+
+#13 [stage-0 7/7] RUN uv sync --frozen && chmod +x scripts/*.sh
+#13 0.260    Building duress @ file:///app
+#13 1.296       Built duress @ file:///app
+#13 1.298 Prepared 1 package in 1.03s
+#13 1.300 Installed 1 package in 1ms
+#13 1.460 Bytecode compiled 1231 files in 159ms
+#13 1.460  + duress==0.1.0 (from file:///app)
+#13 DONE 1.5s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 14.7s done
+#14 exporting manifest sha256:31c3fd2c27af0500a3cec2f054f131337ad603bd1335917a43bf728863ff3c5d 0.0s done
+#14 exporting config sha256:0ff0ec5d1a70dc7c7499d2d4f1500c3fa1d654f2433c333df45e304455641a6b 0.0s done
+#14 exporting attestation manifest sha256:70f332547f6c2910ba70f2065a48018b80c6dff8e97091f51f7c5e8c1e57e6dc 0.0s done
+#14 exporting manifest list sha256:53f47629466fb4b800b059d837e6a6b4e731a7133fde725b2960846703a1cdf5 0.0s done
+#14 naming to docker.io/library/duress:release done
+#14 unpacking to docker.io/library/duress:release
+#14 unpacking to docker.io/library/duress:release 4.9s done
+#14 DONE 19.7s

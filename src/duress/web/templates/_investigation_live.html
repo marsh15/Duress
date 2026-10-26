@@ -1,3 +1,4 @@
 <div id="investigation-live" class="investigation-live"{% if poll %} hx-get="{{ poll_url }}" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}>
+  <aside id="investigation-poll-message" class="notice notice-orange" role="status" aria-live="polite" hidden></aside>
   {% include "_investigation_body.html" %}
 </div>

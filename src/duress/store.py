@@ -21,7 +21,7 @@ def duress_home(root: Path | None = None) -> Path:
 
 
 def ensure_dirs(home: Path) -> None:
-    for name in ("investigations", "dna", "evidence", "run"):
+    for name in ("investigations", "dna", "evidence", "run", "reductions", "differentials"):
         (home / name).mkdir(parents=True, exist_ok=True)
 
 
@@ -341,10 +341,10 @@ def save_dna(home: Path, document: Any) -> Path:
 
 
 def load_dna_payload(home: Path, dna_id: str) -> Any:
-    path = dna_path(home, dna_id)
-    if not path.exists():
-        raise FileNotFoundError(dna_id)
-    return read_json(path)
+    from .records import read_record
+
+    # Preserve the raw loaded mapping for digest preflight; do not normalize it.
+    return read_record(home / "dna", dna_id)
 
 
 def list_dna(home: Path) -> list[dict[str, Any]]:
@@ -354,8 +354,13 @@ def list_dna(home: Path) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for path in sorted(directory.glob("*.json")):
         try:
-            payload = read_json(path)
-        except (OSError, ValueError):
+            payload = load_dna_payload(home, path.stem)
+        except FileNotFoundError:
+            continue
+        if not isinstance(payload.get("reproducer"), dict) or any(
+            key in payload and not isinstance(payload[key], dict)
+            for key in ("characterization", "provenance_scenario", "provenance")
+        ):
             continue
         items.append(
             {

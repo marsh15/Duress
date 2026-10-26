@@ -22,7 +22,7 @@ from . import __version__
 from . import limits as limits_module
 from .services import Workspace, dna_index, load_dna_document, replay, replay_payload, verify_fix
 from .records import (
-    ensure_showcase, investigation_index, load_investigation_record,
+    ensure_showcase,
     load_operation_record, save_operation_record,
 )
 
@@ -58,7 +58,7 @@ class RateLimiter:
     hour: dict[str, deque[float]] = field(default_factory=lambda: defaultdict(deque))
     day: dict[str, deque[float]] = field(default_factory=lambda: defaultdict(deque))
 
-    def allow(self, key: str) -> bool:
+    def allow(self, key: str, *, consume: bool = True) -> bool:
         now = self.clock()
         for bucket, window in ((self.hour, 3600.0), (self.day, 86400.0)):
             entries = bucket[key]
@@ -68,8 +68,9 @@ class RateLimiter:
             return False
         if len(self.day[key]) >= self.per_day:
             return False
-        self.hour[key].append(now)
-        self.day[key].append(now)
+        if consume:
+            self.hour[key].append(now)
+            self.day[key].append(now)
         return True
 
 
@@ -164,11 +165,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return await call_next(request)
 
     def begin_operation(request: Request) -> None:
-        if not rate.allow(client_key(request)):
+        key = client_key(request)
+        if not rate.allow(key, consume=False):
             raise HTTPException(status_code=429, detail="rate_limited")
         if not gate.acquire():
-            # A refused admission must not consume the caller's quota twice.
             raise HTTPException(status_code=409, detail="operation_in_progress")
+        # There is no await between checking and consuming admission.
+        rate.allow(key)
 
     @app.get("/api/health")
     def health() -> dict[str, Any]:
@@ -199,17 +202,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/dna")
     def dna_list() -> dict[str, Any]:
         return {"items": dna_index(workspace())}
-
-    @app.get("/api/investigations")
-    def investigations() -> dict[str, Any]:
-        return {"items": investigation_index(workspace()), "creation_available": False}
-
-    @app.get("/api/investigations/{investigation_id}")
-    def investigation_get(investigation_id: str) -> dict[str, Any]:
-        try:
-            return load_investigation_record(workspace(), investigation_id)
-        except FileNotFoundError:
-            raise HTTPException(status_code=404, detail="unknown_investigation") from None
 
     @app.get("/api/operations/{operation_id}")
     def operation_get(operation_id: str) -> dict[str, Any]:
@@ -307,7 +299,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         finally:
             gate.release()
 
+    from .api_backend import install_backend_routes
     from .web import install_web
 
+    install_backend_routes(
+        app,
+        settings=settings,
+        workspace=workspace,
+        authorize=authorize,
+        begin_operation=begin_operation,
+        gate=gate,
+    )
     install_web(app, workspace)
     return app

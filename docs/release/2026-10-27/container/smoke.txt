@@ -1,0 +1,15 @@
+== public health API ==
+PASS health (version 0.1.0)
+== public target registry ==
+PASS targets: razorpay-vulnerable, razorpay-fixed
+== public pages ==
+PASS public page home (HTTP 200, HTML)
+PASS public page investigation detail (HTTP 200, HTML)
+PASS public page DNA detail (HTTP 200, HTML)
+== portable DNA replay ==
+PASS portable payload replay: REPRODUCED
+== verify-fix ==
+PASS verify-fix: VERIFIED
+== smoke passed ==
+No cached or live investigation was started; only public reads and explicitly requested DNA operations ran.
+warning: `VIRTUAL_ENV=/Users/santoshkumar/myprojects/Duress-core/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead

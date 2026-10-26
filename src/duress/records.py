@@ -42,13 +42,14 @@ def ensure_showcase(workspace) -> None:
 
 
 def load_investigation_record(workspace, investigation_id: str) -> dict[str, Any]:
-    try:
-        return read_record(workspace.home / "investigations", investigation_id)
-    except FileNotFoundError:
-        showcase = read_record(workspace.root / "showcase", "investigation")
-        if investigation_id not in {"showcase", showcase.get("investigation_id")}:
-            raise FileNotFoundError(investigation_id) from None
-        return showcase
+    directory = workspace.home / "investigations"
+    local = directory / f"{investigation_id}.json"
+    if local.exists() or local.is_symlink():
+        return read_record(directory, investigation_id)
+    showcase = read_record(workspace.root / "showcase", "investigation")
+    if investigation_id not in {"showcase", showcase.get("investigation_id")}:
+        raise FileNotFoundError(investigation_id)
+    return showcase
 
 
 def investigation_index(workspace) -> list[dict[str, Any]]:

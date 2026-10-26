@@ -18,5 +18,6 @@ services:
         value: /tmp/duress
       - key: DURESS_DEMO_TOKEN
         generateValue: true
-      # Autonomous model-provider configuration is pending; this web release
-      # browses recorded evidence and uses the existing replay/verify services.
+      # The full investigation UI is enabled. Live model-backed runs use
+      # DURESS_LLM_BASE_URL, DURESS_LLM_MODEL and, when required, DURESS_LLM_API_KEY
+      # configured in the Render service environment.

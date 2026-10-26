@@ -20,4 +20,4 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 # The public service is the only thing bound to 0.0.0.0. Managed targets are
 # loopback-only and refused otherwise (plan P4f).
-CMD ["sh", "-c", "duress serve --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "exec duress serve --host 0.0.0.0 --port ${PORT:-8000}"]

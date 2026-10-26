@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "run_id": "20261026T202054Z-1d7e6e4f",
+  "generated_at": "2026-10-26T20:32:01+00:00",
+  "recorded": true,
+  "environment": {
+    "worktree_dirty": true,
+    "source_tree_sha256": "c44d37a404ffcbce79923e7f61b0ea6d5ab75afa607cc47303bfd39250896b59",
+    "python": "3.12.12",
+    "python_implementation": "CPython",
+    "sqlite": "3.53.4",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "uv": "uv 0.12.19 (Homebrew 2026-09-24 aarch64-apple-darwin)",
+    "packages": {
+      "pytest": "9.1.1",
+      "fastapi": "0.162.0",
+      "httpx": "0.28.1",
+      "pydantic": "2.14.1",
+      "uvicorn": "0.54.0"
+    },
+    "git_revision": "91af35e47d0781c9b1ecc0d8120e8f7a5291beb1"
+  },
+  "suites": [
+    {
+      "name": "fast",
+      "started_at": "2026-10-26T20:20:54+00:00",
+      "command": "/opt/homebrew/bin/uv run pytest -q -m 'not slow' --junitxml=/Users/santoshkumar/myprojects/Duress-core/docs/measurements/release-runs/20261026T202054Z-1d7e6e4f/01-fast/junit.xml",
+      "exit_code": 0,
+      "seconds": 666.86,
+      "counts": {
+        "collected": 676,
+        "passed": 666,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 10
+      },
+      "junit_xml": "docs/measurements/release-runs/20261026T202054Z-1d7e6e4f/01-fast/junit.xml",
+      "failure_output": ""
+    }
+  ],
+  "record_path": "docs/measurements/release-20261026T202054Z-1d7e6e4f.json"
+}

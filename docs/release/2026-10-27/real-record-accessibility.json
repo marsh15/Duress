@@ -1,0 +1,38 @@
+{
+  "method": "axe-core 4.10.3 and viewport checks against actual saved local records",
+  "results": [
+    {
+      "route": "/investigations/inv-20261026T201423-ce3e28",
+      "serious_critical_axe_violations": [],
+      "fits_viewport": {
+        "390": true,
+        "768": true
+      }
+    },
+    {
+      "route": "/reductions/red-7adc661ef772",
+      "serious_critical_axe_violations": [],
+      "fits_viewport": {
+        "390": true,
+        "768": true
+      }
+    },
+    {
+      "route": "/differential/diff-3212fcb129e2",
+      "serious_critical_axe_violations": [],
+      "fits_viewport": {
+        "390": true,
+        "768": true
+      }
+    },
+    {
+      "route": "/evidence/td42b59f1dd23",
+      "serious_critical_axe_violations": [],
+      "fits_viewport": {
+        "390": true,
+        "768": true
+      }
+    }
+  ],
+  "source_commit": "4cdb718028a3c1e69d81143968edd48112e3a6fb"
+}

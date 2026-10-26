@@ -1,7 +1,7 @@
 # Decisions
 
 Decisions are recorded here with the milestone that introduced them. Revision 4 of
-`plan.md` is the frozen contract; this file records how M0 implements it and why.
+`plan.md` is the frozen contract; this file records milestone implementations and why.
 
 ## M0 — reference integration and concurrency reproduction
 
@@ -351,7 +351,167 @@ The trial supervisor still refuses any managed target host other than
 container smoke test observes the public API answering on `0.0.0.0` while the
 trial targets remain loopback-only.
 
-## Web application release
+## M3 — bounded investigations and evidence-based hypotheses
+
+### D-M3-1 — Model text selects experiments; execution resolves predictions
+
+**Status:** implemented.
+
+The investigator builds an allowlisted, bounded source bundle, validates exact
+file/line citations, checks check/await/write structure with AST inspection, and
+links predictions to a closed scenario registry. Normalized built scenario IDs
+connect model picks, selected experiments and results. S1/S2 are controls;
+selection is capped at seven. Only a FAIL trial with the predicted check, kind
+and role confirms a hypothesis. A different observed failure stays distinct.
+Every linked experiment must have passed to refute a prediction; a missing or
+inconclusive experiment cannot establish refutation. Finding attribution checks
+the predicted check, kind and role too: confirmation elsewhere does not link a
+hypothesis to a different failure from another selected experiment. Rejected hypotheses remain
+visible. The fixed target may refute a usable hypothesis whose structure check
+already reported a transactional recheck.
+
+### D-M3-2 — Explicit authored cache provenance and bounded HTTP inference
+
+**Status:** client and fixture paths verified; genuine hosted inference unverified.
+
+The live client sends OpenAI-compatible JSON-mode requests. It permits one
+output repair, with shared call/input-token budgets and a total request timeout
+capped at 60 seconds. Both estimated and reported input usage are charged;
+over-budget responses are refused before recording. Errors redact the key
+before truncation. Cached mode reads model/prompt-addressed fixtures and never
+contacts the provider. Authored fixtures use `duress-authored-fixture` and
+`authored_fixture` provenance so they cannot be reported as observed model
+output. Missing/invalid/unusable model responses fall back to the seven real
+registry scenarios. HTTP fixtures exercise the protocol without credentials.
+The five-run hosted live-versus-exhaustive experiment remains pending.
+
+### D-M3-3 — No-provider-network checks must permit the managed target network
+
+**Status:** diagnosed and corrected.
+
+The interrupted E2E fixture patched `httpx.AsyncClient` globally. Readiness and
+webhook execution use that same client, so all trials became INCONCLUSIVE with
+`harness_error:AssertionError`. This caused both reported failures and let the
+fixed-target test pass without executing a valid trial. The fixture now blocks
+model inference and non-loopback HTTP while allowing the managed synthetic
+target traffic. Outcome assertions are retained; the fixed target must PASS.
+No verdict, oracle, aggregation or process-liveness rule was weakened.
+
+### D-M3-4 — Characterization failures still consume trials
+
+**Status:** implemented and regression-tested.
+
+A failed characterization now carries its executed ScenarioResult on DnaError,
+so the investigation accounts for its trials and exhausted budget even when no
+DNA is produced. A characterization that reproduces a different signature is
+not attached as the original finding's DNA. This metadata does not change
+preflight's digest calculation, the reproducer identity or M2 replay behavior.
+
+### D-M3-5 — Persisted records are shared across API and CLI
+
+**Status:** implemented; frontend merge requires route reconciliation.
+
+Investigations persist atomic progress records and expose queued/running/
+completed/failed separately from PASS/FAIL/INCONCLUSIVE. `api_backend.py`
+registers the M3/M4 routes once inside the existing application, sharing its
+workspace, rate limiter and operation gate. M2 replay and verify-fix endpoints
+retain their contracts. The upstream web checkout also defines read-only investigation record routes.
+For this merge, `api_backend.install_backend_routes()` owns the investigation
+list/start/detail, hypothesis/findings, reduction and differential APIs. Keep the
+upstream web pages and templates plus `GET /api/operations/{operation_id}`; do not
+register the upstream `GET /api/investigations` or
+`GET /api/investigations/{investigation_id}` handlers alongside the backend
+handlers. The web pages use those backend-owned investigation reads; saved-result
+pages retain the upstream `GET /api/operations/{operation_id}` lookup.
+`BACKEND_HANDOFF.md` records the route reconciliation details. This decision
+records route ownership; the in-progress API integration is not claimed as
+complete here.
+
+## M4 — bounded reduction and differential evidence
+
+### D-M4-1 — Reduction preserves the experiment, not just its failure label
+
+**Status:** implemented and tested against fake executors and managed targets.
+
+Reduction removes one delivery and drops newly empty steps. It preserves the
+exact surviving step order/concurrency, retained deliveries/intents, business
+roles, faults, retry policy, fixtures, seed, expectation, invariant pack and
+execution semantics. Required-evidence/pass-condition deliveries are pinned.
+Party-released DNA cannot lose matching arrivals below the original party count.
+The runtime predicate requires three valid same-signature failures with the
+original release; incomplete or contradictory trial summaries remain unknown.
+Non-finite p0 and inconsistent original release metadata cannot qualify.
+
+Reverse-order greedy search is bounded to ten admissible candidates, restarting
+after acceptance. Claims describe only admissible single-delivery removal under
+this predicate. With no accepted deletion and incomplete evidence, the honest
+claim is "not reduced; 1-minimality not established". Global minimality is never
+claimed. Investigation-triggered reduction shares the investigation deadline;
+its search, independent revalidation and required black-box characterization all
+use the same runner start-margin rule. Trial accounting includes all stages.
+
+### D-M4-2 — Failed revalidation retains the original primary artifact
+
+**Status:** implemented.
+
+A reduced schedule gets a new reproducer digest and must pass unchanged
+preflight. Replay revalidation requires at least ten valid trials, p >= 0.9 for
+the original signature and the original uniform release. A failed check yields
+INCONCLUSIVE and keeps the original primary; the proposed artifact may remain
+for inspection. Accepted reduced DNA embeds the full experiment and is tested
+with artifact-only independent replay. Neither the preflight digest calculation
+nor the process-table group-liveness rules changed.
+
+### D-M4-3 — Event identity is intentionally insufficient business deduplication
+
+**Status:** implemented in the synthetic naive_fix target.
+
+`naive_fix` adds an event-ID table in front of the unchanged vulnerable handler.
+It passes same-event S3 deliveries and sequential S9, but distinct S5 event IDs
+for the same payment retain the actual check/await/write race. Differential
+cells report observed verdicts beside expectations; inconclusive cells are not
+agreement and use CLI exit code 2. Verify-fix against S5 DNA must reject this
+candidate as NOT_VERIFIED, still_reproduces.
+
+### D-M4-4 — Accepted API work must leave a pollable terminal record
+
+**Status:** implemented and contract-tested.
+
+Reduction starts queued, advances to running, and records completed or failed.
+Unexpected failures before a service writes its own record are recorded by the
+API wrapper for investigations and differentials too. Differential picks are
+validated against the same closed parameter library before admission; explicit
+empty lists are refused instead of silently running defaults. Busy refusals no
+longer consume the start quota: admission checks rate eligibility, acquires the
+shared gate, then charges the accepted operation without an intervening await.
+This retains 401/429/409 behavior and prevents an unrelated busy request from
+exhausting a caller's quota.
+
+
+### D-M4-5 — Final review closed affected-role and lifecycle gaps
+
+**Status:** implemented and regression-tested.
+
+Concurrent-group admissibility counts deliveries per affected signature role;
+unrelated deliveries cannot preserve that role's race, and unrelated groups do
+not pin otherwise removable deliveries. Two negative regressions cover both
+directions. Fault-free characterization is now part of the public reduction
+path by default, including investigations; the API refuses an explicit opt-out.
+Its observed rate is stored on the original's unhashed characterization metadata
+and on the reduction summary. Investigations reserve all 62 possible trials
+(40 candidate + 11 replay + 11 fault-free), preserving the 130-trial cap.
+
+The backend composes the app lifespan: shutdown cancels owned tasks and awaits
+cleanup, recording CancelledError before re-raising it. Cancellation before the
+runner starts also releases admission and closes the unstarted coroutine. On
+startup, stale queued/running records become failed with interrupted_by_restart.
+Completed records stay unchanged. Lifecycle tests cover all three operation
+types and startup reconciliation. Durable resumption is outside these milestones.
+
+## Web application release (M6 snapshot at upstream commit 4743a5e)
+
+The following decisions describe the frontend release snapshot before the M3/M4 backend branch was integrated. Statements that investigation creation or reduction were pending are historical release-scope statements; the backend decisions above document their later implementation and acceptance.
+
 
 ### D-WEB-1 — Presentation uses the existing execution boundary
 
@@ -372,3 +532,29 @@ An operation record retains the exact response from the existing service togethe
 ### D-WEB-5 — UI labels never become portable artifact fields
 
 Final inspection caught a showcase label being attached to the DNA mapping used by the page. Although downloads remained unchanged, copying the displayed JSON could include an unsupported extra field. The label now lives exclusively in the view context. A regression compares embedded JSON with the actual download and validates the document schema. The reproducer and existing preflight logic were not changed.
+
+## Final integrated product delivery
+
+### D-RELEASE-1 — Forms use the existing asynchronous admission contract
+
+Investigation, reduction, and differential creation call their backend-owned routes. A 202 is admission only. Persisted records are the progress source; lifecycle completion does not override FAIL or INCONCLUSIVE. There is still one engine, one in-process operation gate, and one API worker. Visible polling errors distinguish an unavailable record from an unresolved experiment.
+
+### D-RELEASE-2 — Retain schedules rather than reconstructing history
+
+Investigation persistence now includes the actual built schedule and control level for each exact parameterized scenario ID. This is additive presentation evidence, not a change to execution semantics. Older records say their schedule was not retained. Authored fixtures remain labelled, and unexecuted/rejected hypotheses never become confirmed findings through presentation.
+
+### D-RELEASE-3 — Expose only settled business snapshots
+
+The UI reads the supervisor's copied SQLite snapshot in read-only mode and renders only orders, payments, and fulfilments. It refuses symlinks and missing/corrupt snapshots and computes no new verdict. Passing-trial evidence is normally removed. This preserves the execution boundary while making the committed effects inspectable.
+
+### D-RELEASE-4 — Consistent record reads and honest reduction claims
+
+Reduction and differential records now share the constrained, object-only, symlink-refusing JSON reader. Malformed records return unavailable rather than a response-validation crash. Reduction pages distinguish candidate search claims, replay revalidation, and the retained primary artifact. NOT_REDUCED does not imply that revalidation failed: there may have been no admissible candidate to test.
+
+### D-RELEASE-5 — Container shutdown reaches the application
+
+The Docker shell command uses `exec` to pass stop signals directly to the single API process. Its lifespan cancels and drains owned operations through the existing cleanup path. Registered targets remain bound to loopback. No replacement queue, frontend framework, or arbitrary execution interface was introduced.
+
+### D-RELEASE-6 — Test accessibility with populated records
+
+The initial static-page axe checks missed low-contrast hypothesis markers, an analysis status band whose generic content class overrode its dark background, and keyboard-inaccessible scrolling tables. Actual completed records also exposed a long parameterized scenario ID overflowing the mobile viewport. The final changes retain dark status backgrounds, darken the numerical markers, wrap technical prose without changing its value, and make table/JSON scrolling keyboard-focusable. The real browser journey now checks populated investigation, snapshot, reduction, and differential pages with axe and narrow viewports. This is a presentation correction; experiment and artifact contents are unchanged.

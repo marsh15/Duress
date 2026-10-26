@@ -5,4 +5,5 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .duress/
+.recovery/
 docs/measurements/

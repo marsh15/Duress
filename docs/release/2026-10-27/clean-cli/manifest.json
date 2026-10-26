@@ -1,0 +1,112 @@
+{
+  "python": "3.12.12",
+  "checkout": "/tmp/duress-release-clean-20261027",
+  "initial_home_files": [
+    "dna/0edb63c480dbc29b.json"
+  ],
+  "commands": [
+    {
+      "name": "normal-control",
+      "command": [
+        "uv",
+        "run",
+        "--python",
+        "3.12",
+        "duress",
+        "run",
+        "razorpay-fixed",
+        "--scenario",
+        "S1",
+        "--json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "seconds": 5.81
+    },
+    {
+      "name": "portable-replay",
+      "command": [
+        "uv",
+        "run",
+        "--python",
+        "3.12",
+        "duress",
+        "replay",
+        "0edb63c480dbc29b",
+        "--json"
+      ],
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "seconds": 8.72
+    },
+    {
+      "name": "portable-verification",
+      "command": [
+        "uv",
+        "run",
+        "--python",
+        "3.12",
+        "duress",
+        "verify-fix",
+        "0edb63c480dbc29b",
+        "--candidate",
+        "razorpay-fixed",
+        "--json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "seconds": 20.74
+    },
+    {
+      "name": "cached-investigation",
+      "command": [
+        "uv",
+        "run",
+        "--python",
+        "3.12",
+        "duress",
+        "investigate",
+        "razorpay-vulnerable",
+        "--mode",
+        "cached",
+        "--json"
+      ],
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "seconds": 24.92
+    },
+    {
+      "name": "rendezvous-reduction",
+      "command": [
+        "uv",
+        "run",
+        "--python",
+        "3.12",
+        "duress",
+        "reduce",
+        "0edb63c480dbc29b",
+        "--json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "seconds": 9.48
+    },
+    {
+      "name": "matrix",
+      "command": [
+        "uv",
+        "run",
+        "--python",
+        "3.12",
+        "duress",
+        "differential",
+        "--policy",
+        "matrix",
+        "--json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "seconds": 190.4
+    }
+  ]
+}

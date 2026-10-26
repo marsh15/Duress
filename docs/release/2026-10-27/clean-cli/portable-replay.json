@@ -1,0 +1,15 @@
+{
+  "outcome": "REPRODUCED",
+  "reason": null,
+  "dna_id": "0edb63c480dbc29b",
+  "target_id": "razorpay-vulnerable",
+  "signature_matched": true,
+  "valid": 10,
+  "fail": 10,
+  "inconclusive": 0,
+  "trials": 10,
+  "reasons": [
+    "fail_observed",
+    "signature:INV-1@1:duplicate_fulfilment:order:A"
+  ]
+}

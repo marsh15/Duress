@@ -14,16 +14,17 @@ def test_bundled_record_and_dna_are_available_from_empty_home(tmp_path, monkeypa
     monkeypatch.setenv('DURESS_HOME', str(tmp_path))
     with TestClient(create_app(Settings(root=ROOT))) as http:
         history = http.get('/api/investigations').json()
-        assert history['creation_available'] is False
+        assert history['creation_available'] is True
         assert any(x['investigation_id'] == 'showcase-m2' and x['showcase'] for x in history['items'])
         record = http.get('/api/investigations/showcase-m2').json()
         assert record['hypotheses'] == []
         assert record['recorded_summary']['valid'] == 10
         dna_id = record['dna_ids'][0]
         assert http.get('/api/dna/' + dna_id).json()['dna_id'] == dna_id
-        # No autonomous feature is advertised as an executable route.
-        assert http.post('/api/investigations', json={'target_id':'razorpay-vulnerable','mode':'cached'}).status_code == 405
-        assert http.post('/api/dna/' + dna_id + '/reduce', json={}).status_code == 404
+        # M3/M4 now provide these routes. Invalid input is rejected before any
+        # target starts; this browsing test stays read-only.
+        assert http.post('/api/investigations', json={'target_id':'razorpay-vulnerable','mode':'invalid'}).status_code == 422
+        assert http.post('/api/dna/' + dna_id + '/reduce', json={'black_box': False}).status_code == 422
 
 
 def test_operation_result_is_readable_and_unknown_ids_are_404(tmp_path, monkeypatch):

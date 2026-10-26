@@ -31,6 +31,14 @@ init = ["python", "-m", "razorpay_ref", "init-db", "--db", "{db}", "--seed", "{s
 serve = ["python", "-m", "razorpay_ref.serve", "--variant", "fixed", "--host", "{host}", "--port", "{port}", "--workers", "{workers}"]
 app = "razorpay_ref.fixed.app:app"
 
+# C.1: event-id dedupe in front of the unchanged defect (the tempting, insufficient fix).
+[variants.naive_fix]
+id = "razorpay-naive-fix"
+workers = 1
+init = ["python", "-m", "razorpay_ref", "init-db", "--db", "{db}", "--seed", "{seed}", "--variant", "naive_fix"]
+serve = ["python", "-m", "razorpay_ref.serve", "--variant", "naive_fix", "--host", "{host}", "--port", "{port}", "--workers", "{workers}"]
+app = "razorpay_ref.naive_fix.app:app"
+
 # E8: the corrected handler must stay sound with two workers sharing the database.
 [variants.fixed_2w]
 id = "razorpay-fixed-2w"

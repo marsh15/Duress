@@ -2,21 +2,45 @@
   <div class="status-copy" role="status" aria-live="polite">
     <span class="status-glyph" aria-hidden="true">{% if view.status|lower == 'completed' %}✓{% elif view.status|lower in ['error', 'failed'] %}!{% else %}<span class="spinner"></span>{% endif %}</span>
     <div>
-      <h2 id="progress-title">{{ view.status|replace('_', ' ')|title }}</h2>
-      <p>{% if view.phase %}{{ view.phase|replace('_', ' ')|title }}{% elif view.status|lower in ['queued', 'running'] %}Waiting for the first progress event{% else %}Investigation record is ready{% endif %}</p>
+      <h2 id="progress-title">Lifecycle · {{ view.status|replace('_', ' ')|title }}</h2>
+      <p>{% if view.phase %}Current phase · {{ view.phase|replace('_', ' ')|title }}{% elif view.status|lower in ['queued', 'running'] %}Waiting for the first progress event{% else %}No current execution phase was recorded{% endif %}</p>
     </div>
   </div>
   <div class="status-meta">
-    {% if view.mode_effective %}<span><b>Mode</b>{{ view.mode_effective }}</span>{% endif %}
+    <span><b>Business verdict</b>{% if view.verdict %}<strong class="state-chip business-verdict state-{{ view.verdict|lower }}">{{ view.verdict }}</strong>{% else %}Unresolved{% endif %}</span>
+    <span><b>Requested mode</b>{{ view.mode_requested|default('not recorded') }}</span>
+    <span><b>Effective mode</b>{{ view.mode_effective|default('pending') or 'pending' }}</span>
     {% if view.created_at %}<span><b>Created</b>{{ view.created_at }}</span>{% endif %}
   </div>
 </section>
 
 {% if view.fallback_reason %}
-<aside class="notice notice-cyan"><strong>Mode fallback</strong><span>{{ view.fallback_reason }}</span></aside>
+<aside class="notice notice-cyan"><strong>Mode fallback · {{ view.fallback_reason|replace('_', ' ') }}</strong><span>{{ view.fallback_detail|default('') or 'The effective mode is shown above.' }}</span></aside>
 {% endif %}
 {% if view.explanation %}
 <section class="explanation-band" aria-label="Investigation explanation"><p>{{ view.explanation }}</p></section>
+{% endif %}
+
+{% set model = view.model|default({}) %}
+{% set provenance = model.provenance|default({}) %}
+{% set model_budget = model.budget|default({}) %}
+{% set bundle = view.record.bundle|default({}) %}
+{% if model or bundle %}
+<section class="content-section" aria-labelledby="provenance-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Evidence provenance</p><h2 id="provenance-title">How this run formed its hypotheses</h2></div></div>
+  <dl class="status-list">
+    <div><dt>Requested mode</dt><dd>{{ view.mode_requested|default('not recorded') }}</dd></div>
+    <div><dt>Effective mode</dt><dd>{{ view.mode_effective|default('pending') or 'pending' }}</dd></div>
+    {% if model.model %}<div><dt>Model</dt><dd>{{ model.model }}</dd></div>{% endif %}
+    {% if model.response_source %}<div><dt>Response source</dt><dd>{{ model.response_source }}</dd></div>{% endif %}
+    {% if provenance.source %}<div><dt>Provenance</dt><dd>{{ provenance.source|replace('_', ' ') }}</dd></div>{% endif %}
+    {% if model_budget.calls is defined %}<div><dt>Model calls</dt><dd>{{ model_budget.calls }}{% if model_budget.max_calls is defined %} / {{ model_budget.max_calls }}{% endif %}</dd></div>{% elif model.calls is defined %}<div><dt>Model calls</dt><dd>{{ model.calls|length }}</dd></div>{% endif %}
+    {% if model_budget.input_tokens is defined %}<div><dt>Input tokens</dt><dd>{{ model_budget.input_tokens }}{% if model_budget.max_input_tokens is defined %} / {{ model_budget.max_input_tokens }}{% endif %}</dd></div>{% endif %}
+    {% if bundle.sha256 %}<div><dt>Source bundle SHA-256</dt><dd><code>{{ bundle.sha256 }}</code></dd></div>{% endif %}
+    {% if bundle.files is defined %}<div><dt>Source files</dt><dd>{{ bundle.files|length }}</dd></div>{% endif %}
+  </dl>
+  {% if provenance.source == 'authored_fixture' %}<p class="aggregate-note">This response is an authored cached fixture, not hosted model inference evidence. The execution results below come from the recorded scenario trials.</p>{% elif model.response_source == 'live' %}<p class="aggregate-note">The configured provider supplied hypothesis proposals. Citations and outcomes below are checked and reported separately from the executed business verdict.</p>{% endif %}
+</section>
 {% endif %}
 
 {% if view.recorded_summary %}
@@ -37,6 +61,57 @@
   <div class="metric metric-confirm"><span>Confirmed hypotheses</span><strong>{{ view.confirmed_count }}</strong></div>
 </section>
 {% endif %}
+
+{% if view.trial_cap is not none or view.duration_s is not none or view.budget_exhausted or view.scenario_count %}
+<section class="content-section" aria-labelledby="run-budget-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Execution budget</p><h2 id="run-budget-title">Run progress</h2></div>{% if view.budget_exhausted %}<span class="state-chip state-inconclusive">Budget exhausted</span>{% endif %}</div>
+  <div class="metric-row" aria-label="Selected scenario lifecycle counts">
+    <div class="metric"><span>Selected scenarios</span><strong>{{ view.scenario_count }}</strong></div>
+    <div class="metric"><span>Completed</span><strong>{{ view.scenarios_completed|default(0) }}</strong></div>
+    <div class="metric"><span>Running</span><strong>{{ view.scenarios_running|default(0) }}</strong></div>
+    <div class="metric"><span>Pending</span><strong>{{ view.scenarios_pending|default(0) }}</strong></div>
+  </div>
+  <div class="metric-row" aria-label="Trial and wall time budget">
+    <div class="metric"><span>Skipped</span><strong>{{ view.scenarios_skipped|default(0) }}</strong></div>
+    <div class="metric"><span>Trials used</span><strong>{{ view.trials_used|default(0) }}{% if view.trial_cap is not none %} / {{ view.trial_cap }}{% endif %}</strong></div>
+    {% if view.duration_s is not none %}<div class="metric"><span>Elapsed seconds</span><strong>{{ view.duration_s }}</strong></div>{% endif %}
+    {% if view.wall_cap_s is not none %}<div class="metric"><span>Wall time cap</span><strong>{{ view.wall_cap_s }}s</strong></div>{% endif %}
+  </div>
+  {% if view.record.updated_at %}<p class="trial-reason">Record updated {{ view.record.updated_at }}</p>{% endif %}
+</section>
+{% endif %}
+
+<section class="content-section" aria-labelledby="findings-title">
+  <div class="section-heading compact-heading">
+    <div><p class="eyebrow">Observed failures</p><h2 id="findings-title">Findings</h2></div>
+    <span class="section-count">{{ view.findings|length }} recorded findings</span>
+  </div>
+  {% if view.findings %}
+  <div class="hypothesis-list">
+    {% for finding in view.findings %}
+    {% set signature = finding.signature|default({}) %}
+    <article class="hypothesis-row">
+      <div class="hypothesis-index"><span>{{ "%02d"|format(loop.index) }}</span></div>
+      <div class="hypothesis-main">
+        <div class="hypothesis-title-row">
+          <div><p class="hypothesis-id">Observed in {{ finding.scenario_id|default('scenario not recorded') }}</p><h3>{{ signature.check|default('Failure signature not recorded') }}{% if signature.kind %} · {{ signature.kind }}{% endif %}</h3></div>
+          {% if finding.dna_id %}<a class="finding-badge" href="/dna/{{ finding.dna_id }}">Failure DNA · {{ finding.dna_id }}</a>{% endif %}
+        </div>
+        {% if signature.roles %}<p class="prediction"><span>Affected roles</span>{% for role in signature.roles %}<code>{{ role }}</code>{% endfor %}</p>{% endif %}
+        <dl class="status-list">
+          {% if finding.fail is defined %}<div><dt>Failing trials</dt><dd>{{ finding.fail }}</dd></div>{% endif %}
+          {% if finding.valid is defined %}<div><dt>Valid trials</dt><dd>{{ finding.valid }}</dd></div>{% endif %}
+          {% if finding.hypothesis_ids %}<div><dt>Linked hypotheses</dt><dd>{{ finding.hypothesis_ids|join(', ') }}</dd></div>{% endif %}
+          {% if finding.dna_error %}<div><dt>DNA characterization</dt><dd>{{ finding.dna_error|replace('_', ' ') }}</dd></div>{% endif %}
+        </dl>
+        {% if finding.explanation %}<p>{{ finding.explanation }}</p>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% elif view.status|lower in ['queued', 'running'] %}<p class="empty-note">No observed failure finding has been recorded yet. Hypothesis proposals alone do not establish a finding.</p>
+  {% else %}<p class="empty-note">No executed failure findings were recorded for this investigation.</p>{% endif %}
+</section>
 
 {% if view.comparison %}
 <section class="historical-comparison" aria-labelledby="historical-comparison-title">
@@ -60,7 +135,7 @@
   <div class="business-state-grid">
     <section aria-labelledby="orders-state-title">
       <h3 id="orders-state-title">Orders</h3>
-      <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Baseline and observed order status from the retained snapshot</caption><thead><tr><th scope="col">Order</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
+      <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Baseline and observed order status from the retained snapshot</caption><thead><tr><th scope="col">Order</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
       {% for order in baseline.orders|default([]) %}
         {% set observed_order = observed.orders|default([])|selectattr('id', 'equalto', order.id)|first %}
         <tr><th scope="row"><code>{{ order.id }}</code></th><td>{{ order.status|default('—') }}</td><td>{{ observed_order.status|default('—') }}</td></tr>
@@ -72,7 +147,7 @@
     </section>
     <section aria-labelledby="payments-state-title">
       <h3 id="payments-state-title">Payments</h3>
-      <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Baseline and observed payment status from the retained snapshot</caption><thead><tr><th scope="col">Payment</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
+      <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Baseline and observed payment status from the retained snapshot</caption><thead><tr><th scope="col">Payment</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
       {% for payment in baseline.payments|default([]) %}
         {% set observed_payment = observed.payments|default([])|selectattr('id', 'equalto', payment.id)|first %}
         <tr><th scope="row"><code>{{ payment.id }}</code></th><td>{{ payment.status|default('—') }}</td><td>{{ observed_payment.status|default('—') }}</td></tr>
@@ -85,7 +160,7 @@
   </div>
   <section class="fulfilment-state" aria-labelledby="fulfilments-state-title">
     <h3 id="fulfilments-state-title">Fulfilment rows</h3>
-    <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Baseline and observed fulfilment rows from the retained snapshot</caption><thead><tr><th scope="col">Snapshot</th><th scope="col">Row</th><th scope="col">Order</th><th scope="col">Payment</th><th scope="col">Amount</th></tr></thead><tbody>
+    <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Baseline and observed fulfilment rows from the retained snapshot</caption><thead><tr><th scope="col">Snapshot</th><th scope="col">Row</th><th scope="col">Order</th><th scope="col">Payment</th><th scope="col">Amount</th></tr></thead><tbody>
       {% if baseline.fulfilments|default([]) %}{% for row in baseline.fulfilments %}<tr><th scope="row">Baseline</th><td>{{ row.id|default('—') }}</td><td>{{ row.order_id|default('—') }}</td><td>{{ row.payment_id|default('—') }}</td><td>{{ row.amount|default('—') }}</td></tr>{% endfor %}{% else %}<tr><th scope="row">Baseline</th><td colspan="4">No fulfilment rows recorded</td></tr>{% endif %}
       {% if observed.fulfilments|default([]) %}{% for row in observed.fulfilments %}<tr><th scope="row">Observed</th><td>{{ row.id|default('—') }}</td><td>{{ row.order_id|default('—') }}</td><td>{{ row.payment_id|default('—') }}</td><td>{{ row.amount|default('—') }}</td></tr>{% endfor %}{% else %}<tr><th scope="row">Observed</th><td colspan="4">No fulfilment rows recorded</td></tr>{% endif %}
     </tbody></table></div>
@@ -101,21 +176,66 @@
       <span class="section-count">{% if view.scenario_count %}{{ view.scenario_count }} detail rows{% else %}No detail rows retained{% endif %}</span>
     </div>
     {% if view.scenarios %}
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0">
       <table class="data-table">
         <caption class="visually-hidden">Investigation scenario outcomes and trial counts</caption>
-        <thead><tr><th scope="col">Scenario</th><th scope="col">Outcome</th><th scope="col">Valid</th><th scope="col">Fail</th><th scope="col">Trials</th></tr></thead>
+        <thead><tr><th scope="col">Scenario</th><th scope="col">Selected by</th><th scope="col">Lifecycle</th><th scope="col">Outcome</th><th scope="col">Valid</th><th scope="col">Fail</th><th scope="col">Trials</th></tr></thead>
         <tbody>
         {% for scenario in view.scenarios %}
+          {% set result = scenario.result|default({}) %}
           <tr>
-            <th scope="row"><span class="scenario-name">{{ scenario.template_id }}</span><span class="scenario-id">{{ scenario.scenario_id }}</span></th>
-            <td><span class="state-chip state-{{ scenario.status|lower }}">{{ scenario.status }}</span></td>
+            <th scope="row"><span class="scenario-name">{{ scenario.template_id }}</span><span class="scenario-id">{{ scenario.scenario_id }}</span>{% if scenario.params %}<span class="scenario-id">Parameters: {{ scenario.params }}</span>{% endif %}</th>
+            <td>{{ scenario.selected_by|default('not recorded')|replace('_', ' ') }}</td>
+            <td><span class="state-chip state-muted">{{ scenario.lifecycle|default('not recorded')|replace('_', ' ') }}</span></td>
+            <td>{% if result.status %}<span class="state-chip state-{{ result.status|lower }}">{{ result.status }}</span>{% else %}Not reported{% endif %}</td>
             <td>{{ scenario.valid }}</td><td class="number-fail">{{ scenario.fail }}</td><td>{{ scenario.trials }}</td>
           </tr>
+          {% if result.signature or result.reasons or result.budget_exhausted %}
+          <tr><td colspan="7">
+            {% if result.signature %}<strong>Primary signature:</strong> <code>{{ result.signature.check|default('') }} · {{ result.signature.kind|default('') }}{% if result.signature.roles %} · {{ result.signature.roles|join(', ') }}{% endif %}</code>{% endif %}
+            {% if result.reasons %}<p class="trial-reason">{{ result.reasons|join(' · ') }}</p>{% endif %}
+            {% if result.budget_exhausted %}<span class="state-chip state-inconclusive">Scenario budget exhausted</span>{% endif %}
+          </td></tr>
+          {% endif %}
         {% endfor %}
         </tbody>
       </table>
     </div>
+    {% if view.scenarios %}
+    <div class="scenario-details">
+      {% for scenario in view.scenarios %}
+      {% set schedule = scenario.schedule|default({}) %}
+      <details>
+        <summary>{{ scenario.scenario_id|default(scenario.template_id) }} · actual schedule</summary>
+        {% if schedule and schedule.deliveries is defined %}
+        <p class="trial-reason">Control level: {{ scenario.control_level|default('not recorded')|replace('_', ' ') }} · {{ schedule.deliveries|length }} normalized deliveries</p>
+        <h3>Delivery groups and steps</h3>
+        {% if schedule.steps %}
+        <ol class="scenario-step-list">
+          {% for step in schedule.steps %}
+          <li>
+            <strong>Step {{ loop.index }}</strong> · {% if step.deliveries|length > 1 %}concurrent group{% else %}single delivery{% endif %}{% if step.delay_before_ms %} · {{ step.delay_before_ms }} ms delay before group{% endif %}
+            <ul>
+              {% for delivery_id in step.deliveries %}
+              {% set delivery = schedule.deliveries|selectattr('id', 'equalto', delivery_id)|first %}
+              {% if delivery %}<li><code>{{ delivery.id }}</code> · {{ delivery.event.type|default('event type not recorded') }} · {{ delivery.effect_intent|default('effect not recorded') }} · order {{ delivery.event.order_role|default('—') }} · payment {{ delivery.event.payment_role|default('—') }}{% if delivery.invalid_signature %} · invalid signature{% endif %}{% if delivery.event_id %} · event ID {{ delivery.event_id }}{% endif %}</li>{% else %}<li><code>{{ delivery_id }}</code> · delivery details missing from retained schedule</li>{% endif %}
+              {% endfor %}
+            </ul>
+          </li>
+          {% endfor %}
+        </ol>
+        {% else %}<p class="empty-note">No step groups were retained in this schedule.</p>{% endif %}
+        <h3>Fault and release configuration</h3>
+        {% if schedule.faults %}<ul>{% for fault in schedule.faults %}<li><code>{{ fault.kind|default('fault') }}</code>{% if fault.parties is defined %} · {{ fault.parties }} rendezvous parties{% endif %}{% if fault.timeout_ms is defined %} · timeout {{ fault.timeout_ms }} ms{% endif %}{% if fault.ms is defined %} · latency {{ fault.ms }} ms{% endif %}{% if fault.payments %} · payments {{ fault.payments|join(', ') }}{% endif %}</li>{% endfor %}</ul>{% else %}<p class="empty-note">No injected fault or rendezvous release gate was recorded.</p>{% endif %}
+        {% set delivery_policy = schedule.delivery_policy|default({}) %}
+        <p class="trial-reason">Delivery policy: {{ delivery_policy.max_attempts|default('default') }} max attempts · {{ delivery_policy.attempt_timeout_ms|default('default') }} ms attempt timeout{% if delivery_policy.retry_on %} · retry on {{ delivery_policy.retry_on|join(', ') }}{% endif %}{% if delivery_policy.backoff_ms %} · backoff {{ delivery_policy.backoff_ms|join(', ') }} ms{% endif %}</p>
+        {% else %}
+        <p class="empty-note">The actual normalized schedule was not retained with this older record. It is not reconstructed from the current scenario library.</p>
+        {% endif %}
+      </details>
+      {% endfor %}
+    </div>
+    {% endif %}
     {% else %}<p class="empty-note">No individual scenario rows were retained in this record.</p>{% endif %}
   </section>
 
@@ -154,15 +274,18 @@
       <div class="hypothesis-index"><span>{{ "%02d"|format(loop.index) }}</span></div>
       <div class="hypothesis-main">
         <div class="hypothesis-title-row">
-          <div><p class="hypothesis-id">Hypothesis {{ hypothesis.id|default(loop.index) }}</p><h3>{{ hypothesis.mechanism|default('Mechanism not provided') }}</h3></div>
+          <div><p class="hypothesis-id">Hypothesis {{ hypothesis.id|default(loop.index) }}{% if hypothesis.usable is defined %} · {% if hypothesis.usable %}usable for execution{% else %}rejected from execution{% endif %}{% endif %}</p><h3>{% if hypothesis.title %}{{ hypothesis.title }} · {% endif %}{{ hypothesis.mechanism|default('Mechanism not provided') }}</h3></div>
           {% if outcome|lower == 'confirmed' %}<span class="finding-badge">Confirmed finding</span>{% else %}<span class="state-chip state-muted">{{ outcome|replace('_', ' ')|title }}</span>{% endif %}
         </div>
+        <p class="empty-inline">This is a source-grounded hypothesis proposal. Its outcome comes from execution; the investigation verdict is reported separately above.</p>
         <dl class="status-list">
           <div><dt>Citation</dt><dd>{{ hypothesis.citation_status|default('not checked')|string }}</dd></div>
           <div><dt>Structure</dt><dd>{{ hypothesis.structure_status|default('not checked')|string }}</dd></div>
           <div><dt>Linkage</dt><dd>{{ hypothesis.linkage_status|default('not checked')|string }}</dd></div>
           <div><dt>Outcome</dt><dd>{{ outcome|replace('_', ' ') }}</dd></div>
         </dl>
+        {% if hypothesis.structure_detail %}<p class="trial-reason"><strong>Structure review:</strong> {{ hypothesis.structure_detail }}</p>{% endif %}
+        {% if hypothesis.outcome_detail %}<p class="trial-reason"><strong>Execution review:</strong> {{ hypothesis.outcome_detail }}</p>{% endif %}
         {% set predicted = hypothesis.predicted_failure|default({}) %}
         {% if predicted %}
         <p class="prediction"><span>Predicted failure</span><code>{{ predicted.check|default('check unknown') }}</code><code>{{ predicted.kind|default('kind unknown') }}</code><span>role {{ predicted.role|default('unspecified') }}</span></p>
@@ -202,6 +325,8 @@
       <div class="trial-detail"><div><strong>{{ trial.trial_id|default('Trial ' ~ loop.index) }}</strong><span>{{ trial.scenario_id|default('Scenario') }}</span></div>
         {% if trial.signature %}<p class="trial-signature">{{ trial.signature.check|default('') }} · {{ trial.signature.kind|default('') }}{% if trial.signature.roles %} · {{ trial.signature.roles|join(', ') }}{% endif %}</p>{% endif %}
         {% if trial.reasons %}<p class="trial-reason">{{ trial.reasons|join(' · ') }}</p>{% endif %}
+        {% if trial.settlement or trial.released_by or trial.duration_s is not none %}<p class="trial-reason">{% if trial.settlement %}Settlement {{ trial.settlement }}{% endif %}{% if trial.released_by %}{% if trial.settlement %} · {% endif %}released by {{ trial.released_by }}{% endif %}{% if trial.duration_s is not none %}{% if trial.settlement or trial.released_by %} · {% endif %}{{ trial.duration_s }}s{% endif %}</p>{% endif %}
+        {% if trial.trial_id and trial.trial_id in evidence_ids|default([]) %}<p class="trial-reason"><a href="/evidence/{{ trial.trial_id }}">Inspect retained state</a></p>{% endif %}
       </div>
       <span class="trial-verdict">{{ trial.status|default('recorded') }}</span>
     </li>
@@ -215,7 +340,7 @@
 {% if view.observed_attempts %}
 <section class="content-section observed-attempts" aria-labelledby="attempts-title">
   <div class="section-heading compact-heading"><div><p class="eyebrow">Representative execution</p><h2 id="attempts-title">Observed delivery attempts</h2></div><span class="section-count">{{ view.observed_attempts|length }} recorded attempts</span></div>
-  <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts from the retained representative DNA</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
+  <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts from the retained representative DNA</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
   {% for attempt in view.observed_attempts %}<tr><th scope="row"><code>{{ attempt.delivery_id|default('') }}</code></th><td>{{ attempt.attempt|default('—') }}</td><td>{{ attempt.outcome|default('—') }}</td><td>{{ attempt.status_code|default('—') }}</td><td>{{ attempt.body_status|default('—') }}</td><td>{{ attempt.started_s|default('—') }}</td><td>{{ attempt.ended_s|default('—') }}</td></tr>{% endfor %}
   </tbody></table></div>
 </section>
@@ -238,3 +363,5 @@
   <div class="dna-links">{% for dna_id in view.dna_ids %}<a href="/dna/{{ dna_id }}"><code>{{ dna_id }}</code><span>Inspect DNA</span></a>{% endfor %}</div>
 </section>
 {% endif %}
+
+<details class="artifact-json"><summary>Inspect complete persisted investigation record</summary><pre tabindex="0"><code>{{ view.record|tojson(indent=2) }}</code></pre></details>

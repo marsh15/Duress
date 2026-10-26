@@ -1,0 +1,28 @@
+{
+  "created_at": "2026-10-26T20:15:00+00:00",
+  "dna_id": "0edb63c480dbc29b",
+  "kind": "replay",
+  "operation_id": "19a176cc7ab64f50",
+  "payload": {
+    "outcome": {
+      "dna_id": "0edb63c480dbc29b",
+      "fail": 10,
+      "inconclusive": 0,
+      "outcome": "REPRODUCED",
+      "reason": null,
+      "reasons": [
+        "fail_observed",
+        "signature:INV-1@1:duplicate_fulfilment:order:A"
+      ],
+      "signature_matched": true,
+      "target_id": "razorpay-vulnerable",
+      "trials": 10,
+      "valid": 10
+    },
+    "preflight": {
+      "control_level": "environment_controlled",
+      "ok": true
+    }
+  },
+  "target_id": "razorpay-vulnerable"
+}

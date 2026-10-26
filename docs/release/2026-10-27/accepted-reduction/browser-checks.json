@@ -1,0 +1,16 @@
+{
+  "native_download_sha256": "27aded8bd9e0707b1f9d2c441b60f4e86b811d6917864fecd49aa7b0cd91d57b",
+  "native_download_matches_portable_replay_input": true,
+  "checks": [
+    {
+      "route": "/reductions/red-35fca6183641",
+      "serious_critical_axe_violations": [],
+      "fits_390_and_768": true
+    },
+    {
+      "route": "/dna/8c6f00ad4cbc8a0f",
+      "serious_critical_axe_violations": [],
+      "fits_390_and_768": true
+    }
+  ]
+}

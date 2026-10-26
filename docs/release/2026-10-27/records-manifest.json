@@ -1,0 +1,29 @@
+{
+  "origin": "Actual passing local browser journey (real services; no mocked execution)",
+  "records": {
+    "investigation.json": {
+      "source": ".recovery/final-journey/browser-home0/investigations/inv-20261026T201423-ce3e28.json",
+      "sha256": "ec575a12af13f19bbb67c1a1249f0b2f65319a48fef7180fcb9955e12b3382b1"
+    },
+    "reduction.json": {
+      "source": ".recovery/final-journey/browser-home0/reductions/red-7adc661ef772.json",
+      "sha256": "a970d35ff9c3e7370f6e751f22b6d91c659e17fd0fa01198db2f4c1408720de4"
+    },
+    "differential.json": {
+      "source": ".recovery/final-journey/browser-home0/differentials/diff-3212fcb129e2.json",
+      "sha256": "f8568bc6034ed8ef453724dd4af5d10c328247c3613f96f4e240bac1e8f5ebdf"
+    },
+    "replay.json": {
+      "source": ".recovery/final-journey/browser-home0/operations/19a176cc7ab64f50.json",
+      "sha256": "b93546ae44e252879188ffd1212e9039d2c1d81ab831ee9963170927dd7f38e9"
+    },
+    "verification.json": {
+      "source": ".recovery/final-journey/browser-home0/operations/f135db836f5849ef.json",
+      "sha256": "b93b77c980b247ff5b059a7bd425fae5097f7bd5e7b5d2223422054c74a061a2"
+    },
+    "failure-dna.json": {
+      "source": ".recovery/final-journey/browser-home0/dna/0edb63c480dbc29b.json",
+      "sha256": "c44a4c4574359bf8391061219cde455ea498769e06ed02b20e44a7855490769b"
+    }
+  }
+}
