@@ -5,3 +5,4 @@ __pycache__/
 .ruff_cache/
 .duress/
 .DS_Store
+duress-report.html

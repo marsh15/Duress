@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Duress · Failure evidence workbench{% endblock %}
+{% block content %}
+<section class="welcome-grid" aria-labelledby="welcome-title">
+  <div class="welcome-copy">
+    <p class="eyebrow">Payments · webhook reliability</p>
+    <h1 id="welcome-title">Keep the failure.<br>Carry the proof.</h1>
+    <p class="welcome-lede">Inspect recorded evidence, replay a portable reproducer against a fresh target, and measure whether a candidate fix changes the result.</p>
+    <div class="welcome-facts" aria-label="Available workflows">
+      <div><strong>01</strong><span>inspect a recorded scenario</span></div>
+      <div><strong>02</strong><span>replay portable DNA</span></div>
+      <div><strong>03</strong><span>verify a candidate fix</span></div>
+    </div>
+  </div>
+
+  <section class="workbench-panel pending-panel" aria-labelledby="new-investigation-title">
+    <div class="panel-topline">
+      <div>
+        <p class="panel-kicker">Generation status</p>
+        <h2 id="new-investigation-title">Investigation creation</h2>
+      </div>
+      <span class="pending-mark">Pending</span>
+    </div>
+    <div class="pending-explanation">
+      <p>New investigation runs are not available in this build. The investigator workflow is still pending.</p>
+      <button class="button button-primary" type="button" disabled aria-describedby="investigation-pending-note">Investigation unavailable</button>
+      <p id="investigation-pending-note" class="field-help">Use the recorded investigation below, or open a saved record from history.</p>
+    </div>
+    <div class="target-registry" aria-labelledby="targets-title">
+      <div class="registry-heading"><h3 id="targets-title">Available targets</h3><span>API registry</span></div>
+      <ul id="target-registry-list" class="registry-list"><li class="list-placeholder">Loading targets…</li></ul>
+    </div>
+  </section>
+</section>
+
+<section class="showcase-section" aria-labelledby="showcase-title">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Recorded evidence</p>
+      <h2 id="showcase-title">A benchmark you can inspect</h2>
+    </div>
+    <span class="recorded-label"><span aria-hidden="true">●</span> Recorded benchmark</span>
+  </div>
+  {% if showcase %}
+  <div class="showcase-strip">
+    <a class="showcase-primary" href="/investigations/{{ showcase.investigation_id }}">
+      <span class="showcase-icon" aria-hidden="true">↗</span>
+      <span class="showcase-main">
+        <strong>{{ showcase.target_id }}</strong>
+        <span>{{ showcase.mode_effective }} mode · {{ showcase.status }}</span>
+      </span>
+      <span class="showcase-stat">{% if showcase.confirmed is not none %}<strong>{{ showcase.confirmed }}</strong><span>confirmed findings recorded</span>{% else %}<strong>—</strong><span>No hypotheses in this record</span>{% endif %}</span>
+      <span class="showcase-open">Inspect recorded evidence</span>
+    </a>
+    {% if showcase.dna_ids %}
+    <div class="showcase-artifacts">
+      <span>Portable DNA</span>
+      {% for dna_id in showcase.dna_ids %}
+      <a href="/dna/{{ dna_id }}">{{ dna_id }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% if showcase.comparison %}
+  <div class="home-historical-summary">
+    <div><span>Historical M2 verify-fix</span><strong>{{ showcase.comparison.outcome }}</strong></div>
+    <div><span>Vulnerable control</span><strong>{{ showcase.comparison.control_same_signature_failures }} / {{ showcase.comparison.control_valid }}</strong><small>same-signature failures / valid</small></div>
+    <div><span>{{ showcase.comparison.candidate_target }}</span><strong>{{ showcase.comparison.candidate_valid }}</strong><small>valid trials in retained result</small></div>
+    <p>{{ showcase.comparison.note }}</p>
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="empty-strip">
+    <span class="empty-mark" aria-hidden="true">—</span>
+    <p>No recorded benchmark is available in this workspace yet.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="records-section" aria-labelledby="history-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">Workspace records</p><h2 id="history-title">Investigation history</h2></div>
+    <span class="section-count">Read-only records</span>
+  </div>
+  <ul id="investigation-history" class="record-list" aria-live="polite"><li class="list-placeholder">Loading investigation records…</li></ul>
+</section>
+
+<section class="records-section dna-index-section" aria-labelledby="dna-index-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">Portable artifacts</p><h2 id="dna-index-title">Failure DNA</h2></div>
+    <span class="section-count">Inspect, download, or replay</span>
+  </div>
+  <ul id="dna-index" class="record-list" aria-live="polite"><li class="list-placeholder">Loading DNA artifacts…</li></ul>
+</section>
+{% endblock %}

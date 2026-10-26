@@ -21,6 +21,10 @@ from pydantic import BaseModel, Field
 from . import __version__
 from . import limits as limits_module
 from .services import Workspace, dna_index, load_dna_document, replay, replay_payload, verify_fix
+from .records import (
+    ensure_showcase, investigation_index, load_investigation_record,
+    load_operation_record, save_operation_record,
+)
 
 MAX_BODY_BYTES = 1_000_000
 
@@ -124,7 +128,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.gate = gate
 
     def workspace() -> Workspace:
-        return Workspace.discover(settings.root)
+        store = Workspace.discover(settings.root)
+        ensure_showcase(store)
+        return store
 
     def authorize(
         authorization: str | None = Header(default=None),
@@ -194,6 +200,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def dna_list() -> dict[str, Any]:
         return {"items": dna_index(workspace())}
 
+    @app.get("/api/investigations")
+    def investigations() -> dict[str, Any]:
+        return {"items": investigation_index(workspace()), "creation_available": False}
+
+    @app.get("/api/investigations/{investigation_id}")
+    def investigation_get(investigation_id: str) -> dict[str, Any]:
+        try:
+            return load_investigation_record(workspace(), investigation_id)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="unknown_investigation") from None
+
+    @app.get("/api/operations/{operation_id}")
+    def operation_get(operation_id: str) -> dict[str, Any]:
+        try:
+            return load_operation_record(workspace(), operation_id)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="unknown_operation") from None
+
     @app.get("/api/dna/{dna_id}")
     def dna_get(dna_id: str) -> dict[str, Any]:
         try:
@@ -221,10 +245,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             run = await replay(
                 store, dna_id=dna_id, target_id=target_id, policy=body.policy
             )
-            return {
+            payload = {
                 "outcome": run.outcome.model_dump(mode="json"),
                 "preflight": run.preflight,
             }
+            operation_id = save_operation_record(store, kind="replay", payload=payload,
+                                                dna_id=dna_id, target_id=target_id)
+            return {**payload, "operation_id": operation_id}
         finally:
             gate.release()
 
@@ -242,10 +269,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             run = await replay_payload(
                 store, payload=body.dna, dna_id=dna_id, target_id=body.target_id
             )
-            return {
+            payload = {
                 "outcome": run.outcome.model_dump(mode="json"),
                 "preflight": run.preflight,
             }
+            operation_id = save_operation_record(store, kind="import_replay", payload=payload,
+                                                dna_id=dna_id, target_id=body.target_id)
+            return {**payload, "operation_id": operation_id}
         finally:
             gate.release()
 
@@ -269,8 +299,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 vulnerable_target_id=body.vulnerable_target_id,
                 candidate_target_id=body.candidate_target_id,
             )
-            return run.outcome.model_dump(mode="json")
+            payload = run.outcome.model_dump(mode="json")
+            operation_id = save_operation_record(store, kind="verify_fix", payload=payload,
+                dna_id=dna_id, vulnerable_target_id=body.vulnerable_target_id,
+                candidate_target_id=body.candidate_target_id)
+            return {**payload, "operation_id": operation_id}
         finally:
             gate.release()
 
+    from .web import install_web
+
+    install_web(app, workspace)
     return app

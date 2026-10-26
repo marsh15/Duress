@@ -22,7 +22,7 @@ In the container (`duress:m1`, `python:3.12-slim`): exit 0, 147 passed, 0 failed
 | E8 | fixed, 2 workers, copies 5: 20/20 valid PASS |
 | F1 launch command | the supervisor runs the profile's declared serve command; exit 0 and clean settlement |
 
-Known M1 limitations: the investigator, S5/S6/S9 templates, DNA, replay and verify-fix are M2–M3 and are not claimed here. The fixture-mode target is a control, not a realistic integration. PASS and FAIL are bounded empirical statements about the trials that ran.
+Historical scope: this M1 run preceded M2. S5/S6/S9, DNA, replay and verify-fix were subsequently implemented and verified in the M2 section below. Autonomous investigation remains pending. The fixture-mode target is a control, not a realistic integration. PASS and FAIL are bounded empirical statements about the trials that ran.
 
 ## M2 — DNA, replay, verify-fix and the API
 
@@ -131,6 +131,28 @@ Phase bounds from C.2.2 are 5/10/30/10/5/5 s. M0 does not yet enforce them; the 
 
 - **Exit-status wrapper.** uvicorn re-raises the captured signal after a graceful shutdown (exit -15). Target contract C.1 requires exit 0, so the reference target launches through `razorpay_ref.serve`, which keeps uvicorn's drain and suppresses the re-raise. This is target-side, not harness-side.
 - **Controlled reproduction.** E1 and E2 are environment-controlled by a party rendezvous. E5 measures unrestricted black-box bursts separately; the two must not be conflated.
-- **No engine yet.** M0 has no oracle, invariant pack, DNA or UI. Verification is direct SQL on a post-exit copy, as the M0 gate requires.
+- **Historical M0 scope.** M0 verification uses direct SQL on a post-exit copy. The oracle, invariant pack and DNA were subsequently implemented in M1–M2; the web release is described separately.
 - **Provider state.** The stub's fixtures are external truth and are never mutated; all counted effects are the target's local rows.
 - **Container gate.** E7 runs the same gate files in Docker; the measured suites are not run in the container.
+
+## Web application — verification scope
+
+The frontend release preserves the M0–M2 targets and trusted execution services. The pre-change `uv run pytest -q -m 'not slow'` run at `d08409c` completed with **198 passed, 3 deselected** in 351.59 s. This was rerun, not assumed from the previous milestone.
+
+The focused web, records, measurement and read-only API suite passed **26 tests** locally. `DURESS_BROWSER_TESTS=1 uv run pytest -q tests/browser` (executed through `scripts/measure.py`) passed **7 tests** in 59.28 s. The browser tests use Chromium against a temporary local application home, not mocked execution endpoints. They include actual DNA export, REPRODUCED replay and VERIFIED fix verification, plus saved result pages, tamper rejection, navigation, 390/768 px layouts, keyboard focus and HTML escaping. axe-core 4.10.3 found **zero serious or critical violations** on the workspace, recorded investigation and DNA pages. A separate full axe inspection returned no violations on those pages.
+
+Raw final browser evidence: `docs/measurements/release-20261026T143734Z-0d965b83.json` and its referenced JUnit XML. An earlier browser run had 6 passes and 1 failure due to an incorrect label expectation (`Recorded benchmark` versus `Recorded M2 benchmark`); its failed record is retained rather than presented as a passing gate. Earlier exploratory checks also found insufficient muted-text contrast and missing HTML 404 pages; those were corrected before the final browser gate.
+
+Docker build `docker build -t duress:web .` succeeded. The container was started with `PORT=8080`, exposed on local port 18765, and its log reported `0.0.0.0:8080`. `scripts/smoke.sh http://127.0.0.1:18765 --dna showcase/dna/e8007dd56adae8ae.json` passed health, targets and page checks, then observed **REPRODUCED** and **VERIFIED** through the existing API. The same focused suite passed **26 tests** in the Linux container. `duress sweep` returned `nothing to sweep`. Commands and retained outputs are in `docs/measurements/web-container.json`.
+
+Screenshots under `docs/screenshots/` were captured from the running local application at 1440 px width. They show the recorded showcase, not an autonomous live investigation. The showcase artifact is the original M2 DNA; business-state rows were read from its retained representative SQLite snapshot without running another experiment.
+
+**Not verified:** a Render deployment, hosted/browser smoke tests, hosted timing or capacity, and a live model provider. Autonomous investigation and reduction are pending and were excluded from this frontend assignment. The full M6 milestone is not claimed.
+
+### Broad regression observation and final artifact presentation check
+
+The first post-change fast run returned **222 passed, 2 failed, 7 skipped, 3 deselected** in 519.07 s. The failures were in unchanged tests: `test_s9_fixed_second_payment_is_an_order_duplicate` reached the 20-valid-trial aggregate PASS quota but then asserted one fulfilment on every observation, including an empty snapshot; `test_c10_rendezvous_releases_by_parties_then_timeout_then_not_at_all` observed about 78 ms against its 50 ms assertion. This run overlapped browser and Docker work. That overlap is a possible contributing condition, not an established cause. No engine, target or original assertion was modified.
+
+Both failed tests passed unchanged in a focused rerun (**2 passed**), recorded in `docs/measurements/release-20261026T144731Z-b6bd12c0.json`. The failed broad run remains in `release-20261026T143735Z-9431df52.json` and its JUnit. Failure traceback trailing spaces were normalized for Git; outcomes and assertion text were retained. A serial broad rerun was then started to assess the complete gate.
+
+Final presentation inspection found that a UI-only showcase flag was being added to the displayed DNA dictionary. The flag now belongs to the view context. The added regression verifies that embedded JSON equals the downloadable artifact and validates as `DnaDocument`. The focused suite after this fix passed **27 tests**. This does not alter DNA integrity checking or execution semantics.

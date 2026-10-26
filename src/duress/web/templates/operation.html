@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Operation {{ view.id }} · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><a href="/dna">Failure DNA</a><span aria-hidden="true">/</span><span>Operation</span></nav>
+<header class="page-heading"><div><p class="eyebrow">Saved operation result · {{ view.kind|replace('_', ' ') }}</p><h1>{{ view.outcome|replace('_', ' ')|title }}</h1><p class="heading-detail">{{ view.id }}{% if view.created_at %} <span aria-hidden="true">/</span> {{ view.created_at }}{% endif %}</p></div>{% if view.dna_id %}<a class="button button-secondary" href="/dna/{{ view.dna_id }}">Open source DNA</a>{% endif %}</header>
+
+<section class="status-band status-band--{{ view.outcome|lower|replace('_', '-') }}" aria-labelledby="operation-state-title">
+  <div class="status-copy"><span class="status-glyph" aria-hidden="true">{% if view.outcome|upper in ['VERIFIED', 'NOT_REPRODUCED'] %}✓{% elif view.outcome|upper in ['FAIL', 'REPRODUCED', 'NOT_VERIFIED', 'DIFFERENT_FAILURE', 'REJECTED'] %}!{% else %}·{% endif %}</span><div><h2 id="operation-state-title">{{ view.outcome|replace('_', ' ') }}</h2><p>{{ view.kind|replace('_', ' ')|title }} result retained for review</p></div></div>
+  <div class="status-meta">{% if view.target_id %}<span><b>Target</b>{{ view.target_id }}</span>{% endif %}{% if view.dna_id %}<span><b>Failure DNA</b>{{ view.dna_id }}</span>{% endif %}</div>
+</section>
+
+{% if view.reason %}<aside class="notice notice-orange"><strong>Result reason</strong><span>{{ view.reason|replace('_', ' ') }}</span></aside>{% endif %}
+<section class="content-section operation-stats" aria-labelledby="operation-stats-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Returned counts</p><h2 id="operation-stats-title">Operation summary</h2></div></div>
+  {% if view.control or view.candidate %}
+  <div class="verify-count-grid">
+    {% for label, stage in [('Vulnerable control', view.control), ('Candidate', view.candidate)] %}
+    {% if stage %}<div class="verify-count-stage"><h3>{{ label }}</h3><dl>{% for key in ['valid', 'fail', 'inconclusive', 'trials', 'same_signature_failures', 'required_valid', 'p_hat'] %}{% if stage[key] is defined %}<div><dt>{{ key|replace('_', ' ') }}</dt><dd>{{ stage[key] }}</dd></div>{% endif %}{% endfor %}</dl></div>{% endif %}
+    {% endfor %}
+  </div>
+  {% elif view.valid is not none or view.fail is not none or view.trials is not none %}
+  <div class="metric-row operation-metrics">{% if view.valid is not none %}<div class="metric"><span>Valid</span><strong>{{ view.valid }}</strong></div>{% endif %}{% if view.fail is not none %}<div class="metric metric-fail"><span>Fail</span><strong>{{ view.fail }}</strong></div>{% endif %}{% if view.inconclusive is not none %}<div class="metric"><span>Inconclusive</span><strong>{{ view.inconclusive }}</strong></div>{% endif %}{% if view.trials is not none %}<div class="metric"><span>Trials</span><strong>{{ view.trials }}</strong></div>{% endif %}</div>
+  {% else %}<p class="empty-note">This operation record contains no aggregate count fields.</p>{% endif %}
+  {% if view.statement %}<blockquote class="verification-statement"><p>{{ view.statement }}</p><footer>Historical or returned verification statement</footer></blockquote>{% endif %}
+</section>
+
+<details class="artifact-json"><summary>Inspect complete operation record</summary><pre><code>{{ view.payload|tojson(indent=2) }}</code></pre></details>
+{% endblock %}

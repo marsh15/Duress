@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "run_id": "20261026T144731Z-b6bd12c0",
+  "generated_at": "2026-10-26T14:47:54+00:00",
+  "recorded": true,
+  "environment": {
+    "worktree_dirty": true,
+    "source_tree_sha256": "05a6ce15e1f3b188d8e20396c05c65275b7cfdbd63f8fecc63b8c655e695ad14",
+    "python": "3.12.14",
+    "python_implementation": "CPython",
+    "sqlite": "3.53.1",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "uv": "uv 0.12.19 (Homebrew 2026-09-24 aarch64-apple-darwin)",
+    "packages": {
+      "pytest": "9.1.1",
+      "fastapi": "0.162.0",
+      "httpx": "0.28.1",
+      "pydantic": "2.14.1",
+      "uvicorn": "0.54.0"
+    },
+    "git_revision": "d08409c510be35efce05dd52b94c202b95134508"
+  },
+  "suites": [
+    {
+      "name": "pytest",
+      "started_at": "2026-10-26T14:47:31+00:00",
+      "command": "/opt/homebrew/bin/uv run pytest tests/integration/test_matrix_m2.py::test_s9_fixed_second_payment_is_an_order_duplicate tests/unit/test_exec_semantics.py::test_c10_rendezvous_releases_by_parties_then_timeout_then_not_at_all -q --junitxml=/Users/santoshkumar/myprojects/Duress/docs/measurements/release-runs/20261026T144731Z-b6bd12c0/01-pytest/junit.xml",
+      "exit_code": 0,
+      "seconds": 22.78,
+      "counts": {
+        "collected": 2,
+        "passed": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "junit_xml": "docs/measurements/release-runs/20261026T144731Z-b6bd12c0/01-pytest/junit.xml",
+      "failure_output": ""
+    }
+  ],
+  "record_path": "docs/measurements/release-20261026T144731Z-b6bd12c0.json"
+}

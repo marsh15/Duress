@@ -80,3 +80,9 @@ failure needs more than the 44-trial cap and is reported as
 The result is `VERIFIED` only when the candidate produced no same-signature and
 no other failure across the required valid trials. The statement printed with
 the result is conditional and includes the independence assumption.
+
+## Web application
+
+Open `/dna` to browse artifacts and import a portable JSON file for replay. Each artifact page exposes its embedded delivery schedule, effect intents, release condition, invariant rows, representative responses and full JSON. **Download portable JSON** exports the stored document. Replay and fix verification use the existing M2 services and show their actual response and conditional statement; the result page is a saved local record, not a portable artifact.
+
+The bundled `showcase/dna/e8007dd56adae8ae.json` is the recorded M2 artifact. The workbench labels the showcase as historical evidence. Installing it into an empty runtime home preserves its reproducer and digest and does not replace an existing artifact. Failure reduction is pending; the web interface does not claim a smaller or minimal reproducer.

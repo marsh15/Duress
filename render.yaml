@@ -18,11 +18,5 @@ services:
         value: /tmp/duress
       - key: DURESS_DEMO_TOKEN
         generateValue: true
-      # An OpenAI-compatible endpoint. Optional: live mode falls back to cached
-      # and exhaustive when it is absent. Never commit a key.
-      - key: DURESS_LLM_BASE_URL
-        sync: false
-      - key: DURESS_LLM_API_KEY
-        sync: false
-      - key: DURESS_LLM_MODEL
-        sync: false
+      # Autonomous model-provider configuration is pending; this web release
+      # browses recorded evidence and uses the existing replay/verify services.

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Failure DNA {{ view.id }} · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Failure DNA</span></nav>
+<header class="page-heading dna-heading">
+  <div>
+    <p class="eyebrow">Portable reproducer · schema v{{ view.document.schema_version|default('1') }}{% if view.showcase %} · recorded M2 benchmark{% endif %}</p>
+    <h1>Failure DNA</h1>
+    <p class="heading-detail"><code>{{ view.id }}</code> <span aria-hidden="true">/</span> {{ view.target_id }} <span aria-hidden="true">/</span> {{ view.reproducer.domain|default('payments-webhook') }}</p>
+  </div>
+  <a class="button button-secondary" href="/dna/{{ view.id }}/download" download>Download portable JSON</a>
+</header>
+<script id="dna-document" type="application/json">{{ view.document|tojson }}</script>
+
+<section class="dna-signature-band" aria-labelledby="signature-title">
+  <div class="signature-mark" aria-hidden="true">!</div>
+  <div><p class="eyebrow">Recorded failure signature</p><h2 id="signature-title">{{ view.signature.check|default('Unknown check') }} <span>·</span> {{ view.signature.kind|default('Unknown kind') }}</h2><p>{% if view.signature.roles %}Affected roles: {{ view.signature.roles|join(', ') }}{% else %}No roles recorded{% endif %}</p></div>
+  <div class="signature-rate"><strong>{{ view.characterization.p0|default('—') }}</strong><span>characterization p₀</span><small>{{ view.characterization.fail|default(0) }} / {{ view.characterization.valid|default(0) }} valid failures</small></div>
+</section>
+
+<section class="content-section schedule-section" aria-labelledby="schedule-title">
+  <div class="section-heading compact-heading">
+    <div><p class="eyebrow">Reproducer structure</p><h2 id="schedule-title">Delivery schedule</h2></div>
+    <div class="intent-summary" aria-label="Effect intent counts">
+      {% for intent, count in view.intent_counts.items() %}<span><b>{{ count }}</b>{{ intent|replace('_', ' ') }}</span>{% endfor %}
+    </div>
+  </div>
+  <div class="schedule-context">
+    <p><span>Release condition</span><strong>{{ view.release_condition }}</strong></p>
+    <p><span>Control level</span><strong>{{ view.reproducer.control_level|default('not recorded')|replace('_', ' ') }}</strong></p>
+    <p><span>Faults</span><strong>{{ view.schedule.faults|length }}</strong></p>
+  </div>
+  {% if view.schedule.steps %}
+  <ol class="schedule-track">
+    {% for step in view.schedule.steps %}
+    <li class="schedule-step">
+      <div class="step-rail"><span>{{ loop.index }}</span></div>
+      <div class="step-content">
+        <div class="step-heading"><strong>{% if step.deliveries|length > 1 %}Concurrent group{% else %}Delivery{% endif %}</strong>{% if step.delay_before_ms %}<span>{{ step.delay_before_ms }} ms delay before group</span>{% endif %}</div>
+        <div class="delivery-group">
+          {% for delivery_id in step.deliveries %}
+          {% set delivery = view.deliveries|selectattr('id', 'equalto', delivery_id)|first %}
+          {% if delivery %}
+          <article class="delivery-row">
+            <span class="delivery-name">{{ delivery.id }}</span>
+            <span class="intent-tag intent-{{ delivery.effect_intent|default('none') }}">{{ delivery.effect_intent|default('none')|replace('_', ' ') }}</span>
+            <span class="delivery-event">{{ delivery.event.type|default('event') }}<small>{{ delivery.event.order_role|default('') }}{% if delivery.event.payment_role %} / {{ delivery.event.payment_role }}{% endif %}</small></span>
+            <span class="delivery-retry">{{ delivery.max_attempts|default(view.schedule.delivery_policy.max_attempts|default(1)) }} attempt{% if delivery.max_attempts|default(view.schedule.delivery_policy.max_attempts|default(1)) != 1 %}s{% endif %}</span>
+          </article>
+          {% else %}<article class="delivery-row"><span class="delivery-name">{{ delivery_id }}</span><span class="empty-inline">Delivery details unavailable</span></article>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}<p class="empty-note">No schedule steps were recorded.</p>{% endif %}
+  {% if view.schedule.faults %}
+  <div class="fault-strip"><strong>Injected faults</strong>{% for fault in view.schedule.faults %}<span>{{ fault.kind|default('fault')|replace('_', ' ') }}{% if fault.ms is defined %} · {{ fault.ms }} ms{% endif %}{% if fault.parties is defined %} · {{ fault.parties }} parties{% endif %}</span>{% endfor %}</div>
+  {% endif %}
+</section>
+
+<div class="dna-detail-grid">
+  <section class="content-section violation-section" aria-labelledby="violations-title">
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Representative observation</p><h2 id="violations-title">Invariant violations</h2></div><span class="section-count">{{ view.violation_rows|length }} rows</span></div>
+    {% if view.violation_rows %}
+    <div class="table-wrap"><table class="data-table violation-table"><caption class="visually-hidden">Recorded invariant violation rows</caption><thead><tr><th scope="col">Check</th><th scope="col">Kind</th><th scope="col">Roles</th><th scope="col">Entities</th></tr></thead><tbody>
+      {% for violation in view.violation_rows %}<tr><th scope="row"><code>{{ violation.check|default('unknown') }}</code></th><td>{{ violation.kind|default('unknown') }}</td><td>{{ violation.roles|default([])|join(', ') }}</td><td>{{ violation.entity_ids|default([])|join(', ') }}</td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<p class="empty-note">No violation rows were included in this artifact.</p>{% endif %}
+  </section>
+  <section class="content-section release-section" aria-labelledby="release-title">
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Characterization</p><h2 id="release-title">Release conditions</h2></div></div>
+    {% if view.release_conditions %}<ul class="condition-list">{% for condition, count in view.release_conditions.items() %}<li><span>{{ condition }}</span><strong>{{ count }}</strong></li>{% endfor %}</ul>{% else %}<p class="condition-callout">{{ view.release_condition }}</p>{% endif %}
+    <p class="field-help">The recorded condition describes when the provider stub released held deliveries.</p>
+  </section>
+</div>
+
+<section class="content-section reduction-section" aria-labelledby="reduction-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Minimized reproducer</p><h2 id="reduction-title">Original and reduced</h2></div><span class="section-count">{{ view.reduction.original_delivery_count }} original deliveries</span></div>
+  {% if view.reduction.available %}
+    {% if view.reduction.claim %}<p class="claim-line">{{ view.reduction.claim }}</p>{% endif %}
+    {% if view.reduction.reduced_schedule %}
+    <div class="reduction-compare">
+      <div><span>Original schedule</span><strong>{{ view.reduction.original_delivery_count }} deliveries</strong><p>{{ view.reduction.original_delivery_ids|join(' · ') }}</p></div>
+      <span class="compare-divider" aria-hidden="true">→</span>
+      <div><span>Reduced schedule</span><strong>{{ view.reduction.reduced_delivery_count }} deliveries</strong><p>{{ view.reduction.reduced_delivery_ids|join(' · ') }}</p></div>
+    </div>
+    {% elif view.reduction.reduced_dna_id %}<p class="field-help">Reduced artifact: <a href="/dna/{{ view.reduction.reduced_dna_id }}"><code>{{ view.reduction.reduced_dna_id }}</code></a></p>
+    {% else %}<p class="empty-note">Reduction result is recorded; the reduced schedule is not embedded in this document.</p>{% endif %}
+  {% else %}
+    <p class="empty-note">No reduced schedule is recorded. Reduction is pending in this build; the original artifact remains available for replay and verification.</p>
+  {% endif %}
+  <div class="pending-inline"><button class="button button-secondary" type="button" disabled>Reduction unavailable</button><p>Reduction is pending in this build. No reduction request is sent.</p></div>
+</section>
+
+{% if view.observations.attempts %}
+<section class="content-section observed-attempts" aria-labelledby="dna-attempts-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Retained observation</p><h2 id="dna-attempts-title">Observed delivery attempts</h2></div><span class="section-count">{{ view.observations.attempts|length }} actual attempts</span></div>
+  <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts preserved in this Failure DNA artifact</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
+    {% for attempt in view.observations.attempts %}<tr><th scope="row"><code>{{ attempt.delivery_id|default('') }}</code></th><td>{{ attempt.attempt|default('—') }}</td><td>{{ attempt.outcome|default('—') }}</td><td>{{ attempt.status_code|default('—') }}</td><td>{{ attempt.body_status|default('—') }}</td><td>{{ attempt.started_s|default('—') }}</td><td>{{ attempt.ended_s|default('—') }}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+
+<section class="content-section action-section" aria-labelledby="replay-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Replay or import</p><h2 id="replay-title">Check portability</h2></div></div>
+  <div class="token-row"><label for="api-token">Access token</label><input id="api-token" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Optional token for this session"><span>Memory only · clears on reload</span></div>
+  <div class="action-grid">
+    <div class="action-panel">
+      <span class="action-number">01</span><div><h3>Replay this artifact</h3><p>Run its embedded schedule against a fresh target process.</p></div>
+      <button class="button button-primary" type="button" id="replay-existing" data-dna-id="{{ view.id }}">Replay {{ view.id }}</button>
+      <p id="replay-message" class="form-message" role="status" aria-live="polite"></p>
+      <div id="replay-result" class="operation-result" aria-live="polite"></div>
+    </div>
+    <div class="action-panel import-panel">
+      <span class="action-number">02</span><div><h3>Import portable JSON</h3><p>Replay a file without adding it to the workspace.</p></div>
+      <label for="import-file">Failure DNA JSON file</label><input id="import-file" type="file" accept="application/json,.json">
+      <label for="import-target">Target</label><select id="import-target"><option value="razorpay-vulnerable">razorpay-vulnerable</option></select>
+      <button class="button button-secondary" type="button" id="replay-import">Import and replay</button>
+      <p id="import-message" class="form-message" role="status" aria-live="polite"></p>
+      <div id="import-result" class="operation-result" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section class="content-section verify-section" aria-labelledby="verify-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Empirical check</p><h2 id="verify-title">Verify a fix</h2></div><span class="verification-note">A bounded result for this reproducer</span></div>
+  <p class="section-intro">The control re-establishes the failure on the vulnerable target. The candidate then runs the sized trial count under the same DNA conditions.</p>
+  <form id="verify-fix-form" class="verify-form">
+    <div><label for="vulnerable-target">Vulnerable control</label><select id="vulnerable-target" name="vulnerable_target_id"><option value="razorpay-vulnerable">razorpay-vulnerable</option></select></div>
+    <div><label for="candidate-target">Candidate fix</label><select id="candidate-target" name="candidate_target_id"><option value="razorpay-fixed">razorpay-fixed</option></select></div>
+    <button class="button button-primary" type="submit" data-dna-id="{{ view.id }}">Verify fix</button>
+  </form>
+  <div id="verify-message" class="form-message" role="status" aria-live="polite"></div>
+  <div id="verify-result" class="operation-result" aria-live="polite"></div>
+  <p class="caveat-note">Verification is not a proof of correctness for other schedules, loads or environments.</p>
+</section>
+
+<details class="artifact-json"><summary>Inspect complete artifact JSON</summary><pre><code>{{ view.document|tojson(indent=2) }}</code></pre></details>
+{% endblock %}

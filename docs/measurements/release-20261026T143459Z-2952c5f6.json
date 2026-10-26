@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "20261026T143459Z-2952c5f6",
+  "generated_at": "2026-10-26T14:36:05+00:00",
+  "recorded": true,
+  "environment": {
+    "worktree_dirty": true,
+    "source_tree_sha256": "16048785500ec3d1d6d2e302d63640d4a8bf92d630756889fada84ddc960b533",
+    "python": "3.12.14",
+    "python_implementation": "CPython",
+    "sqlite": "3.53.1",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "uv": "uv 0.12.19 (Homebrew 2026-09-24 aarch64-apple-darwin)",
+    "packages": {
+      "pytest": "9.1.1",
+      "fastapi": "0.162.0",
+      "httpx": "0.28.1",
+      "pydantic": "2.14.1",
+      "uvicorn": "0.54.0"
+    },
+    "git_revision": "d08409c510be35efce05dd52b94c202b95134508"
+  },
+  "suites": [
+    {
+      "name": "pytest",
+      "started_at": "2026-10-26T14:34:59+00:00",
+      "command": "/opt/homebrew/bin/uv run pytest tests/browser -q --junitxml=/Users/santoshkumar/myprojects/Duress/docs/measurements/release-runs/20261026T143459Z-2952c5f6/01-pytest/junit.xml",
+      "exit_code": 1,
+      "seconds": 66.41,
+      "counts": {
+        "collected": 7,
+        "passed": 6,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "junit_xml": "docs/measurements/release-runs/20261026T143459Z-2952c5f6/01-pytest/junit.xml",
+      "failure_output": "F......                                                                  [100%]\n=================================== FAILURES ===================================\n___________ test_workspace_navigation_registry_and_pending_features ____________\n\npage = <Page url='http://127.0.0.1:51301/investigations'>\n\n    def test_workspace_navigation_registry_and_pending_features(page):\n        from playwright.sync_api import expect\n        errors = []\n        page.on('pageerror', lambda exc: errors.append(str(exc)))\n        page.goto('/')\n        expect(page.get_by_role('button', name='Investigation unavailable')).to_be_disabled()\n        expect(page.locator('#target-registry-list')).to_contain_text('razorpay-fixed')\n        expect(page.locator('#investigation-history')).to_contain_text('showcase-m2')\n        page.get_by_role('link', name='Targets', exact=True).click()\n        expect(page.get_by_role('heading', level=1)).to_contain_text('Targets')\n        expect(page.get_by_text('127.0.0.1', exact=False).first).to_be_visible()\n        page.get_by_role('link', name='Investigations', exact=True).click()\n>       expect(page.get_by_text('Recorded benchmark', exact=False).first).to_be_visible()\nE       AssertionError: Locator expected to be visible\nE       Actual value: None\nE       Error: element(s) not found \nE       Call log:\nE         - Expect \"to_be_visible\" get_by_text(\"Recorded benchmark\").first with timeout 5000ms\nE         - waiting for get_by_text(\"Recorded benchmark\").first\nE       \nE       Aria snapshot:\nE       - link \"Skip to content\":\nE         - /url: \"#main\"\nE       - banner:\nE         - link \"Duress home\":\nE           - /url: /\nE           - text: duress\nE         - paragraph: Failure analysis for webhook systems\nE         - navigation \"Primary navigation\":\nE           - link \"Workbench\":\nE             - /url: /\nE           - link \"Targets\":\nE             - /url: /targets\nE           - link \"Investigations\":\nE             - /url: /investigations\nE           - link \"Failure DNA\":\nE             - /url: /dna\nE       - main:\nE         - navigation \"Breadcrumb\":\nE           - link \"Workbench\":\nE             - /url: /\nE           - text: Investigations\nE         - paragraph: Saved records \u00b7 read only\nE         - heading \"Investigation history\" [level=1]\nE         - paragraph: Recorded evidence and supplied showcase data. Creating new investigations is pending.\nE         - text: Creation pending\nE         - article:\nE           - text: completed Recorded M2 benchmark\nE           - heading \"razorpay-vulnerable\" [level=2]:\nE             - link \"razorpay-vulnerable\":\nE               - /url: /investigations/showcase-m2\nE           - paragraph: Recorded M2 benchmark \u00b7 recorded\nE           - text: showcase-m2\nE           - strong: \"10\"\nE           - text: valid aggregate trials\nE           - strong: \"10\"\nE           - text: aggregate failures\nE           - strong: \"1.0\"\nE           - text: characterization p\u2080\nE           - strong: VERIFIED\nE           - text: historical verification\nE           - link \"Inspect record\":\nE             - /url: /investigations/showcase-m2\nE         - complementary:\nE           - strong: Investigator status\nE           - text: Autonomous hypothesis generation and reduction are pending. This page shows saved records only.\nE       - contentinfo: Duress Reproducible conditions. Portable evidence.\n\ntests/browser/test_product.py:86: AssertionError\n=========================== short test summary info ============================\nFAILED tests/browser/test_product.py::test_workspace_navigation_registry_and_pending_features\n1 failed, 6 passed in 65.54s (0:01:05)",
+      "junit_note": "Traceback trailing spaces normalized for Git; recorded test outcomes and assertion text preserved."
+    }
+  ],
+  "record_path": "docs/measurements/release-20261026T143459Z-2952c5f6.json"
+}

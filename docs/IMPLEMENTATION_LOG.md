@@ -100,3 +100,13 @@ verify-fix; the API slice; `duress dna build|list`, `replay`, `verify-fix`,
 
 The DNA id is identical across independent builds and across the macOS host and
 the Linux container, which is the intended canonical-identity property.
+
+## Web product experience (after M2)
+
+- Confirmed the clean checkout and remote `main` at `d08409c` before implementation. The pre-change fast gate passed: 198 tests, 3 deselected. The assignment was narrowed to frontend, ordinary API integration, documentation and release preparation; no unfinished engine, reducer or target changes are included.
+- Added the Jinja/HTMX presentation layer, read-only investigation records, bundled M2 showcase, and saved replay/verification result metadata. The existing M0–M2 execution services and targets remain unchanged.
+- Packaged only retained M2 DNA and measurement evidence. The showcase explicitly distinguishes aggregate/representative data from a full trial stream and from live execution.
+- Browser verification detected low-contrast muted text and navigation; correcting those colors is part of the web checkpoint. Final gate results and commit references follow below after execution.
+- Verified the product path with 7 passing Playwright tests and zero serious/critical axe issues on the three main pages. Docker startup, read-only smoke, actual portable replay/verification and 26 focused container tests passed.
+- Independent Luna review found a misleading rejected-import message and malformed DNA metadata handling; fixed both. Final presentation inspection also separated the showcase badge from portable JSON; 27 focused tests passed after that change.
+- The first broad post-change run had 222 passes and two failures in unchanged backend tests. Both passed unchanged in a focused diagnostic rerun. A serial broad rerun follows; the failed evidence is retained. No backend test assertions were relaxed.

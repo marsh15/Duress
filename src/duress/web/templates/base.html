@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#122d3a">
+  <title>{% block title %}Duress{% endblock %}</title>
+  <link rel="stylesheet" href="/web/static/site.css">
+  <script defer src="/web/static/vendor/htmx.min.js"></script>
+  <script defer src="/web/static/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="Duress home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>duress</span>
+      </a>
+      <p class="topbar-note">Failure analysis for webhook systems</p>
+      <nav class="topbar-nav" aria-label="Primary navigation">
+        <a href="/">Workbench</a>
+        <a href="/targets">Targets</a>
+        <a href="/investigations">Investigations</a>
+        <a href="/dna">Failure DNA</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page-shell">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>Duress</span>
+      <span>Reproducible conditions. Portable evidence.</span>
+    </div>
+  </footer>
+</body>
+</html>

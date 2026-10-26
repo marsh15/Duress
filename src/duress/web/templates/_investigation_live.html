@@ -1,0 +1,3 @@
+<div id="investigation-live" class="investigation-live"{% if poll %} hx-get="{{ poll_url }}" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}>
+  {% include "_investigation_body.html" %}
+</div>

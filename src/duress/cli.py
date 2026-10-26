@@ -280,6 +280,25 @@ def serve_command(
     uvicorn.run(create_app(), host=host, port=port, log_level="info")
 
 
+@app.command("report")
+def report_command(
+    investigation: str = typer.Argument("showcase", help="Stored record id, or showcase"),
+    output: Path = typer.Option(Path("duress-report.html"), "--output", "-o"),
+) -> None:
+    """Export an existing investigation record as a self-contained HTML report."""
+    from .records import load_investigation_record
+    from .store import atomic_write_text
+    from .web import render_report
+
+    try:
+        record = load_investigation_record(_workspace(), investigation)
+    except FileNotFoundError:
+        typer.echo(f"error: unknown investigation {investigation!r}", err=True)
+        raise typer.Exit(3) from None
+    atomic_write_text(output, render_report(record))
+    typer.echo(f"report {output.resolve()}")
+
+
 def main() -> None:
     app()
 
