@@ -37,7 +37,7 @@ class GracefulServer(uvicorn.Server):
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m razorpay_ref.serve")
-    parser.add_argument("--variant", required=True, choices=("vulnerable", "fixed"))
+    parser.add_argument("--variant", required=True, choices=("vulnerable", "fixed", "naive_fix"))
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, required=True)
     parser.add_argument("--workers", type=int, default=1, help="ASGI worker processes (E8)")
