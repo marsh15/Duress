@@ -72,3 +72,15 @@ def test_malformed_nested_dna_is_unavailable_instead_of_crashing(tmp_path, sched
     (tmp_path / ".duress/dna/dna-001.json").write_text(json.dumps(document))
     assert client.get("/dna/dna-001").status_code == 404
     assert client.get("/dna").status_code == 200
+
+
+def test_null_delivery_retry_override_uses_the_recorded_policy(tmp_path):
+    client = _client(tmp_path)
+    document = _dna()
+    for delivery in document["reproducer"]["schedule"]["deliveries"]:
+        delivery["max_attempts"] = None
+    (tmp_path / ".duress/dna/dna-001.json").write_text(json.dumps(document))
+    response = client.get("/dna/dna-001")
+    assert response.status_code == 200
+    assert "1 attempt" in response.text
+    assert "None attempts" not in response.text

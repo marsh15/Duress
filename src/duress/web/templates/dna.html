@@ -48,7 +48,8 @@
             <span class="delivery-name">{{ delivery.id }}</span>
             <span class="intent-tag intent-{{ delivery.effect_intent|default('none') }}">{{ delivery.effect_intent|default('none')|replace('_', ' ') }}</span>
             <span class="delivery-event">{{ delivery.event.type|default('event') }}<small>{{ delivery.event.order_role|default('') }}{% if delivery.event.payment_role %} / {{ delivery.event.payment_role }}{% endif %}</small></span>
-            <span class="delivery-retry">{{ delivery.max_attempts|default(view.schedule.delivery_policy.max_attempts|default(1)) }} attempt{% if delivery.max_attempts|default(view.schedule.delivery_policy.max_attempts|default(1)) != 1 %}s{% endif %}</span>
+            {% set attempts = delivery.max_attempts or view.schedule.delivery_policy.max_attempts|default(1) %}
+            <span class="delivery-retry">{{ attempts }} attempt{% if attempts != 1 %}s{% endif %}</span>
           </article>
           {% else %}<article class="delivery-row"><span class="delivery-name">{{ delivery_id }}</span><span class="empty-inline">Delivery details unavailable</span></article>{% endif %}
           {% endfor %}
