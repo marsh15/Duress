@@ -43,6 +43,10 @@ DOMAIN = "payments-webhook"
 class DnaError(RuntimeError):
     """The failure could not be characterised into a DNA."""
 
+    def __init__(self, message: str, *, scenario_result: ScenarioResult | None = None) -> None:
+        super().__init__(message)
+        self.scenario_result = scenario_result
+
 
 # --------------------------------------------------------------------------- #
 # Identity helpers
@@ -184,6 +188,7 @@ async def characterise(
     workdir_root: Path,
     home: Path | None = None,
     limits: limits_module.Limits | None = None,
+    wall_deadline: float | None = None,
 ) -> Characterisation:
     """Run the frozen ``characterize`` policy and require a real FAIL.
 
@@ -200,16 +205,18 @@ async def characterise(
             limits=limits or limits_module.DEFAULT_LIMITS,
             home=home,
             keep_evidence=True,
-        )
+        ),
+        wall_deadline=wall_deadline,
     )
     if result.result.status != "FAIL" or result.result.signature is None:
         raise DnaError(
             "characterization_did_not_fail:"
-            f"{result.result.status}:{','.join(result.result.reasons)}"
+            f"{result.result.status}:{','.join(result.result.reasons)}",
+            scenario_result=result,
         )
     valid = result.result.valid
     if valid <= 0:
-        raise DnaError("characterization_no_valid_trials")
+        raise DnaError("characterization_no_valid_trials", scenario_result=result)
     return Characterisation(
         scenario_result=result,
         signature=result.result.signature,
@@ -341,6 +348,7 @@ async def build_dna(
     home: Path | None = None,
     limits: limits_module.Limits | None = None,
     provenance: dict[str, Any] | None = None,
+    wall_deadline: float | None = None,
 ) -> tuple[DnaDocument, Characterisation]:
     characterisation = await characterise(
         profile,
@@ -349,6 +357,7 @@ async def build_dna(
         workdir_root=workdir_root,
         home=home,
         limits=limits,
+        wall_deadline=wall_deadline,
     )
     document = build_document(
         profile, scenario, characterisation, provenance=provenance

@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-10-26T14:41:40+00:00",
+  "key": "1f026e34216a18d8b4e6479288d51a4abd1e97f88cd7c05ba988fd8f448fe38b",
+  "model": "duress-authored-fixture",
+  "prompt_sha256": "62a065620491fc6cef878825c719af4584b5098df051c8d25ab727ca21937471",
+  "provenance": {
+    "bundle_sha256": "98a07d7bca763fb3c021d1f9c19b921e15f817b68432539425b39074cc84b496",
+    "note": "Written by scripts/build_llm_fixture.py from the current target source; not model output.",
+    "source": "authored_fixture",
+    "target_id": "razorpay-vulnerable"
+  },
+  "response": {
+    "content": "{\n  \"hypotheses\": [\n    {\n      \"citations\": [\n        {\n          \"file\": \"razorpay_ref/vulnerable/handler.py\",\n          \"line_end\": 97,\n          \"line_start\": 54,\n          \"quote\": \"\\\"SELECT status, amount, currency FROM payments WHERE id = ? AND order_id = ?\\\",\"\n        }\n      ],\n      \"id\": \"H1\",\n      \"mechanism\": \"The handler reads the payment and order status, awaits the provider, and only then inserts the fulfilment. Concurrent copies of the same event can all pass the status check before any of them commits, producing more than one fulfilment.\",\n      \"mechanism_kind\": \"check_then_act_race\",\n      \"predicted_failure\": {\n        \"check\": \"INV-1@1\",\n        \"kind\": \"duplicate_fulfilment\",\n        \"role\": \"order:A\"\n      },\n      \"scenarios\": [\n        {\n          \"params\": {\n            \"copies\": 3,\n            \"fault\": \"rendezvous\",\n            \"latency_ms\": 200\n          },\n          \"template_id\": \"S3\"\n        }\n      ],\n      \"title\": \"Status check and fulfilment insert are not atomic for duplicate deliveries\"\n    },\n    {\n      \"citations\": [\n        {\n          \"file\": \"razorpay_ref/vulnerable/handler.py\",\n          \"line_end\": 97,\n          \"line_start\": 54,\n          \"quote\": \"\\\"SELECT status, amount, currency FROM payments WHERE id = ? AND order_id = ?\\\",\"\n        }\n      ],\n      \"id\": \"H2\",\n      \"mechanism\": \"payment.captured and order.paid carry different event ids but the same payment. Deduplicating by event id cannot stop them, so the same check-then-act window applies across the two events.\",\n      \"mechanism_kind\": \"check_then_act_race\",\n      \"predicted_failure\": {\n        \"check\": \"INV-1@1\",\n        \"kind\": \"duplicate_fulfilment\",\n        \"role\": \"order:A\"\n      },\n      \"scenarios\": [\n        {\n          \"params\": {\n            \"fault\": \"rendezvous\",\n            \"latency_ms\": 200\n          },\n          \"template_id\": \"S5\"\n        }\n      ],\n      \"title\": \"Different events for the same payment race through the same window\"\n    }\n  ]\n}",
+    "usage": {}
+  }
+}
