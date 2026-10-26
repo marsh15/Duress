@@ -11,6 +11,12 @@ from duress import api, cli
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def test_container_excludes_local_recovery_archives_and_runtime_evidence():
+    ignored = (ROOT / ".dockerignore").read_text().splitlines()
+    assert ".recovery/" in ignored
+    assert ".duress/" in ignored
+
+
 def test_container_entrypoint_hands_signals_to_the_single_server_process():
     dockerfile = (ROOT / "Dockerfile").read_text()
     command_line = next(line for line in dockerfile.splitlines() if line.startswith("CMD "))
