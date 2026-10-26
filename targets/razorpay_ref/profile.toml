@@ -9,7 +9,7 @@ workers = 1
 
 [seed]
 path = "seed.json"
-roles = { "order:A" = "order_A", "payment:A1" = "pay_A1", "payment:A2" = "pay_A2" }
+roles = { "order:A" = "order_A", "payment:A1" = "pay_A1", "payment:A2" = "pay_A2", "order:B" = "order_B", "payment:B1" = "pay_B1", "payment:B2" = "pay_B2" }
 
 [signing]
 scheme = "hmac-sha256-hex"
@@ -18,9 +18,23 @@ event_id_header = "X-Razorpay-Event-Id"
 secret_ref = "env:DURESS_WEBHOOK_SECRET"
 
 [variants.vulnerable]
-init = ["python", "-m", "razorpay_ref", "init-db", "--variant", "vulnerable"]
+id = "razorpay-vulnerable"
+workers = 1
+init = ["python", "-m", "razorpay_ref", "init-db", "--db", "{db}", "--seed", "{seed}", "--variant", "vulnerable"]
+serve = ["python", "-m", "razorpay_ref.serve", "--variant", "vulnerable", "--host", "{host}", "--port", "{port}", "--workers", "{workers}"]
 app = "razorpay_ref.vulnerable.app:app"
 
 [variants.fixed]
-init = ["python", "-m", "razorpay_ref", "init-db", "--variant", "fixed"]
+id = "razorpay-fixed"
+workers = 1
+init = ["python", "-m", "razorpay_ref", "init-db", "--db", "{db}", "--seed", "{seed}", "--variant", "fixed"]
+serve = ["python", "-m", "razorpay_ref.serve", "--variant", "fixed", "--host", "{host}", "--port", "{port}", "--workers", "{workers}"]
+app = "razorpay_ref.fixed.app:app"
+
+# E8: the corrected handler must stay sound with two workers sharing the database.
+[variants.fixed_2w]
+id = "razorpay-fixed-2w"
+workers = 2
+init = ["python", "-m", "razorpay_ref", "init-db", "--db", "{db}", "--seed", "{seed}", "--variant", "fixed"]
+serve = ["python", "-m", "razorpay_ref.serve", "--variant", "fixed", "--host", "{host}", "--port", "{port}", "--workers", "{workers}"]
 app = "razorpay_ref.fixed.app:app"

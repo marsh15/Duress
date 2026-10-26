@@ -50,7 +50,7 @@ def fixed_db(tmp_path):
             " VALUES ('order_A', 'pay_A1', 5000, '2026-01-01T00:00:00+00:00')"
         )
         conn.execute(
-            "INSERT INTO orders (id, amount, currency, status) VALUES ('order_B', 5000, 'INR', 'created')"
+            "INSERT INTO orders (id, amount, currency, status) VALUES ('order_C', 5000, 'INR', 'created')"
         )
     finally:
         conn.close()
@@ -72,7 +72,7 @@ def test_duplicate_payment_id_is_a_duplicate(fixed_db):
     exc = _integrity_error(
         fixed_db,
         "INSERT INTO fulfilments (order_id, payment_id, amount, created_at)"
-        " VALUES ('order_B', 'pay_A1', 5000, '2026-01-01T00:00:00+00:00')",
+        " VALUES ('order_C', 'pay_A1', 5000, '2026-01-01T00:00:00+00:00')",
     )
 
     assert exc.sqlite_errorname == "SQLITE_CONSTRAINT_UNIQUE"
@@ -94,7 +94,7 @@ def test_check_violation_is_not_a_duplicate(fixed_db):
     exc = _integrity_error(
         fixed_db,
         "INSERT INTO fulfilments (order_id, payment_id, amount, created_at)"
-        " VALUES ('order_B', 'pay_A2', 0, '2026-01-01T00:00:00+00:00')",
+        " VALUES ('order_C', 'pay_A2', 0, '2026-01-01T00:00:00+00:00')",
     )
 
     assert exc.sqlite_errorname == "SQLITE_CONSTRAINT_CHECK"
@@ -105,7 +105,7 @@ def test_not_null_violation_is_not_a_duplicate(fixed_db):
     exc = _integrity_error(
         fixed_db,
         "INSERT INTO fulfilments (order_id, payment_id, amount, created_at)"
-        " VALUES ('order_B', 'pay_A2', 5000, NULL)",
+        " VALUES ('order_C', 'pay_A2', 5000, NULL)",
     )
 
     assert exc.sqlite_errorname == "SQLITE_CONSTRAINT_NOTNULL"

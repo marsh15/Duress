@@ -1,0 +1,46 @@
+{
+  "milestone": "M1",
+  "label": "local",
+  "generated_at": "2026-10-26T12:20:49+00:00",
+  "environment": {
+    "python": "3.12.14",
+    "sqlite": "3.53.1",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "uvicorn": "0.54.0",
+    "fastapi": "0.162.0",
+    "httpx": "0.28.1",
+    "pydantic": "2.14.1"
+  },
+  "fast_suite": {
+    "command": "uv run pytest -q -m \"not slow\"",
+    "exit_code": 0,
+    "passed": 141,
+    "failed": null,
+    "deselected": 3,
+    "seconds": 206.76,
+    "summary": "141 passed, 3 deselected, 1 warning in 205.74s (0:03:25)",
+    "failure_output": ""
+  },
+  "acceptance_tests": {
+    "files": [
+      "tests/unit/test_limits.py",
+      "tests/unit/test_exec_semantics.py",
+      "tests/unit/test_schedule_validation.py",
+      "tests/unit/test_invariants.py",
+      "tests/unit/test_evaluate_trial.py",
+      "tests/unit/test_aggregate.py",
+      "tests/unit/test_trial_phases.py",
+      "tests/unit/test_profiles.py",
+      "tests/unit/test_operations.py",
+      "tests/integration/test_deadline.py",
+      "tests/integration/test_isolation.py",
+      "tests/integration/test_matrix_fast.py",
+      "tests/integration/test_controls.py",
+      "tests/integration/test_engine_vs_m0.py",
+      "tests/integration/test_e8_two_workers.py",
+      "tests/integration/test_declared_launch.py"
+    ],
+    "collected": 114,
+    "collection_exit_code": 0
+  }
+}

@@ -5,6 +5,12 @@
       "amount": 5000,
       "currency": "INR",
       "status": "created"
+    },
+    {
+      "id": "order_B",
+      "amount": 5000,
+      "currency": "INR",
+      "status": "created"
     }
   ],
   "payments": [
@@ -18,6 +24,20 @@
     {
       "id": "pay_A2",
       "order_id": "order_A",
+      "amount": 5000,
+      "currency": "INR",
+      "status": "authorized"
+    },
+    {
+      "id": "pay_B1",
+      "order_id": "order_B",
+      "amount": 5000,
+      "currency": "INR",
+      "status": "authorized"
+    },
+    {
+      "id": "pay_B2",
+      "order_id": "order_B",
       "amount": 5000,
       "currency": "INR",
       "status": "authorized"

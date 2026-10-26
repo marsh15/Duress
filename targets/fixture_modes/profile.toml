@@ -1,0 +1,74 @@
+# Fixture-mode control target (plan C.1). Not a realistic integration.
+[profile]
+id = "fixture-modes"
+contract_version = 1
+domain = "payments-webhook"
+
+[process]
+workers = 1
+
+[seed]
+path = "seed.json"
+roles = { "order:A" = "order_A", "payment:A1" = "pay_A1", "payment:A2" = "pay_A2", "order:B" = "order_B", "payment:B1" = "pay_B1", "payment:B2" = "pay_B2" }
+
+[signing]
+scheme = "hmac-sha256-hex"
+header = "X-Razorpay-Signature"
+event_id_header = "X-Razorpay-Event-Id"
+secret_ref = "env:DURESS_WEBHOOK_SECRET"
+
+[variants.no_sig_check]
+id = "fixture-no_sig_check"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "no_sig_check"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "no_sig_check", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"
+
+[variants.ack_without_effect]
+id = "fixture-ack_without_effect"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "ack_without_effect"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "ack_without_effect", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"
+
+[variants.reject_all]
+id = "fixture-reject_all"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "reject_all"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "reject_all", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"
+
+[variants.crash_on_boot]
+id = "fixture-crash_on_boot"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "crash_on_boot"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "crash_on_boot", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"
+
+[variants.hang_on_shutdown]
+id = "fixture-hang_on_shutdown"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "hang_on_shutdown"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "hang_on_shutdown", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"
+
+[variants.dup_then_hang]
+id = "fixture-dup_then_hang"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "dup_then_hang"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "dup_then_hang", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"
+
+[variants.spawn_orphan]
+id = "fixture-spawn_orphan"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "spawn_orphan"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "spawn_orphan", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"
+
+[variants.mark_duplicate_captured]
+id = "fixture-mark_duplicate_captured"
+workers = 1
+init = ["python", "-m", "fixture_modes", "init-db", "--db", "{db}", "--seed", "{seed}", "--mode", "mark_duplicate_captured"]
+serve = ["python", "-m", "fixture_modes.serve", "--mode", "mark_duplicate_captured", "--host", "{host}", "--port", "{port}"]
+app = "fixture_modes.app:app"

@@ -2,8 +2,8 @@
   "label": "docker",
   "status": "pass",
   "collected": 4,
-  "seconds": 98,
-  "generated_at": "2026-10-26T09:57:23+00:00",
+  "seconds": 92,
+  "generated_at": "2026-10-26T12:27:00+00:00",
   "environment": {
     "python": "3.12.15",
     "sqlite": "3.46.1",

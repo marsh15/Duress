@@ -6,21 +6,32 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "httpx>=0.27",
+    "pydantic>=2.9",
+    "typer>=0.12",
     "uvicorn>=0.32",
 ]
+
+[project.scripts]
+duress = "duress.cli:app"
 
 [dependency-groups]
 dev = [
     "pytest>=8.3",
+    "pytest-asyncio>=0.24",
 ]
 
-[tool.uv]
-package = false
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/duress"]
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src", "targets"]
+asyncio_mode = "strict"
 testpaths = ["targets/razorpay_ref/tests", "tests"]
 addopts = "-ra"
 markers = [
-    "slow: measured M0 experiments (E4-E6); not part of the M0 gate",
+    "slow: measured experiments and long matrices; not part of the fast gate",
 ]

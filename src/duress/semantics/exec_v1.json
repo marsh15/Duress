@@ -1,0 +1,78 @@
+{
+  "id": "exec",
+  "version": 1,
+  "clauses": [
+    {
+      "id": "C1",
+      "rule": "steps_in_order",
+      "definition": "Steps run strictly in order. Step k+1 starts delay_before_ms after every attempt of step k has resolved."
+    },
+    {
+      "id": "C2",
+      "rule": "concurrent_group",
+      "definition": "Every first-attempt request in a step is built, then one event releases all of them. Send order is unspecified."
+    },
+    {
+      "id": "C3",
+      "rule": "planned_attempt_timeout",
+      "definition": "attempt_timeout_ms is a planned client-side total timeout. On expiry the connection closes, the attempt outcome is timeout, and the trial is never aborted."
+    },
+    {
+      "id": "C4",
+      "rule": "retries",
+      "definition": "Attempt n+1 is sent backoff_ms[n] after attempt n resolves when that outcome is in retry_on. Body and event id are unchanged; the signature is regenerated."
+    },
+    {
+      "id": "C5",
+      "rule": "planned_duration",
+      "definition": "W = sum over steps of (delay_before_ms + max over the step's deliveries of sum over attempts of (attempt_timeout_ms + backoff_ms)). W <= 25000 ms, below the 30000 ms execution deadline."
+    },
+    {
+      "id": "C6",
+      "rule": "execution_deadline",
+      "definition": "If the 30000 ms execution deadline passes before every planned attempt is dispatched and resolved, in-flight attempts are cancelled, nothing further is dispatched, and execution_deadline_exceeded, cancelled_attempts and undispatched are recorded."
+    },
+    {
+      "id": "C7",
+      "rule": "signing",
+      "definition": "HMAC-SHA256 hex over the exact body bytes with the resolved secret. A deliberately invalid signature uses key = sha256('duress-invalid:' + delivery_id) hex digest as the HMAC key over the body."
+    },
+    {
+      "id": "C8",
+      "rule": "stub_fixtures",
+      "definition": "GET /t/{trial}/v1/payments/{id} returns the fixture as 200 JSON, or 404 for an unknown id. Any other prefix returns 410 and is recorded as a stale_call."
+    },
+    {
+      "id": "C9",
+      "rule": "latency_fault",
+      "definition": "Each matching provider call is delayed by ms."
+    },
+    {
+      "id": "C10",
+      "rule": "rendezvous_fault",
+      "definition": "Matching calls are held until parties have arrived (released_by=parties) or timeout_ms has passed since the first arrival (released_by=timeout). Everything held is released at once; later calls are not held."
+    },
+    {
+      "id": "C11",
+      "rule": "expectation_vocabulary",
+      "definition": "Evidence kinds answered, group_overlap, attempt_timed_out, retried, send_after_end; effects exactly_once(order,payment) and payment_unchanged(payment); pass condition status_class."
+    },
+    {
+      "id": "C12",
+      "rule": "settlement",
+      "definition": "Settlement follows the phased supervisor: clean, drain_unverified, forced, crashed or unconfirmed."
+    }
+  ],
+  "signing": {
+    "scheme": "hmac-sha256-hex",
+    "header": "X-Razorpay-Signature",
+    "event_id_header": "X-Razorpay-Event-Id"
+  },
+  "settlements": [
+    "clean",
+    "drain_unverified",
+    "forced",
+    "crashed",
+    "unconfirmed"
+  ]
+}

@@ -1,7 +1,8 @@
 """E1 — vulnerable, two simultaneous duplicate deliveries, two-party rendezvous.
 
-Gate: in >= 19 of 20 valid trials the order has two fulfilments, and the barrier
-was released by party count (not by timeout) with both parties having arrived.
+Gate: in >= 19 of 20 valid trials the order has two fulfilments, both linked to
+the expected payment, and the barrier was released by party count (not by
+timeout) with both parties having arrived.
 """
 
 from __future__ import annotations
@@ -27,10 +28,16 @@ def _make_trial(stub, workdir_root):
 def test_vulnerable_two_party_race(stub, tmp_path):
     trials = run_until_valid(lambda: _make_trial(stub, tmp_path), REQUIRED_VALID, MAX_ATTEMPTS)
     valid = valid_trials(trials)
+    expected_payment = "pay_A1"
     hits = [
         trial
         for trial in valid
-        if trial.fulfilment_count == 2 and trial.released_by == "parties" and trial.arrivals >= 2
+        if trial.fulfilment_count == 2
+        and trial.released_by == "parties"
+        and trial.arrivals >= 2
+        # F2: both duplicate rows must reference the delivery's payment, not just
+        # any payment of the order (pay_A2 exists in the seed).
+        and all(row["payment_id"] == expected_payment for row in trial.fulfilments)
     ]
 
     write_measurement(
@@ -41,6 +48,12 @@ def test_vulnerable_two_party_race(stub, tmp_path):
             "variant": "vulnerable",
             "copies": 2,
             "parties": 2,
+            "expected_payment": expected_payment,
+            "duplicate_rows_linked_to_expected_payment": all(
+                row["payment_id"] == expected_payment
+                for trial in valid
+                for row in trial.fulfilments
+            ),
             "required_valid": REQUIRED_VALID,
             "attempts": len(trials),
             "valid": len(valid),

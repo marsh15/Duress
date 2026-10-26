@@ -101,3 +101,102 @@ as measurements. `scripts/m0_evidence.py` renders `docs/EVIDENCE.md` from
 
 The invariant pack, oracle, DNA, scenario registry, investigator, UI, `naive_fix`
 and reduction are M1–M6. M0 does not import or pre-build them.
+## M1 — trusted execution, oracle and isolation
+
+### D-M1-1 — Profiles declare the real launch command (F1)
+
+**Status:** implemented and tested.
+
+`profile.toml` now carries `init` and `serve` commands with `{db}`, `{seed}`,
+`{host}`, `{port}` and `{workers}` placeholders. The supervisor formats and
+executes that command. For the reference target it is
+`python -m razorpay_ref.serve ...`, the launcher that suppresses uvicorn's
+post-drain signal re-raise; no engine component invokes stock `uvicorn`.
+`tests/integration/test_declared_launch.py` wraps the declared command in a
+recorder and proves the supervisor ran it, exited 0, and settled cleanly.
+`fixed_2w` declares two workers for E8.
+
+### D-M1-2 — E1 asserts the linked payment (F2)
+
+**Status:** implemented.
+
+E1 now requires both duplicate fulfilment rows to reference `pay_A1`, the
+delivery's payment, in addition to the count, party release and arrival checks.
+`pay_A2` exists in the seed, so a row linked to the wrong payment can no longer
+pass the gate.
+
+### D-M1-3 — exec@1 is a document, not prose
+
+**Status:** implemented.
+
+`src/duress/semantics/exec_v1.json` is the versioned contract; its identity is
+`exec@1#sha256(canonical spec)`. The runner implements ordered steps, a build
+barrier before group release, planned attempt timeouts, retries with the same
+body/event id and a regenerated signature, and a deadline that cancels and
+records `cancelled_attempts` / `undispatched`. `tests/unit/test_exec_semantics.py`
+has one conformance test per clause, including live stub latency and rendezvous
+behaviour.
+
+### D-M1-4 — Phased supervisor and settlement
+
+**Status:** implemented.
+
+P1–P6 have independent timeouts and a 65 s watchdog. A trial starts only if its
+operation has the 65 s margin (the operation loop enforces this when a wall
+deadline is supplied). `unconfirmed` kills leave the pidfile in place, return no
+snapshot, and abort the operation; the CLI sweeps pidfiles before a run, and
+`duress sweep` does it on demand. A mismatched recorded start time is never
+killed, because the pid may have been reused. The supervisor refuses any host
+other than `127.0.0.1`.
+
+### D-M1-5 — Oracle precedence and the S8 control ordering
+
+**Status:** implemented.
+
+`evaluate_trial` follows C.6 steps 1–10. Independent violations FAIL even with
+the deadline flag or a forced settlement. A deadline without an independent
+violation is `trial_timeout`, never PASS. Required evidence precedes other
+findings. One deliberate refinement: when S8's positive control did not execute
+(`control_failed_to_execute`), the result is INCONCLUSIVE even though the
+expected effect on B is also missing. That follows C.5's named S8 outcome; the
+scenario FAIL would otherwise mask a control failure. `test_evaluate_trial`
+covers this path and every other precedence step.
+
+### D-M1-6 — Invariant pack is SQL plus explicit intent checks
+
+**Status:** implemented.
+
+Each member carries its SQL/flags, an evaluator-source hash and a canonical
+definition hash. `payments-ref-v1` identity is the digest of the sorted member
+identities. INV-5 joins the delivery's effect intent with the baseline and the
+committed rows; every 2xx is checked, so a duplicate acknowledgement of a
+first capture cannot pass. MP-1, MP-2 and MP-3 are fixture-tested at the
+database level, and the matrix exercises them end to end.
+
+### D-M1-7 — Stale calls are attributed to the trial window
+
+**Status:** implemented.
+
+The stub keeps per-namespace counters plus a global stale counter. Each trial
+records the global value at construction and reports the delta at the end, so a
+call to a retired namespace during the trial is `harness:isolation` even though
+the namespace it touches belongs to an earlier trial.
+
+### D-M1-8 — Fixture modes are controls, not targets
+
+**Status:** implemented.
+
+`targets/fixture_modes` implements the eight modes from C.1 using the vulnerable
+schema. `hang_on_shutdown` ignores SIGTERM until SIGKILL, `dup_then_hang`
+commits two fulfilments first, and `spawn_orphan` starts a child in the trial's
+process group that writes only after its parent dies. These modes exist to prove
+the oracle can see behaviour, not as examples of integrations.
+
+### D-M1-9 — Not in M1
+
+**Status:** deferred by plan.
+
+S5/S6/S9 templates, Failure DNA, preflight, replay, verify-fix, reduction, the
+investigator and the web UI are M2–M5. `EXHAUSTIVE_SET` is intentionally empty
+until M2 adds the registry entries. The M1 lets the DL-3 test build an S6-shaped
+schedule directly; it is not a registry template yet.

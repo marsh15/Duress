@@ -12,6 +12,6 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project
 
 COPY . .
-RUN chmod +x scripts/m0_gate.sh
+RUN uv sync --frozen && chmod +x scripts/m0_gate.sh
 
 CMD ["scripts/m0_gate.sh"]

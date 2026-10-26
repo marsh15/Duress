@@ -40,8 +40,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--variant", required=True, choices=("vulnerable", "fixed"))
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, required=True)
+    parser.add_argument("--workers", type=int, default=1, help="ASGI worker processes (E8)")
     parser.add_argument("--log-level", default="warning")
     args = parser.parse_args(argv)
+
+    if args.workers > 1:
+        # uvicorn.run's supervisor handles SIGTERM for the whole worker set and
+        # returns normally, so the process exits 0 after a graceful drain.
+        uvicorn.run(
+            f"razorpay_ref.{args.variant}.app:app",
+            host=args.host,
+            port=args.port,
+            workers=args.workers,
+            log_level=args.log_level,
+            access_log=False,
+        )
+        return 0
 
     module = importlib.import_module(f"razorpay_ref.{args.variant}.app")
     config = uvicorn.Config(
