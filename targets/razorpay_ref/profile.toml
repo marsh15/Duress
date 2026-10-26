@@ -1,0 +1,26 @@
+# Target profile: razorpay-ref (contract v1)
+[profile]
+id = "razorpay-ref"
+contract_version = 1
+domain = "payments-webhook"
+
+[process]
+workers = 1
+
+[seed]
+path = "seed.json"
+roles = { "order:A" = "order_A", "payment:A1" = "pay_A1", "payment:A2" = "pay_A2" }
+
+[signing]
+scheme = "hmac-sha256-hex"
+header = "X-Razorpay-Signature"
+event_id_header = "X-Razorpay-Event-Id"
+secret_ref = "env:DURESS_WEBHOOK_SECRET"
+
+[variants.vulnerable]
+init = ["python", "-m", "razorpay_ref", "init-db", "--variant", "vulnerable"]
+app = "razorpay_ref.vulnerable.app:app"
+
+[variants.fixed]
+init = ["python", "-m", "razorpay_ref", "init-db", "--variant", "fixed"]
+app = "razorpay_ref.fixed.app:app"

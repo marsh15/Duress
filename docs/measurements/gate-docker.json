@@ -1,0 +1,15 @@
+{
+  "label": "docker",
+  "status": "pass",
+  "collected": 4,
+  "seconds": 98,
+  "generated_at": "2026-10-26T09:57:23+00:00",
+  "environment": {
+    "python": "3.12.15",
+    "sqlite": "3.46.1",
+    "platform": "Linux-7.2.9-orbstack-00391-g2b298d05fbd4-aarch64-with-glibc2.41",
+    "uvicorn": "0.54.0",
+    "fastapi": "0.162.0",
+    "httpx": "0.28.1"
+  }
+}

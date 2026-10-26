@@ -1,0 +1,26 @@
+{
+  "orders": [
+    {
+      "id": "order_A",
+      "amount": 5000,
+      "currency": "INR",
+      "status": "created"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay_A1",
+      "order_id": "order_A",
+      "amount": 5000,
+      "currency": "INR",
+      "status": "authorized"
+    },
+    {
+      "id": "pay_A2",
+      "order_id": "order_A",
+      "amount": 5000,
+      "currency": "INR",
+      "status": "authorized"
+    }
+  ]
+}

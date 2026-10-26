@@ -1,0 +1,26 @@
+[project]
+name = "duress"
+version = "0.1.0"
+description = "Put your integrations under pressure. Keep the proof."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "httpx>=0.27",
+    "uvicorn>=0.32",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src", "targets"]
+testpaths = ["targets/razorpay_ref/tests", "tests"]
+addopts = "-ra"
+markers = [
+    "slow: measured M0 experiments (E4-E6); not part of the M0 gate",
+]
