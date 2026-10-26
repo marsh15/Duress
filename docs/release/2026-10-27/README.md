@@ -28,3 +28,9 @@ DURESS_HOME="$release_home" uv run --python 3.12 duress verify-fix 0edb63c480dbc
 REPRODUCED returns exit code 1 deliberately; VERIFIED returns 0. The artifact contains the reproduction conditions, not a promise of correctness on other schedules or environments. Digests detect alteration, not authenticity. No runtime API credentials are included.
 
 See [executed gates](../../EVIDENCE.md), [runtime verification](../../FINAL_RUNTIME.md), and [demo instructions](../../DEMO.md) for exact commands and external prerequisites.
+
+## Additional final acceptance
+
+[Clean-clone CLI records](clean-cli/) include normal S1 PASS, exported-artifact replay and verification, cached investigation, rendezvous reduction, and the longer 180-valid-trial matrix with 9/9 agreement. [Accepted reduction](accepted-reduction/) preserves a separate latency experiment that genuinely reduced from three deliveries to two after ten revalidation trials. Its browser-downloaded artifact independently reproduced in ten valid trials; it does not replace or erase the rendezvous NOT_REDUCED result.
+
+[Container observations](container/summary.json) cover final image `53f47629466f…`, Linux workflows and a real shutdown/restart cancellation. [Slow measurements](slow-measurements/) retain new E4/E5/E6 data separately from historical files. [Populated record accessibility](real-record-accessibility.json) and accepted-reduction browser checks cover actual data, including mobile widths. Failed browser harness runs are retained as compressed original JUnit, with corrections and passing reruns explained in `EVIDENCE.md`.

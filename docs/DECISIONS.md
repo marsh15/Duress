@@ -554,3 +554,7 @@ Reduction and differential records now share the constrained, object-only, symli
 ### D-RELEASE-5 — Container shutdown reaches the application
 
 The Docker shell command uses `exec` to pass stop signals directly to the single API process. Its lifespan cancels and drains owned operations through the existing cleanup path. Registered targets remain bound to loopback. No replacement queue, frontend framework, or arbitrary execution interface was introduced.
+
+### D-RELEASE-6 — Test accessibility with populated records
+
+The initial static-page axe checks missed low-contrast hypothesis markers, an analysis status band whose generic content class overrode its dark background, and keyboard-inaccessible scrolling tables. Actual completed records also exposed a long parameterized scenario ID overflowing the mobile viewport. The final changes retain dark status backgrounds, darken the numerical markers, wrap technical prose without changing its value, and make table/JSON scrolling keyboard-focusable. The real browser journey now checks populated investigation, snapshot, reduction, and differential pages with axe and narrow viewports. This is a presentation correction; experiment and artifact contents are unchanged.

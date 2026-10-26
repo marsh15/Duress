@@ -1,0 +1,192 @@
+{
+  "record_type": "differential",
+  "differential_id": "diff-2bb312ed3ab6",
+  "status": "completed",
+  "policy": "matrix",
+  "targets": [
+    "razorpay-vulnerable",
+    "razorpay-naive-fix",
+    "razorpay-fixed"
+  ],
+  "scenarios": [
+    "S3[copies=3,fault=rendezvous,latency_ms=200]",
+    "S5[fault=rendezvous,latency_ms=200]",
+    "S9"
+  ],
+  "cells": [
+    {
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "target_id": "razorpay-vulnerable",
+      "variant": "vulnerable",
+      "expected": "FAIL",
+      "observed": "FAIL",
+      "agrees": true,
+      "signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "valid": 20,
+      "fail": 20,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "fail_observed",
+        "signature:INV-1@1:duplicate_fulfilment:order:A"
+      ]
+    },
+    {
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "target_id": "razorpay-naive-fix",
+      "variant": "naive_fix",
+      "expected": "PASS",
+      "observed": "PASS",
+      "agrees": true,
+      "signature": null,
+      "valid": 20,
+      "fail": 0,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "quota_met"
+      ]
+    },
+    {
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "target_id": "razorpay-fixed",
+      "variant": "fixed",
+      "expected": "PASS",
+      "observed": "PASS",
+      "agrees": true,
+      "signature": null,
+      "valid": 20,
+      "fail": 0,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "quota_met"
+      ]
+    },
+    {
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]",
+      "target_id": "razorpay-vulnerable",
+      "variant": "vulnerable",
+      "expected": "FAIL",
+      "observed": "FAIL",
+      "agrees": true,
+      "signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "valid": 20,
+      "fail": 20,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "fail_observed",
+        "signature:INV-1@1:duplicate_fulfilment:order:A"
+      ]
+    },
+    {
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]",
+      "target_id": "razorpay-naive-fix",
+      "variant": "naive_fix",
+      "expected": "FAIL",
+      "observed": "FAIL",
+      "agrees": true,
+      "signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "valid": 20,
+      "fail": 20,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "fail_observed",
+        "signature:INV-1@1:duplicate_fulfilment:order:A"
+      ]
+    },
+    {
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]",
+      "target_id": "razorpay-fixed",
+      "variant": "fixed",
+      "expected": "PASS",
+      "observed": "PASS",
+      "agrees": true,
+      "signature": null,
+      "valid": 20,
+      "fail": 0,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "quota_met"
+      ]
+    },
+    {
+      "scenario_id": "S9",
+      "target_id": "razorpay-vulnerable",
+      "variant": "vulnerable",
+      "expected": "PASS",
+      "observed": "PASS",
+      "agrees": true,
+      "signature": null,
+      "valid": 20,
+      "fail": 0,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "quota_met"
+      ]
+    },
+    {
+      "scenario_id": "S9",
+      "target_id": "razorpay-naive-fix",
+      "variant": "naive_fix",
+      "expected": "PASS",
+      "observed": "PASS",
+      "agrees": true,
+      "signature": null,
+      "valid": 20,
+      "fail": 0,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "quota_met"
+      ]
+    },
+    {
+      "scenario_id": "S9",
+      "target_id": "razorpay-fixed",
+      "variant": "fixed",
+      "expected": "PASS",
+      "observed": "PASS",
+      "agrees": true,
+      "signature": null,
+      "valid": 20,
+      "fail": 0,
+      "inconclusive": 0,
+      "trials": 20,
+      "reasons": [
+        "quota_met"
+      ]
+    }
+  ],
+  "summary": {
+    "cells": 9,
+    "compared": 9,
+    "agree": 9,
+    "disagree": 0,
+    "inconclusive": 0,
+    "unexpected_cells": []
+  },
+  "created_at": "2026-10-26T20:42:26+00:00"
+}

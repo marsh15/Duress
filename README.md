@@ -8,7 +8,7 @@ An HTTP acknowledgment can hide duplicate fulfilments, missing business effects,
 
 ![Duress workbench](docs/screenshots/workbench.png)
 
-[Executed investigation](docs/screenshots/investigation.png) · [Business-state evidence](docs/screenshots/business-state.png) · [Comparison](docs/screenshots/comparison.png) · [Silent walkthrough](docs/screenshots/duress-walkthrough.webm) · [Demo outline](docs/DEMO.md)
+[Executed investigation](docs/screenshots/investigation.png) · [Business-state evidence](docs/screenshots/business-state.png) · [Comparison](docs/screenshots/comparison.png) · [Accepted reduction](docs/screenshots/accepted-reduction.png) · [Silent walkthrough](docs/screenshots/duress-walkthrough.webm) · [Demo outline](docs/DEMO.md)
 
 ## From investigation to proof
 
@@ -88,9 +88,11 @@ scripts/smoke.sh http://127.0.0.1:8000 --dna showcase/dna/e8007dd56adae8ae.json
 UV_PYTHON=3.12 scripts/portability.sh
 ```
 
+Release gates recorded 666 passing broad Python tests, three passing slow experiments, the ten browser scenarios (including documented targeted reruns), and 79 passing final focused cases in both the clean Python 3.12 checkout and Linux container. Exact scope and failed development attempts remain in the evidence.
+
 Browser checks exercise real local services, including investigation creation, persisted progress, business-state evidence, DNA export, replay, verification, reduction, differential comparison, tamper rejection, keyboard navigation, responsive layouts, and axe accessibility checks.
 
-[New release records](docs/release/2026-10-27/) retain a real 30-trial cached investigation (FAIL), 10/10 replay reproduction, a 5/5 vulnerable control and 20 zero-failure corrected trials, a truthful NOT_REDUCED result, and a 9/9 agreeing 45-trial differential matrix. These are bounded local observations, with authored fixture provenance. [Executed evidence](docs/EVIDENCE.md) records actual commands, counts, environment, and failures. [Runtime verification](docs/FINAL_RUNTIME.md) records Docker and artifact-only portability checks. Historical M0–M4 measurements remain unchanged and distinct from new integrated runs.
+[New release records](docs/release/2026-10-27/) retain a real 30-trial cached investigation (FAIL), 10/10 replay reproduction, a 5/5 vulnerable control and 20 zero-failure corrected trials, a truthful NOT_REDUCED result, and a 9/9 agreeing 45-trial differential matrix. A separate latency experiment also produced an accepted 3→2 reduction whose downloaded artifact independently reproduced in 10/10 valid trials. These are bounded local observations, with authored fixture provenance. [Executed evidence](docs/EVIDENCE.md) records actual commands, counts, environment, and failures. [Runtime verification](docs/FINAL_RUNTIME.md) records Docker and artifact-only portability checks. Historical M0–M4 measurements remain unchanged and distinct from new integrated runs.
 
 Ordinary pytest does not overwrite historical measurements. Intentional new measurements use `DURESS_RECORD_MEASUREMENTS=1 uv run python scripts/measure.py --run fast`; `--render` reads retained evidence without execution.
 

@@ -325,3 +325,19 @@ their pre-verification hashes; ordinary pytest did not rewrite historical
 evidence. The earlier 402/592 backend-only results remain scoped to `f68ceb7`;
 the counts above describe the merged tree. Hosted live inference remains
 unverified, as before.
+
+## Final integrated product delivery — 2026-10-27
+
+Started from clean integrated `Duress-core` feature head `1a106c0`; primary main was `b30edc4`, remote PR #1 open/mergeable. No resets, history rewriting, or unrelated worktree edits were used. Luna/xhigh implementation tasks handled investigation screens, reduction/differential screens, and runtime checks; the parent integrated, audited, exercised real journeys, and owns final delivery.
+
+- `00532f4`: enabled existing M3/M4 APIs in Jinja/HTMX, truthful asynchronous lifecycle/business states, hypotheses/findings, actual schedule persistence, retained-state views, reduction and differential flows. Hardened malformed/symlink record reads without normalizing the raw mapping used by DNA digest checks.
+- `93eac20`: container `exec` entrypoint for direct signal delivery; `1ad9711`: excluded task recovery archives from image context.
+- `91af35e`: reconciled README/architecture/operations/handoff/artifact docs; retained actual operation records, screenshots, capture script and silent walkthrough.
+- `4cdb718`: corrected accessibility against populated records: contrast, status-band backgrounds, mobile technical-text wrapping, and keyboard scrolling. Expanded the real browser journey to cover those pages.
+- `38076bb`: corrected null delivery retry overrides in the artifact view; recorded policy remains authoritative.
+
+Acceptance observations: broad regression **666 passed, 10 browser skips, 3 slow deselections**, no failures, 666.86 s; separate slow experiments **3 passed**, 83.79 s, with new raw records in a separate output directory; full browser baseline **10 passed**, then expanded populated-page checks passed in the nine successful cases of a run whose one failure was an ambiguous test locator, followed by a successful targeted navigation rerun. Both browser harness failures and their passing reruns remain in the evidence. Final affected tests passed, final clean-clone focused suite **79 passed**, and final Linux image focused suite **79 passed**. No acceptance assertion was weakened. See `EVIDENCE.md` for exact commands and scope rather than adding overlapping counts together.
+
+The real browser journey generated DNA, inspected settled state, replayed the defect, verified the corrected target, retained an irreducible rendezvous schedule, and compared naive/corrected repairs. A separate browser reduction accepted a latency schedule from three deliveries to two after revalidation; the downloaded derived artifact independently replayed in an empty home. The clean-clone CLI matrix had **180 valid trials and 9/9 agreeing cells**. Final container workflows included cached investigation, reduction, differential comparison, replay/verification, and a real stop/restart cancellation with complete cleanup.
+
+The first final-image export encountered host disk exhaustion; cleanup was restricted to this task's temporary artifacts and earlier image. After restarting OrbStack, the final image build and workflows passed. No historical measurements were overwritten: all 28 original files retain their hashes. Genuine hosted LLM interoperability and Render deployment remain unverified because runtime provider settings and authenticated Render access were absent. These external limitations do not prevent the complete local application from running.

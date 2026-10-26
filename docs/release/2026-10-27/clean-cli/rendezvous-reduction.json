@@ -1,0 +1,123 @@
+{
+  "outcome": "NOT_REDUCED",
+  "reason": "no admissible reductions",
+  "original_dna_id": "0edb63c480dbc29b",
+  "primary_dna_id": "0edb63c480dbc29b",
+  "reduced_dna_id": null,
+  "claim": "no admissible reductions",
+  "result": {
+    "status": "no_admissible_reductions",
+    "skip_reason": null,
+    "claim": "no admissible reductions",
+    "original_deliveries": [
+      "d1",
+      "d2",
+      "d3"
+    ],
+    "reduced_deliveries": [
+      "d1",
+      "d2",
+      "d3"
+    ],
+    "candidates": [
+      {
+        "index": 0,
+        "removed": "d3",
+        "remaining": [
+          "d1",
+          "d2"
+        ],
+        "admissible": false,
+        "inadmissible_reasons": [
+          "rendezvous_below_parties:step0:2<3",
+          "invalid_schedule:step 0 rendezvous parties=3 but 2 matching deliveries"
+        ],
+        "verdict": "inadmissible",
+        "reasons": [],
+        "trials": 0,
+        "budget_exhausted": false,
+        "valid": 0,
+        "fail": 0,
+        "passed": 0,
+        "signatures": {},
+        "release": {}
+      },
+      {
+        "index": 1,
+        "removed": "d2",
+        "remaining": [
+          "d1",
+          "d3"
+        ],
+        "admissible": false,
+        "inadmissible_reasons": [
+          "rendezvous_below_parties:step0:2<3",
+          "invalid_schedule:step 0 rendezvous parties=3 but 2 matching deliveries"
+        ],
+        "verdict": "inadmissible",
+        "reasons": [],
+        "trials": 0,
+        "budget_exhausted": false,
+        "valid": 0,
+        "fail": 0,
+        "passed": 0,
+        "signatures": {},
+        "release": {}
+      },
+      {
+        "index": 2,
+        "removed": "d1",
+        "remaining": [
+          "d2",
+          "d3"
+        ],
+        "admissible": false,
+        "inadmissible_reasons": [
+          "rendezvous_below_parties:step0:2<3",
+          "invalid_schedule:step 0 rendezvous parties=3 but 2 matching deliveries",
+          "pinned_by_expectation:d1"
+        ],
+        "verdict": "inadmissible",
+        "reasons": [],
+        "trials": 0,
+        "budget_exhausted": false,
+        "valid": 0,
+        "fail": 0,
+        "passed": 0,
+        "signatures": {},
+        "release": {}
+      }
+    ],
+    "admissible_tested": 0,
+    "budget_exhausted": false,
+    "trials": 0,
+    "reduced_schedule": null
+  },
+  "reduced_document": null,
+  "revalidation": null,
+  "black_box": {
+    "policy": "characterize",
+    "trials": 10,
+    "budget_exhausted": false,
+    "valid": 10,
+    "fail": 10,
+    "same_signature": 10,
+    "rate": "10/10"
+  },
+  "preflight": {
+    "ok": true
+  },
+  "summary": {
+    "original_dna_id": "0edb63c480dbc29b",
+    "outcome": "NOT_REDUCED",
+    "reason": "no admissible reductions",
+    "claim": "no admissible reductions",
+    "status": "no_admissible_reductions",
+    "reduced_dna_id": null,
+    "primary_dna_id": "0edb63c480dbc29b",
+    "trials": 10,
+    "reduction_id": "red-4f63884af567",
+    "black_box_rate": "10/10",
+    "budget_exhausted": false
+  }
+}

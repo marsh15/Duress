@@ -1,0 +1,4 @@
+INFO:     192.168.215.1:39814 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.215.1:39854 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     192.168.215.1:39858 - "GET /api/investigations/inv-20261026T205716-67a38a HTTP/1.1" 200 OK
+INFO:     192.168.215.1:39872 - "GET /api/health HTTP/1.1" 200 OK

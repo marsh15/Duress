@@ -1,0 +1,936 @@
+{
+  "budget_exhausted": false,
+  "bundle": {
+    "bytes": 22044,
+    "files": [
+      "razorpay_ref/__init__.py",
+      "razorpay_ref/__main__.py",
+      "razorpay_ref/common/__init__.py",
+      "razorpay_ref/common/config.py",
+      "razorpay_ref/common/db.py",
+      "razorpay_ref/common/events.py",
+      "razorpay_ref/common/integrity.py",
+      "razorpay_ref/common/provider.py",
+      "razorpay_ref/common/responses.py",
+      "razorpay_ref/common/schema.py",
+      "razorpay_ref/common/signing.py",
+      "razorpay_ref/serve.py",
+      "razorpay_ref/vulnerable/__init__.py",
+      "razorpay_ref/vulnerable/app.py",
+      "razorpay_ref/vulnerable/handler.py"
+    ],
+    "sha256": "98a07d7bca763fb3c021d1f9c19b921e15f817b68432539425b39074cc84b496"
+  },
+  "created_at": "2026-10-26T20:56:07+00:00",
+  "dna_ids": [
+    "0edb63c480dbc29b"
+  ],
+  "duration_s": 19.65,
+  "errors": [],
+  "events": [
+    {
+      "at": "2026-10-26T20:56:07+00:00",
+      "message": "investigating razorpay-vulnerable in cached mode",
+      "phase": "start"
+    },
+    {
+      "at": "2026-10-26T20:56:07+00:00",
+      "message": "requesting hypotheses (cached)",
+      "phase": "model"
+    },
+    {
+      "at": "2026-10-26T20:56:07+00:00",
+      "message": "2 usable of 2 hypotheses; 4 scenarios selected",
+      "phase": "hypotheses"
+    },
+    {
+      "at": "2026-10-26T20:56:07+00:00",
+      "message": "running S1",
+      "phase": "explore",
+      "scenario_id": "S1"
+    },
+    {
+      "at": "2026-10-26T20:56:11+00:00",
+      "message": "S1: PASS (valid=5, fail=0, trials=5)",
+      "phase": "explore",
+      "scenario_id": "S1"
+    },
+    {
+      "at": "2026-10-26T20:56:11+00:00",
+      "message": "running S2",
+      "phase": "explore",
+      "scenario_id": "S2"
+    },
+    {
+      "at": "2026-10-26T20:56:14+00:00",
+      "message": "S2: PASS (valid=5, fail=0, trials=5)",
+      "phase": "explore",
+      "scenario_id": "S2"
+    },
+    {
+      "at": "2026-10-26T20:56:14+00:00",
+      "message": "running S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "phase": "explore",
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]"
+    },
+    {
+      "at": "2026-10-26T20:56:17+00:00",
+      "message": "S3[copies=3,fault=rendezvous,latency_ms=200]: FAIL (valid=5, fail=5, trials=5)",
+      "phase": "explore",
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]"
+    },
+    {
+      "at": "2026-10-26T20:56:17+00:00",
+      "message": "running S5[fault=rendezvous,latency_ms=200]",
+      "phase": "explore",
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]"
+    },
+    {
+      "at": "2026-10-26T20:56:20+00:00",
+      "message": "S5[fault=rendezvous,latency_ms=200]: FAIL (valid=5, fail=5, trials=5)",
+      "phase": "explore",
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]"
+    },
+    {
+      "at": "2026-10-26T20:56:20+00:00",
+      "message": "characterising INV-1@1:duplicate_fulfilment:order:A",
+      "phase": "characterize",
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]"
+    },
+    {
+      "at": "2026-10-26T20:56:27+00:00",
+      "message": "DNA 0edb63c480dbc29b: p0=1.0 (10/10 valid)",
+      "phase": "characterize"
+    },
+    {
+      "at": "2026-10-26T20:56:27+00:00",
+      "message": "verdict FAIL",
+      "phase": "done"
+    }
+  ],
+  "executed_scenario_ids": [
+    "S1",
+    "S2",
+    "S3[copies=3,fault=rendezvous,latency_ms=200]",
+    "S5[fault=rendezvous,latency_ms=200]"
+  ],
+  "exhaustive_set": [
+    "S1",
+    "S2",
+    "S3[copies=3,fault=rendezvous,latency_ms=200]",
+    "S3[copies=3,fault=latency,latency_ms=200]",
+    "S5[fault=rendezvous,latency_ms=200]",
+    "S6",
+    "S8"
+  ],
+  "explanation": "S3[copies=3,fault=rendezvous,latency_ms=200] failed: INV-1@1 duplicate_fulfilment on order:A in 5/5 valid trials.\nS5[fault=rendezvous,latency_ms=200] failed: INV-1@1 duplicate_fulfilment on order:A in 5/5 valid trials.\n2 scenarios passed, 0 inconclusive, 2 failed of 4 run.",
+  "explanation_source": "template",
+  "fallback_detail": null,
+  "fallback_reason": null,
+  "findings": [
+    {
+      "characterisation_signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "dna_error": null,
+      "dna_id": "0edb63c480dbc29b",
+      "explanation": "S3[copies=3,fault=rendezvous,latency_ms=200] failed: INV-1@1 duplicate_fulfilment on order:A in 5/5 valid trials.\n0 scenarios passed, 0 inconclusive, 1 failed of 1 run.",
+      "fail": 5,
+      "hypothesis_ids": [
+        "H1"
+      ],
+      "p0": 1.0,
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "valid": 5
+    }
+  ],
+  "hypotheses": [
+    {
+      "draft": {
+        "citations": [
+          {
+            "file": "razorpay_ref/vulnerable/handler.py",
+            "line_end": 97,
+            "line_start": 54,
+            "quote": "\"SELECT status, amount, currency FROM payments WHERE id = ? AND order_id = ?\","
+          }
+        ],
+        "id": "H1",
+        "mechanism": "The handler reads the payment and order status, awaits the provider, and only then inserts the fulfilment. Concurrent copies of the same event can all pass the status check before any of them commits, producing more than one fulfilment.",
+        "mechanism_kind": "check_then_act_race",
+        "predicted_failure": {
+          "check": "INV-1@1",
+          "kind": "duplicate_fulfilment",
+          "role": "order:A"
+        },
+        "scenarios": [
+          {
+            "params": {
+              "copies": 3,
+              "fault": "rendezvous",
+              "latency_ms": 200
+            },
+            "template_id": "S3"
+          }
+        ],
+        "title": "Status check and fulfilment insert are not atomic for duplicate deliveries"
+      },
+      "scenario_ids": [
+        "S3[copies=3,fault=rendezvous,latency_ms=200]"
+      ],
+      "scenario_specs": [
+        {
+          "params": {
+            "copies": 3,
+            "fault": "rendezvous",
+            "latency_ms": 200
+          },
+          "template_id": "S3"
+        }
+      ],
+      "source": "model",
+      "status": {
+        "citation": "valid",
+        "citation_errors": [],
+        "linkage": "valid",
+        "linkage_errors": [],
+        "outcome": "confirmed",
+        "outcome_detail": "predicted INV-1@1 duplicate_fulfilment on order:A observed in S3[copies=3,fault=rendezvous,latency_ms=200] (5/5 trial verdicts)",
+        "structure": "pass",
+        "structure_detail": "razorpay_ref/vulnerable/handler.py: async def handle (lines 31-123): SELECT at line 53, await at line 74, INSERT at line 96; no BEGIN IMMEDIATE/EXCLUSIVE re-check between the await and the write"
+      },
+      "usable": true
+    },
+    {
+      "draft": {
+        "citations": [
+          {
+            "file": "razorpay_ref/vulnerable/handler.py",
+            "line_end": 97,
+            "line_start": 54,
+            "quote": "\"SELECT status, amount, currency FROM payments WHERE id = ? AND order_id = ?\","
+          }
+        ],
+        "id": "H2",
+        "mechanism": "payment.captured and order.paid carry different event ids but the same payment. Deduplicating by event id cannot stop them, so the same check-then-act window applies across the two events.",
+        "mechanism_kind": "check_then_act_race",
+        "predicted_failure": {
+          "check": "INV-1@1",
+          "kind": "duplicate_fulfilment",
+          "role": "order:A"
+        },
+        "scenarios": [
+          {
+            "params": {
+              "fault": "rendezvous",
+              "latency_ms": 200
+            },
+            "template_id": "S5"
+          }
+        ],
+        "title": "Different events for the same payment race through the same window"
+      },
+      "scenario_ids": [
+        "S5[fault=rendezvous,latency_ms=200]"
+      ],
+      "scenario_specs": [
+        {
+          "params": {
+            "fault": "rendezvous",
+            "latency_ms": 200
+          },
+          "template_id": "S5"
+        }
+      ],
+      "source": "model",
+      "status": {
+        "citation": "valid",
+        "citation_errors": [],
+        "linkage": "valid",
+        "linkage_errors": [],
+        "outcome": "confirmed",
+        "outcome_detail": "predicted INV-1@1 duplicate_fulfilment on order:A observed in S5[fault=rendezvous,latency_ms=200] (5/5 trial verdicts)",
+        "structure": "pass",
+        "structure_detail": "razorpay_ref/vulnerable/handler.py: async def handle (lines 31-123): SELECT at line 53, await at line 74, INSERT at line 96; no BEGIN IMMEDIATE/EXCLUSIVE re-check between the await and the write"
+      },
+      "usable": true
+    }
+  ],
+  "investigation_id": "inv-20261026T205607-86505a",
+  "mode_effective": "cached",
+  "mode_requested": "cached",
+  "model": {
+    "budget": {
+      "calls": 1,
+      "input_tokens": 8601,
+      "max_calls": 3,
+      "max_input_tokens": 30000
+    },
+    "calls": [
+      {
+        "estimated_tokens": 8601,
+        "key": "1f026e34216a18d8b4e6479288d51a4abd1e97f88cd7c05ba988fd8f448fe38b",
+        "latency_s": 0.0009457819999738604,
+        "ok": true,
+        "reason": null,
+        "source": "cache",
+        "usage": {}
+      }
+    ],
+    "mode": "cached",
+    "model": "duress-authored-fixture",
+    "provenance": {
+      "bundle_sha256": "98a07d7bca763fb3c021d1f9c19b921e15f817b68432539425b39074cc84b496",
+      "note": "Written by scripts/build_llm_fixture.py from the current target source; not model output.",
+      "source": "authored_fixture",
+      "target_id": "razorpay-vulnerable"
+    },
+    "provider": null,
+    "response_source": "cache"
+  },
+  "phase": "done",
+  "record_type": "investigation",
+  "reductions": [],
+  "rejected_hypotheses": 0,
+  "scenarios": [
+    {
+      "control_level": "black_box",
+      "params": {},
+      "result": {
+        "budget_exhausted": false,
+        "fail": 0,
+        "inconclusive": 0,
+        "reasons": [
+          "quota_met"
+        ],
+        "signature": null,
+        "signature_counts": {},
+        "status": "PASS",
+        "trials": 5,
+        "valid": 5
+      },
+      "scenario_id": "S1",
+      "schedule": {
+        "deliveries": [
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "payment.captured"
+            },
+            "event_id": "evt_A1_payment_captured",
+            "id": "d1",
+            "invalid_signature": false,
+            "max_attempts": null
+          }
+        ],
+        "delivery_policy": {
+          "attempt_timeout_ms": 5000,
+          "backoff_ms": [],
+          "max_attempts": 1,
+          "retry_on": []
+        },
+        "events": [],
+        "faults": [],
+        "steps": [
+          {
+            "delay_before_ms": 0,
+            "deliveries": [
+              "d1"
+            ]
+          }
+        ]
+      },
+      "selected_by": "control",
+      "status": "done",
+      "template_id": "S1",
+      "trials": [
+        {
+          "duration_s": 0.65,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "t76e6e5c3c68d"
+        },
+        {
+          "duration_s": 0.678,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "td8d424676b1d"
+        },
+        {
+          "duration_s": 0.638,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "t1d437290e145"
+        },
+        {
+          "duration_s": 0.644,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "tca0948b7ed17"
+        },
+        {
+          "duration_s": 0.636,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "t1b438f6d1fb7"
+        }
+      ]
+    },
+    {
+      "control_level": "black_box",
+      "params": {},
+      "result": {
+        "budget_exhausted": false,
+        "fail": 0,
+        "inconclusive": 0,
+        "reasons": [
+          "quota_met"
+        ],
+        "signature": null,
+        "signature_counts": {},
+        "status": "PASS",
+        "trials": 5,
+        "valid": 5
+      },
+      "scenario_id": "S2",
+      "schedule": {
+        "deliveries": [
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "payment.captured"
+            },
+            "event_id": "evt_A1_payment_captured",
+            "id": "d1",
+            "invalid_signature": false,
+            "max_attempts": null
+          },
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "payment.captured"
+            },
+            "event_id": "evt_A1_payment_captured",
+            "id": "d2",
+            "invalid_signature": false,
+            "max_attempts": null
+          }
+        ],
+        "delivery_policy": {
+          "attempt_timeout_ms": 5000,
+          "backoff_ms": [],
+          "max_attempts": 1,
+          "retry_on": []
+        },
+        "events": [],
+        "faults": [],
+        "steps": [
+          {
+            "delay_before_ms": 0,
+            "deliveries": [
+              "d1"
+            ]
+          },
+          {
+            "delay_before_ms": 0,
+            "deliveries": [
+              "d2"
+            ]
+          }
+        ]
+      },
+      "selected_by": "control",
+      "status": "done",
+      "template_id": "S2",
+      "trials": [
+        {
+          "duration_s": 0.684,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "te64c9c7f32ca"
+        },
+        {
+          "duration_s": 0.687,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "t412e905193d8"
+        },
+        {
+          "duration_s": 0.673,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "t1da4a6762b5e"
+        },
+        {
+          "duration_s": 0.642,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "td60976b63c56"
+        },
+        {
+          "duration_s": 0.668,
+          "reasons": [
+            "pass"
+          ],
+          "released_by": null,
+          "settlement": "clean",
+          "signature": null,
+          "status": "PASS",
+          "trial_id": "t5a4b5ef368fb"
+        }
+      ]
+    },
+    {
+      "control_level": "environment_controlled",
+      "params": {
+        "copies": 3,
+        "fault": "rendezvous",
+        "latency_ms": 200
+      },
+      "result": {
+        "budget_exhausted": false,
+        "fail": 5,
+        "inconclusive": 0,
+        "reasons": [
+          "fail_observed",
+          "signature:INV-1@1:duplicate_fulfilment:order:A"
+        ],
+        "signature": {
+          "check": "INV-1@1",
+          "kind": "duplicate_fulfilment",
+          "roles": [
+            "order:A"
+          ]
+        },
+        "signature_counts": {
+          "INV-1@1:duplicate_fulfilment:order:A": 5
+        },
+        "status": "FAIL",
+        "trials": 5,
+        "valid": 5
+      },
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "schedule": {
+        "deliveries": [
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "payment.captured"
+            },
+            "event_id": "evt_A1_payment_captured",
+            "id": "d1",
+            "invalid_signature": false,
+            "max_attempts": null
+          },
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "payment.captured"
+            },
+            "event_id": "evt_A1_payment_captured",
+            "id": "d2",
+            "invalid_signature": false,
+            "max_attempts": null
+          },
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "payment.captured"
+            },
+            "event_id": "evt_A1_payment_captured",
+            "id": "d3",
+            "invalid_signature": false,
+            "max_attempts": null
+          }
+        ],
+        "delivery_policy": {
+          "attempt_timeout_ms": 5000,
+          "backoff_ms": [],
+          "max_attempts": 1,
+          "retry_on": []
+        },
+        "events": [],
+        "faults": [
+          {
+            "kind": "provider_rendezvous",
+            "parties": 3,
+            "payments": null,
+            "timeout_ms": 2000
+          }
+        ],
+        "steps": [
+          {
+            "delay_before_ms": 0,
+            "deliveries": [
+              "d1",
+              "d2",
+              "d3"
+            ]
+          }
+        ]
+      },
+      "selected_by": "hypothesis",
+      "status": "done",
+      "template_id": "S3",
+      "trials": [
+        {
+          "duration_s": 0.632,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t08fdb92b3609"
+        },
+        {
+          "duration_s": 0.618,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t403951cb41e2"
+        },
+        {
+          "duration_s": 0.645,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t09833f4f5836"
+        },
+        {
+          "duration_s": 0.619,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "tc2ba975b71d4"
+        },
+        {
+          "duration_s": 0.638,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t1a0d7213702a"
+        }
+      ]
+    },
+    {
+      "control_level": "environment_controlled",
+      "params": {
+        "fault": "rendezvous",
+        "latency_ms": 200
+      },
+      "result": {
+        "budget_exhausted": false,
+        "fail": 5,
+        "inconclusive": 0,
+        "reasons": [
+          "fail_observed",
+          "signature:INV-1@1:duplicate_fulfilment:order:A"
+        ],
+        "signature": {
+          "check": "INV-1@1",
+          "kind": "duplicate_fulfilment",
+          "roles": [
+            "order:A"
+          ]
+        },
+        "signature_counts": {
+          "INV-1@1:duplicate_fulfilment:order:A": 5
+        },
+        "status": "FAIL",
+        "trials": 5,
+        "valid": 5
+      },
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]",
+      "schedule": {
+        "deliveries": [
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "payment.captured"
+            },
+            "event_id": "evt_A1_payment_captured",
+            "id": "d1",
+            "invalid_signature": false,
+            "max_attempts": null
+          },
+          {
+            "attempt_timeout_ms": null,
+            "effect_intent": "capture_and_fulfil",
+            "event": {
+              "order_role": "order:A",
+              "payment_role": "payment:A1",
+              "type": "order.paid"
+            },
+            "event_id": "evt_A_order_paid",
+            "id": "d2",
+            "invalid_signature": false,
+            "max_attempts": null
+          }
+        ],
+        "delivery_policy": {
+          "attempt_timeout_ms": 5000,
+          "backoff_ms": [],
+          "max_attempts": 1,
+          "retry_on": []
+        },
+        "events": [],
+        "faults": [
+          {
+            "kind": "provider_rendezvous",
+            "parties": 2,
+            "payments": null,
+            "timeout_ms": 2000
+          }
+        ],
+        "steps": [
+          {
+            "delay_before_ms": 0,
+            "deliveries": [
+              "d1",
+              "d2"
+            ]
+          }
+        ]
+      },
+      "selected_by": "hypothesis",
+      "status": "done",
+      "template_id": "S5",
+      "trials": [
+        {
+          "duration_s": 0.642,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t29f0bf9f6ee9"
+        },
+        {
+          "duration_s": 0.639,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t6fae61140110"
+        },
+        {
+          "duration_s": 0.629,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t7f7d5562941d"
+        },
+        {
+          "duration_s": 0.63,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "t0fa434b247ce"
+        },
+        {
+          "duration_s": 0.637,
+          "reasons": [
+            "independent_violation",
+            "failure_signature:INV-1@1:duplicate_fulfilment:order:A"
+          ],
+          "released_by": "parties",
+          "settlement": "clean",
+          "signature": {
+            "check": "INV-1@1",
+            "kind": "duplicate_fulfilment",
+            "roles": [
+              "order:A"
+            ]
+          },
+          "status": "FAIL",
+          "trial_id": "ta3ade1c77fec"
+        }
+      ]
+    }
+  ],
+  "selected_scenarios": [
+    "S1",
+    "S2",
+    "S3[copies=3,fault=rendezvous,latency_ms=200]",
+    "S5[fault=rendezvous,latency_ms=200]"
+  ],
+  "status": "completed",
+  "target_id": "razorpay-vulnerable",
+  "trial_cap": 130,
+  "trials_used": 30,
+  "updated_at": "2026-10-26T20:56:27+00:00",
+  "usable_hypotheses": 2,
+  "verdict": "FAIL",
+  "wall_cap_s": 440.0
+}

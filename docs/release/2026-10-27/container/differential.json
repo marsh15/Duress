@@ -1,0 +1,192 @@
+{
+  "cells": [
+    {
+      "agrees": true,
+      "expected": "FAIL",
+      "fail": 5,
+      "inconclusive": 0,
+      "observed": "FAIL",
+      "reasons": [
+        "fail_observed",
+        "signature:INV-1@1:duplicate_fulfilment:order:A"
+      ],
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "target_id": "razorpay-vulnerable",
+      "trials": 5,
+      "valid": 5,
+      "variant": "vulnerable"
+    },
+    {
+      "agrees": true,
+      "expected": "PASS",
+      "fail": 0,
+      "inconclusive": 0,
+      "observed": "PASS",
+      "reasons": [
+        "quota_met"
+      ],
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "signature": null,
+      "target_id": "razorpay-naive-fix",
+      "trials": 5,
+      "valid": 5,
+      "variant": "naive_fix"
+    },
+    {
+      "agrees": true,
+      "expected": "PASS",
+      "fail": 0,
+      "inconclusive": 0,
+      "observed": "PASS",
+      "reasons": [
+        "quota_met"
+      ],
+      "scenario_id": "S3[copies=3,fault=rendezvous,latency_ms=200]",
+      "signature": null,
+      "target_id": "razorpay-fixed",
+      "trials": 5,
+      "valid": 5,
+      "variant": "fixed"
+    },
+    {
+      "agrees": true,
+      "expected": "FAIL",
+      "fail": 5,
+      "inconclusive": 0,
+      "observed": "FAIL",
+      "reasons": [
+        "fail_observed",
+        "signature:INV-1@1:duplicate_fulfilment:order:A"
+      ],
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]",
+      "signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "target_id": "razorpay-vulnerable",
+      "trials": 5,
+      "valid": 5,
+      "variant": "vulnerable"
+    },
+    {
+      "agrees": true,
+      "expected": "FAIL",
+      "fail": 5,
+      "inconclusive": 0,
+      "observed": "FAIL",
+      "reasons": [
+        "fail_observed",
+        "signature:INV-1@1:duplicate_fulfilment:order:A"
+      ],
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]",
+      "signature": {
+        "check": "INV-1@1",
+        "kind": "duplicate_fulfilment",
+        "roles": [
+          "order:A"
+        ]
+      },
+      "target_id": "razorpay-naive-fix",
+      "trials": 5,
+      "valid": 5,
+      "variant": "naive_fix"
+    },
+    {
+      "agrees": true,
+      "expected": "PASS",
+      "fail": 0,
+      "inconclusive": 0,
+      "observed": "PASS",
+      "reasons": [
+        "quota_met"
+      ],
+      "scenario_id": "S5[fault=rendezvous,latency_ms=200]",
+      "signature": null,
+      "target_id": "razorpay-fixed",
+      "trials": 5,
+      "valid": 5,
+      "variant": "fixed"
+    },
+    {
+      "agrees": true,
+      "expected": "PASS",
+      "fail": 0,
+      "inconclusive": 0,
+      "observed": "PASS",
+      "reasons": [
+        "quota_met"
+      ],
+      "scenario_id": "S9",
+      "signature": null,
+      "target_id": "razorpay-vulnerable",
+      "trials": 5,
+      "valid": 5,
+      "variant": "vulnerable"
+    },
+    {
+      "agrees": true,
+      "expected": "PASS",
+      "fail": 0,
+      "inconclusive": 0,
+      "observed": "PASS",
+      "reasons": [
+        "quota_met"
+      ],
+      "scenario_id": "S9",
+      "signature": null,
+      "target_id": "razorpay-naive-fix",
+      "trials": 5,
+      "valid": 5,
+      "variant": "naive_fix"
+    },
+    {
+      "agrees": true,
+      "expected": "PASS",
+      "fail": 0,
+      "inconclusive": 0,
+      "observed": "PASS",
+      "reasons": [
+        "quota_met"
+      ],
+      "scenario_id": "S9",
+      "signature": null,
+      "target_id": "razorpay-fixed",
+      "trials": 5,
+      "valid": 5,
+      "variant": "fixed"
+    }
+  ],
+  "created_at": "2026-10-26T20:56:34+00:00",
+  "differential_id": "diff-2969f71b8e74",
+  "policy": "explore",
+  "record_type": "differential",
+  "scenarios": [
+    "S3[copies=3,fault=rendezvous,latency_ms=200]",
+    "S5[fault=rendezvous,latency_ms=200]",
+    "S9"
+  ],
+  "status": "completed",
+  "summary": {
+    "agree": 9,
+    "cells": 9,
+    "compared": 9,
+    "disagree": 0,
+    "inconclusive": 0,
+    "unexpected_cells": []
+  },
+  "targets": [
+    "razorpay-vulnerable",
+    "razorpay-naive-fix",
+    "razorpay-fixed"
+  ]
+}

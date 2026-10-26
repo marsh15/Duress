@@ -13,7 +13,8 @@ The [silent walkthrough](screenshots/duress-walkthrough.webm) and [screenshots](
 5. **Carry and replay the proof.** Open generated DNA, inspect ordering, faults, expectations, and violation rows, then download it. Replay against fresh vulnerable processes. The observed release record reproduced the same signature in 10/10 valid replay trials.
 6. **Check the repair.** Verify the corrected target. The observed result re-established the control in 5/5 valid trials, then observed no failures in 20 valid candidate trials. Read the conditional statement; VERIFIED is bounded evidence for this reproducer.
 7. **Explain a reduction that cannot remove a delivery.** Start bounded reduction. In this run, every removal violated the party-released rendezvous conditions. NOT_REDUCED retained the original DNA. Its separate fault-free characterization observed the same failure in 10/10 valid trials. This is empirical evidence on this host, not a global failure-rate claim.
-8. **Expose the naive repair.** Compare fixes using Explore. S3 passed on naive_fix, but S5 failed: deduplicating an event ID did not deduplicate the business effect across different events. Corrected passed both. S9 passed all three; the nine observed cells agreed with the registered expectations.
+8. **Show a successful removal separately.** The [latency reduction](release/2026-10-27/accepted-reduction/record.json) removed one of three deliveries, passed independent revalidation, and produced a separately downloadable artifact that replayed in a fresh home. Its claim remains bounded to admissible single-delivery removal.
+9. **Expose the naive repair.** Compare fixes using Explore. S3 passed on naive_fix, but S5 failed: deduplicating an event ID did not deduplicate the business effect across different events. Corrected passed both. S9 passed all three; the nine observed cells agreed with the registered expectations.
 
 ## Reproduce the recording
 

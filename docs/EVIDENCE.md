@@ -1,5 +1,7 @@
 # Duress — Evidence
 
+The latest integrated release observations are in the final section below. Earlier milestone sections retain their original scope, including historical pending-feature statements.
+
 The M0–M2 sections were generated from retained measurements by the milestone evidence scripts. The web release section reports observed commands and links their JSON/JUnit records. No result is projected. The M0 gate is E1, E2 and E3; E4–E6 are measurements, not pass criteria.
 
 ## M1 — engine, oracle and isolation
@@ -217,3 +219,66 @@ Observed at: `2026-10-26T14:54:37+00:00`. Environment: Python `3.12.14`, SQLite 
 | Suite | Command | Exit | Passed | Failed | Errors | Skipped | Seconds | Raw JUnit |
 |---|---|---|---|---|---|---|---|---|
 | fast | `/opt/homebrew/bin/uv run pytest -q -m 'not slow' --junitxml=/Users/santoshkumar/myprojects/Duress/docs/measurements/release-runs/20261026T144814Z-2f711a0e/01-fast/junit.xml` | 0 | 225 | 0 | 0 | 7 | 383.21 | `docs/measurements/release-runs/20261026T144814Z-2f711a0e/01-fast/junit.xml` |
+
+## Final integrated product acceptance — 2026-10-27
+
+The final pass enabled investigation creation/progress, source-grounded hypotheses and findings, actual schedules and retained business-state views, reduction, and differential comparison in the existing Jinja/HTMX application. Execution remains in the shared services. The runner, supervisor, oracle, invariant pack, preflight, DNA, replay, verifier, reducer, semantics, and target implementations are unchanged from `1a106c0`. Investigation persistence adds the exact built schedule/control level; record reads now reject malformed roots and symlinks consistently.
+
+Product implementation is `00532f4`; the PID-1 signal fix is `93eac20`; image recovery-archive exclusion is `1ad9711`; product documentation and actual demo records are `91af35e`; populated-record accessibility fixes are `4cdb718`.
+
+### Python regression and browser evidence
+
+- `DURESS_RECORD_MEASUREMENTS=1 DURESS_BROWSER_TESTS=0 uv run --python 3.12 python scripts/measure.py --run fast`: **666 passed, 10 browser tests skipped, 3 slow measurements deselected, no failures**, 666.86 s. Python 3.12.12, SQLite 3.53.4. The uniquely named [run record](measurements/release-20261026T202054Z-1d7e6e4f.json) retains the actual command, source digest, environment, and [JUnit](measurements/release-runs/20261026T202054Z-1d7e6e4f/01-fast/junit.xml). The three slow measurements and browser cases were executed separately below. The Docker-ignore regression was added after broad collection and passed in the separate four-case runtime check.
+- `DURESS_RECORD_MEASUREMENTS=0 DURESS_BROWSER_TESTS=1 uv run --python 3.12 pytest -q tests/browser --basetemp=.recovery/final-browser-accepted --junitxml=.recovery/final-browser-accepted.xml`: **10 passed in 159.76 s**. [Raw JUnit](release/2026-10-27/browser-accepted.xml). This includes the full real investigation → DNA → retained state → replay → verification → reduction → differential journey, plus navigation, import rejection, token memory, keyboard, responsive and axe checks.
+- The subsequent populated-record audit found low-contrast numerical markers, status-band class interference, non-focusable scrolling evidence, and mobile overflow from long scenario IDs. The corrected pages have **zero serious/critical axe violations** and fit **390/768 px** viewports in the [actual-record checks](release/2026-10-27/real-record-accessibility.json). Table and JSON scrolling are keyboard-focusable. The expanded browser journey includes these populated checks. Its suite returned **9 passed, 1 failed in 162.23 s**: only a test locator was ambiguous because both the visible explanation and newly inspectable raw record contained the same text. Scoping that assertion to the visible explanation passed the targeted navigation rerun: **1 passed in 4.02 s**, [JUnit](release/2026-10-27/browser-navigation.xml). The other nine cases, including the expanded full journey, had passed. No business verdict assertion was weakened. The failed suite is retained byte-for-byte as [compressed JUnit](release/2026-10-27/browser-populated-initial.xml.gz).
+- A prior browser harness failure read a differential admission response body after immediate navigation discarded it. The test now reads the persisted ID from the actual navigation and checks its API record. That initial **7 passed, 1 failed** result is retained as [compressed JUnit](release/2026-10-27/browser-initial.xml.gz); its targeted complete-journey rerun passed in 116.92 s ([JUnit](release/2026-10-27/browser-journey.xml)).
+- Final affected presentation tests: `uv run --python 3.12 pytest -q tests/unit/test_web.py tests/unit/test_web_release.py tests/unit/test_investigation_workflow.py tests/unit/test_analysis_ui.py`: **34 passed**. Execution code did not change after the broad gate; later accessibility changes were checked with the browser and this focused suite.
+- Fresh clone `/tmp/duress-release-clean-20261027`, `uv sync --locked --python 3.12`, then the profiles/records/measurement/web/investigation/analysis/runtime/release-record/API-merge suite: **78 passed in 4.71 s**, [JUnit](release/2026-10-27/clean-focused.xml). The clone installed 34 locked packages under CPython 3.12.12 and remained Git-clean.
+
+### Separate slow measurements
+
+The three existing slow experiments ran with `DURESS_RECORD_MEASUREMENTS=1` under Python 3.12. The invocation set `tests.m0.harness.MEASUREMENTS_DIR` to the new `docs/release/2026-10-27/slow-measurements` directory before `pytest.main(['-q', '-m', 'slow', ...])`. This changes only the output destination, not experiment code, assertions, or trials. Result: **3 passed, 677 deselected, 83.79 s**; [JUnit](release/2026-10-27/slow-measurements/junit.xml).
+
+- [E4](release/2026-10-27/slow-measurements/e4.json): 10 valid fixed-target trials, 10 client timeouts, 10 committed effects.
+- [E5](release/2026-10-27/slow-measurements/e5.json): 20 valid trials per condition; duplicate fulfilment observed in 20/20 fault-free, 20/20 50-ms latency, and 20/20 200-ms latency trials. These are new measured local rates, not general probabilities or a fault-free guarantee.
+- [E6](release/2026-10-27/slow-measurements/e6.json): 10 valid trials; observed total p95 0.9348 s. Phase timings and individual rows are retained.
+
+The 28 pre-existing historical measurement files retain their original SHA-256 hashes. New observations are separate files; no committed measurement or acceptance assertion was edited to obtain a pass.
+
+### Executed product demonstration
+
+[Retained records](release/2026-10-27/) are byte-for-byte copies from the passing local journey. Cached proposals are authored fixtures. Both H1 and H2 were confirmed by actual exploration, with 30 total investigation trials and a generated three-delivery DNA. Replay reproduced the signature in 10/10 valid trials; fix verification re-established 5/5 control failures and observed no failures in 20 valid corrected trials. Reduction returned NOT_REDUCED because rendezvous-preserving removal was inadmissible; its fault-free characterization separately observed 10/10 failures. The Explore differential returned 9/9 agreeing cells across 45 valid trials, including naive_fix S3 PASS / S5 FAIL and fixed S5 PASS.
+
+Updated screenshots and the silent WebM walkthrough show actual saved records, not synthetic success output. The separate showcase capture stays labelled historical. [Demo instructions](DEMO.md) name the source records and reproduce the read-only capture command.
+
+### Clean-clone CLI, accepted reduction, and final container
+
+The clean clone was fast-forwarded to final application commit `38076bb`. A fresh runtime home initially held **only** exported DNA `0edb63c480dbc29b`. The real CLI commands and observed exits are retained in [the CLI manifest](release/2026-10-27/clean-cli/manifest.json), alongside complete output JSON:
+
+- Normal fixed-target S1: PASS, exit 0.
+- Exported-artifact replay: REPRODUCED, 10/10 valid matching failures, exit 1 deliberately.
+- Corrected-target verification: VERIFIED, exit 0, with actual control/candidate counts and the conditional statement retained.
+- Cached investigation: completed FAIL, exit 1; rendezvous reduction: NOT_REDUCED, exit 0.
+- `duress differential --policy matrix --json`: **9/9 agreeing cells, 180 valid trials**, no disagreements/inconclusive cells, exit 0, 190.40 s.
+
+A separate latency DNA (`2d5a9f256d7ab01c`) was built through the real CLI after a host-storage failure was resolved. The browser started its reduction through the normal form/API. [The actual reduction](release/2026-10-27/accepted-reduction/record.json) returned **REDUCED**: 3 → 2 deliveries, 3 accepted candidate trials plus 10 replay revalidation trials and 10 required fault-free characterization trials, **23 total**. Original and reduced schedules retained their latency fault, business expectations, invariant pack and roles. The accepted artifact is `8c6f00ad4cbc8a0f`. Its bounded claim is single-delivery minimality under the recorded predicate, not global minimality. The browser opened and downloaded the accepted DNA; its bytes matched the [independent replay input](release/2026-10-27/accepted-reduction/reduced-dna.json). In another empty home, that artifact [reproduced in 10/10 valid trials](release/2026-10-27/accepted-reduction/portable-replay.json). The accepted-result and derived-DNA pages also passed axe and 390/768-px checks ([checks](release/2026-10-27/accepted-reduction/browser-checks.json)). The original rendezvous NOT_REDUCED observation is preserved independently.
+
+The final view correction at `38076bb` makes a null per-delivery retry override inherit the recorded delivery policy, displaying `1 attempt` instead of `None attempts`. Its dedicated regression and affected suites passed **31 tests**. The final clean-clone focused suite passed **79 tests in 3.14 s** ([JUnit](release/2026-10-27/clean-final-focused.xml)). The same 79 cases passed in Linux/Python 3.12.15 in **2.69 s**, [JUnit](release/2026-10-27/container/focused.xml) and [output](release/2026-10-27/container/focused.log). This later presentation-only change did not alter execution semantics or verdicts.
+
+Final clean-checkout build: `docker build -t duress:release .`, exit 0. Image identity: `sha256:53f47629466fb4b800b059d837e6a6b4e731a7133fde725b2960846703a1cdf5`, Linux/arm64, Python 3.12.15. [Build log](release/2026-10-27/container/build.log). Non-secret probe files were deliberately placed in the clone's `.recovery/` and `.duress/`; `docker run --rm --entrypoint sh duress:release -c 'test ! -e /app/.recovery && test ! -e /app/.duress && test ! -e /app/.git'` confirmed exclusion.
+
+[Final container observations](release/2026-10-27/container/summary.json) and [smoke output](release/2026-10-27/container/smoke.txt) retain these actual runs:
+
+1. Normal container entrypoint with `PORT=8080`, `DURESS_HOSTED=true`, and a non-secret test token: public pages, target registry, DNA viewer, and all local scripts/styles loaded; missing-token replay returned 401. `scripts/smoke.sh <local-container-url> --dna showcase/dna/e8007dd56adae8ae.json` returned REPRODUCED and VERIFIED. The API process was PID 1, bound to `0.0.0.0:8080`.
+2. A fresh container respected the normal three-operation quota while executing cached investigation → NOT_REDUCED reduction → Explore differential. The investigation used 30 trials and the differential had 9/9 agreements with zero inconclusive cells. Persisted records and result pages were read back. No quotas were bypassed.
+3. A real investigation was interrupted by `docker stop --time 20`; after restart, its saved status remained failed with `cancelled`, the operation gate was clear, and process-table/pidfile checks found no managed target remaining. Every tested container stopped with exit 0.
+
+The first final-image export was interrupted by a host disk-full condition (`StorageFull: No space left on device`), followed by Docker RPC EOF. The optional initial latency build consequently produced no usable JSON. Only disposable artifacts and the earlier image created by this release pass were removed; existing milestone images and unrelated data were preserved. After OrbStack restarted, the clean build and all checks above passed. Host free space remains low; this is an environment constraint, not a successful hosted deployment. No successful result was fabricated or substituted for the interrupted attempts.
+
+### External verification and final audit scope
+
+No `DURESS_LLM_*` runtime settings were available. Genuine hosted inference, provider interoperability, and the hosted multi-run live-versus-exhaustive comparison remain unverified. Cached authored-fixture and deterministic exhaustive execution are implemented and covered separately. No local model weights or Alan Code credentials were used.
+
+Render-specific connected tooling, CLI credentials, and a logged-in dashboard session were unavailable; the browser reached Render's login page. No public deployment URL or hosted capacity claim is made. Deployment needs an authorized Render account/session or runtime API credential. Local Docker success does not replace that hosted check.
+
+The final source audit preserved the critical execution files and target bytes, checked unique API route ownership, token/admission boundaries, safe record paths, autoescaping/JSON encoding, and actual process cleanup. Confirmed defects fixed in this pass were disabled web workflows, corrupt-record crashes/symlink reads, missing retained schedule/state presentation, container signal forwarding, recovery archives entering the image context, populated-record accessibility/mobile issues, and null retry presentation. No known correctness-blocking defect remains in the exercised local product paths. Relevant full/slow/browser/clean-environment results and development failures are retained above. All 28 historical measurement files still match their baseline hashes.

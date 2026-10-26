@@ -1,0 +1,617 @@
+{
+  "template_id": "S1",
+  "scenario_id": "S1",
+  "params": {},
+  "result": {
+    "status": "PASS",
+    "valid": 5,
+    "fail": 0,
+    "inconclusive": 0,
+    "trials": 5,
+    "signature": null,
+    "signature_counts": {},
+    "reasons": [
+      "quota_met"
+    ],
+    "budget_exhausted": false
+  },
+  "verdicts": [
+    {
+      "status": "PASS",
+      "reasons": [
+        "pass"
+      ],
+      "signature": null,
+      "violations": [],
+      "expected_effect_misses": [],
+      "evidence_missing": [],
+      "pass_condition_failures": []
+    },
+    {
+      "status": "PASS",
+      "reasons": [
+        "pass"
+      ],
+      "signature": null,
+      "violations": [],
+      "expected_effect_misses": [],
+      "evidence_missing": [],
+      "pass_condition_failures": []
+    },
+    {
+      "status": "PASS",
+      "reasons": [
+        "pass"
+      ],
+      "signature": null,
+      "violations": [],
+      "expected_effect_misses": [],
+      "evidence_missing": [],
+      "pass_condition_failures": []
+    },
+    {
+      "status": "PASS",
+      "reasons": [
+        "pass"
+      ],
+      "signature": null,
+      "violations": [],
+      "expected_effect_misses": [],
+      "evidence_missing": [],
+      "pass_condition_failures": []
+    },
+    {
+      "status": "PASS",
+      "reasons": [
+        "pass"
+      ],
+      "signature": null,
+      "violations": [],
+      "expected_effect_misses": [],
+      "evidence_missing": [],
+      "pass_condition_failures": []
+    }
+  ],
+  "observations": [
+    {
+      "trial_id": "t1cecb4dc6ca6",
+      "target_id": "razorpay-fixed",
+      "scenario_id": "S1",
+      "settlement": "clean",
+      "watchdog_fired": false,
+      "harness_errors": [],
+      "instance_ok": true,
+      "baseline_ok": true,
+      "target_ready": true,
+      "snapshot": {
+        "tables": {
+          "orders": [
+            {
+              "id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "fulfilled"
+            },
+            {
+              "id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "created"
+            }
+          ],
+          "payments": [
+            {
+              "id": "pay_A1",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "captured"
+            },
+            {
+              "id": "pay_A2",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B1",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B2",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            }
+          ],
+          "fulfilments": [
+            {
+              "id": 1,
+              "order_id": "order_A",
+              "payment_id": "pay_A1",
+              "amount": 5000,
+              "created_at": "2026-10-26T20:41:18.179642+00:00"
+            }
+          ]
+        }
+      },
+      "schema_ok": true,
+      "schema_error": null,
+      "execution_deadline_exceeded": false,
+      "cancelled_attempts": 0,
+      "undispatched": 0,
+      "phase_timings": {
+        "prepare": 0.110651,
+        "readiness": 0.500252,
+        "execute": 0.054967,
+        "quiesce": 1.4e-05,
+        "drain": 0.177941,
+        "kill_confirm": 0.041312,
+        "evaluate": 0.004624
+      },
+      "attempts": [
+        {
+          "delivery_id": "d1",
+          "attempt": 1,
+          "outcome": "response",
+          "status_code": 200,
+          "body_status": "processed",
+          "body_scope": null,
+          "started_s": 0.006058583006961271,
+          "ended_s": 0.05460329202469438,
+          "error": null
+        }
+      ],
+      "stub": {
+        "calls": 1,
+        "arrivals": 0,
+        "released_by": null,
+        "release_conditions": {},
+        "stale_calls": 0,
+        "holding": 0
+      },
+      "response_semantics_mismatches": [],
+      "exit_code": 0,
+      "workdir": "/tmp/duress-final-cli-home/tmp/duress-t1cecb4dc6ca6-pnhyf_5h",
+      "started_at": "2026-10-26T20:41:17+00:00",
+      "duration_s": 0.8901847909728531
+    },
+    {
+      "trial_id": "t4c232862b1c9",
+      "target_id": "razorpay-fixed",
+      "scenario_id": "S1",
+      "settlement": "clean",
+      "watchdog_fired": false,
+      "harness_errors": [],
+      "instance_ok": true,
+      "baseline_ok": true,
+      "target_ready": true,
+      "snapshot": {
+        "tables": {
+          "orders": [
+            {
+              "id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "fulfilled"
+            },
+            {
+              "id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "created"
+            }
+          ],
+          "payments": [
+            {
+              "id": "pay_A1",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "captured"
+            },
+            {
+              "id": "pay_A2",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B1",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B2",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            }
+          ],
+          "fulfilments": [
+            {
+              "id": 1,
+              "order_id": "order_A",
+              "payment_id": "pay_A1",
+              "amount": 5000,
+              "created_at": "2026-10-26T20:41:18.964410+00:00"
+            }
+          ]
+        }
+      },
+      "schema_ok": true,
+      "schema_error": null,
+      "execution_deadline_exceeded": false,
+      "cancelled_attempts": 0,
+      "undispatched": 0,
+      "phase_timings": {
+        "prepare": 0.065063,
+        "readiness": 0.455994,
+        "execute": 0.037282,
+        "quiesce": 1.2e-05,
+        "drain": 0.202771,
+        "kill_confirm": 0.040015,
+        "evaluate": 0.004018
+      },
+      "attempts": [
+        {
+          "delivery_id": "d1",
+          "attempt": 1,
+          "outcome": "response",
+          "status_code": 200,
+          "body_status": "processed",
+          "body_scope": null,
+          "started_s": 0.006008666998241097,
+          "ended_s": 0.03697645798092708,
+          "error": null
+        }
+      ],
+      "stub": {
+        "calls": 1,
+        "arrivals": 0,
+        "released_by": null,
+        "release_conditions": {},
+        "stale_calls": 0,
+        "holding": 0
+      },
+      "response_semantics_mismatches": [],
+      "exit_code": 0,
+      "workdir": "/tmp/duress-final-cli-home/tmp/duress-t4c232862b1c9-sfx3j8ez",
+      "started_at": "2026-10-26T20:41:18+00:00",
+      "duration_s": 0.8055093750008382
+    },
+    {
+      "trial_id": "t78662e3129e3",
+      "target_id": "razorpay-fixed",
+      "scenario_id": "S1",
+      "settlement": "clean",
+      "watchdog_fired": false,
+      "harness_errors": [],
+      "instance_ok": true,
+      "baseline_ok": true,
+      "target_ready": true,
+      "snapshot": {
+        "tables": {
+          "orders": [
+            {
+              "id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "fulfilled"
+            },
+            {
+              "id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "created"
+            }
+          ],
+          "payments": [
+            {
+              "id": "pay_A1",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "captured"
+            },
+            {
+              "id": "pay_A2",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B1",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B2",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            }
+          ],
+          "fulfilments": [
+            {
+              "id": 1,
+              "order_id": "order_A",
+              "payment_id": "pay_A1",
+              "amount": 5000,
+              "created_at": "2026-10-26T20:41:19.781815+00:00"
+            }
+          ]
+        }
+      },
+      "schema_ok": true,
+      "schema_error": null,
+      "execution_deadline_exceeded": false,
+      "cancelled_attempts": 0,
+      "undispatched": 0,
+      "phase_timings": {
+        "prepare": 0.079658,
+        "readiness": 0.451346,
+        "execute": 0.035554,
+        "quiesce": 1.2e-05,
+        "drain": 0.201251,
+        "kill_confirm": 0.038788,
+        "evaluate": 0.003509
+      },
+      "attempts": [
+        {
+          "delivery_id": "d1",
+          "attempt": 1,
+          "outcome": "response",
+          "status_code": 200,
+          "body_status": "processed",
+          "body_scope": null,
+          "started_s": 0.005974792002234608,
+          "ended_s": 0.03528066698345356,
+          "error": null
+        }
+      ],
+      "stub": {
+        "calls": 1,
+        "arrivals": 0,
+        "released_by": null,
+        "release_conditions": {},
+        "stale_calls": 0,
+        "holding": 0
+      },
+      "response_semantics_mismatches": [],
+      "exit_code": 0,
+      "workdir": "/tmp/duress-final-cli-home/tmp/duress-t78662e3129e3-1bny38_p",
+      "started_at": "2026-10-26T20:41:19+00:00",
+      "duration_s": 0.8104652090114541
+    },
+    {
+      "trial_id": "t31ffcfef46ac",
+      "target_id": "razorpay-fixed",
+      "scenario_id": "S1",
+      "settlement": "clean",
+      "watchdog_fired": false,
+      "harness_errors": [],
+      "instance_ok": true,
+      "baseline_ok": true,
+      "target_ready": true,
+      "snapshot": {
+        "tables": {
+          "orders": [
+            {
+              "id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "fulfilled"
+            },
+            {
+              "id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "created"
+            }
+          ],
+          "payments": [
+            {
+              "id": "pay_A1",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "captured"
+            },
+            {
+              "id": "pay_A2",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B1",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B2",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            }
+          ],
+          "fulfilments": [
+            {
+              "id": 1,
+              "order_id": "order_A",
+              "payment_id": "pay_A1",
+              "amount": 5000,
+              "created_at": "2026-10-26T20:41:20.540487+00:00"
+            }
+          ]
+        }
+      },
+      "schema_ok": true,
+      "schema_error": null,
+      "execution_deadline_exceeded": false,
+      "cancelled_attempts": 0,
+      "undispatched": 0,
+      "phase_timings": {
+        "prepare": 0.065364,
+        "readiness": 0.412927,
+        "execute": 0.034497,
+        "quiesce": 1.1e-05,
+        "drain": 0.2196,
+        "kill_confirm": 0.039172,
+        "evaluate": 0.003563
+      },
+      "attempts": [
+        {
+          "delivery_id": "d1",
+          "attempt": 1,
+          "outcome": "response",
+          "status_code": 200,
+          "body_status": "processed",
+          "body_scope": null,
+          "started_s": 0.006032541976310313,
+          "ended_s": 0.03422579198377207,
+          "error": null
+        }
+      ],
+      "stub": {
+        "calls": 1,
+        "arrivals": 0,
+        "released_by": null,
+        "release_conditions": {},
+        "stale_calls": 0,
+        "holding": 0
+      },
+      "response_semantics_mismatches": [],
+      "exit_code": 0,
+      "workdir": "/tmp/duress-final-cli-home/tmp/duress-t31ffcfef46ac-wpqqk3aw",
+      "started_at": "2026-10-26T20:41:20+00:00",
+      "duration_s": 0.775464833015576
+    },
+    {
+      "trial_id": "tee4f17ae513a",
+      "target_id": "razorpay-fixed",
+      "scenario_id": "S1",
+      "settlement": "clean",
+      "watchdog_fired": false,
+      "harness_errors": [],
+      "instance_ok": true,
+      "baseline_ok": true,
+      "target_ready": true,
+      "snapshot": {
+        "tables": {
+          "orders": [
+            {
+              "id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "fulfilled"
+            },
+            {
+              "id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "created"
+            }
+          ],
+          "payments": [
+            {
+              "id": "pay_A1",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "captured"
+            },
+            {
+              "id": "pay_A2",
+              "order_id": "order_A",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B1",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            },
+            {
+              "id": "pay_B2",
+              "order_id": "order_B",
+              "amount": 5000,
+              "currency": "INR",
+              "status": "authorized"
+            }
+          ],
+          "fulfilments": [
+            {
+              "id": 1,
+              "order_id": "order_A",
+              "payment_id": "pay_A1",
+              "amount": 5000,
+              "created_at": "2026-10-26T20:41:21.388079+00:00"
+            }
+          ]
+        }
+      },
+      "schema_ok": true,
+      "schema_error": null,
+      "execution_deadline_exceeded": false,
+      "cancelled_attempts": 0,
+      "undispatched": 0,
+      "phase_timings": {
+        "prepare": 0.064482,
+        "readiness": 0.480989,
+        "execute": 0.037461,
+        "quiesce": 1.2e-05,
+        "drain": 0.198693,
+        "kill_confirm": 0.043055,
+        "evaluate": 0.003622
+      },
+      "attempts": [
+        {
+          "delivery_id": "d1",
+          "attempt": 1,
+          "outcome": "response",
+          "status_code": 200,
+          "body_status": "processed",
+          "body_scope": null,
+          "started_s": 0.006102249986724928,
+          "ended_s": 0.03716750000603497,
+          "error": null
+        }
+      ],
+      "stub": {
+        "calls": 1,
+        "arrivals": 0,
+        "released_by": null,
+        "release_conditions": {},
+        "stale_calls": 0,
+        "holding": 0
+      },
+      "response_semantics_mismatches": [],
+      "exit_code": 0,
+      "workdir": "/tmp/duress-final-cli-home/tmp/duress-tee4f17ae513a-wfpqbaw1",
+      "started_at": "2026-10-26T20:41:20+00:00",
+      "duration_s": 0.8286553750222083
+    }
+  ]
+}

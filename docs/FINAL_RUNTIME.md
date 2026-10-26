@@ -30,3 +30,13 @@ The portability run used temporary runtime homes and an isolated Python environm
 - Render deployment access was not available through the configured tools: there is no Render-specific connected tool, the `render` CLI is missing, and `RENDER_API_KEY`, `RENDER_CLI_TOKEN`, and `RENDER_TOKEN` are unset. The dashboard opened at its login page. A hosted check needs an authenticated Render session with access to the service/workspace.
 - No `DURESS_LLM_*` environment variables are set. Live inference needs the provider base URL and model in the Render service environment, plus an API key if that provider requires one. No LLM was invoked and no model weights were downloaded.
 - The final local image was rebuilt after the integrated web assets were present. Render deployment and hosted verification remain unrun.
+
+## Final packaging boundary
+
+A later image-context audit found that `.recovery/` was Git-ignored but missing from `.dockerignore`. It is now excluded alongside `.duress/`. The dedicated runtime contract suite passed four tests after this correction. The image above is the earlier successful build; the final clean-checkout image and post-correction checks are recorded in the final evidence section of `EVIDENCE.md`.
+
+## Final verified image and real operation lifecycle
+
+The final application image was rebuilt from clean checkout `38076bb` as `duress:release`, identity `sha256:53f47629466fb4b800b059d837e6a6b4e731a7133fde725b2960846703a1cdf5`. Its 79-case focused suite passed on Linux/Python 3.12.15. Actual non-secret packaging probes confirmed `.recovery`, `.duress`, and `.git` were absent from `/app`.
+
+The final container passed public pages/assets, token refusal, portable replay, fixed-target verification, cached investigation, reduction, differential comparison, and stop/restart during a real investigation. The interrupted job stayed failed with `cancelled`; the gate was clear and no managed target/pidfile remained. Each container exited 0. Exact records, commands, logs, image identity, and the earlier disk-full interruption are retained in [the final evidence](EVIDENCE.md) and [container observations](release/2026-10-27/container/summary.json). The low host disk space was handled without deleting unrelated data. Render and hosted inference remain externally blocked as described above.

@@ -1,0 +1,39 @@
+{
+  "image": "sha256:53f47629466fb4b800b059d837e6a6b4e731a7133fde725b2960846703a1cdf5",
+  "source_commit": "38076bb",
+  "phases": [
+    {
+      "phase": "public pages, assets, authorization, portable replay, verification",
+      "url": "http://127.0.0.1:32768",
+      "exit": 0,
+      "cleanup": "no managed targets or pidfiles"
+    },
+    {
+      "phase": "cached investigation, reduction, differential",
+      "url": "http://127.0.0.1:32769",
+      "mode": "cached",
+      "investigation_trials": 30,
+      "reduction": "NOT_REDUCED",
+      "differential": {
+        "agree": 9,
+        "cells": 9,
+        "compared": 9,
+        "disagree": 0,
+        "inconclusive": 0,
+        "unexpected_cells": []
+      },
+      "exit": 0,
+      "cleanup": "no managed targets or pidfiles"
+    },
+    {
+      "phase": "stop during real investigation and restart",
+      "status": "failed",
+      "errors": [
+        "cancelled"
+      ],
+      "error": null,
+      "exit": 0,
+      "cleanup": "no managed targets or pidfiles"
+    }
+  ]
+}
