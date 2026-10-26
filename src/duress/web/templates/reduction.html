@@ -9,8 +9,8 @@
   <a class="button button-secondary" href="/dna/{{ record.original_dna_id|default('') }}">Return to original DNA</a>
 </header>
 
-<section class="content-section status-band status-band--{{ record.status|default('queued') }}" aria-labelledby="reduction-status-title" data-analysis-poll="{{ 'true' if poll else 'false' }}" data-status-url="/api/reductions/{{ record.reduction_id|default('') }}" data-record-url="/reductions/{{ record.reduction_id|default('') }}">
-  <div class="status-copy"><p class="eyebrow">Persisted operation</p><h2 id="reduction-status-title">{{ record.status|default('queued')|replace('_', ' ')|title }}</h2>
+<section class="status-band status-band--{{ record.status|default('queued') }}" aria-labelledby="reduction-status-title" data-analysis-poll="{{ 'true' if poll else 'false' }}" data-status-url="/api/reductions/{{ record.reduction_id|default('') }}" data-record-url="/reductions/{{ record.reduction_id|default('') }}">
+  <div class="status-copy analysis-state"><p class="eyebrow">Persisted operation</p><h2 id="reduction-status-title">{{ record.status|default('queued')|replace('_', ' ')|title }}</h2>
   {% if record.status in ['queued', 'running'] %}<p id="analysis-poll-message" role="status" aria-live="polite">This reduction is running asynchronously. This page will refresh when its saved record is ready.</p>
   {% elif record.status == 'failed' %}<p id="analysis-poll-message" role="status">{{ record.error|default('The reduction operation failed before producing a final record.') }}</p>
   {% else %}<p id="analysis-poll-message" role="status" aria-live="polite">Reduction outcome: <strong>{{ record.outcome|default('INCONCLUSIVE') }}</strong>{% if record.reason %} · {{ record.reason }}{% endif %}</p>{% endif %}
@@ -77,7 +77,7 @@
 
 <section class="content-section" aria-labelledby="candidate-audit-title">
   <div class="section-heading compact-heading"><div><p class="eyebrow">Candidate audit</p><h2 id="candidate-audit-title">Tested removals and reasons</h2></div><span class="section-count">{{ result.candidates|default([])|length }} candidates</span></div>
-  {% if result.candidates %}<div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Each delivery removal candidate and its recorded admissibility and verdict</caption><thead><tr><th scope="col">Removed delivery</th><th scope="col">Remaining</th><th scope="col">Verdict</th><th scope="col">Trials</th><th scope="col">Candidate reasons</th></tr></thead><tbody>
+  {% if result.candidates %}<div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Each delivery removal candidate and its recorded admissibility and verdict</caption><thead><tr><th scope="col">Removed delivery</th><th scope="col">Remaining</th><th scope="col">Verdict</th><th scope="col">Trials</th><th scope="col">Candidate reasons</th></tr></thead><tbody>
     {% for candidate in result.candidates %}<tr><th scope="row"><code>{{ candidate.removed }}</code></th><td>{{ candidate.remaining|default([])|join(', ') or 'none' }}</td><td>{{ candidate.verdict|default('unknown') }}{% if not candidate.admissible %}<small> · inadmissible</small>{% endif %}</td><td>{{ candidate.trials|default(0) }}</td><td>{% set reasons = candidate.inadmissible_reasons|default([]) + candidate.reasons|default([]) %}{% if reasons %}<ul>{% for reason in reasons %}<li>{{ reason }}</li>{% endfor %}</ul>{% else %}<span class="empty-inline">No rejection reason recorded</span>{% endif %}</td></tr>{% endfor %}
   </tbody></table></div>{% else %}<p class="empty-note">No removal candidates were tested.</p>{% endif %}
 </section>
@@ -97,5 +97,5 @@
 {% if record.black_box %}<section class="content-section" aria-labelledby="black-box-title"><div class="section-heading compact-heading"><div><p class="eyebrow">Fault-free characterization</p><h2 id="black-box-title">Original schedule without injected faults</h2></div><span class="section-count">{{ record.black_box.trials|default(0) }} trials</span></div><p class="result-statement">Same-signature failures: <strong>{{ record.black_box.rate|default('not recorded') }}</strong>{% if record.black_box.budget_exhausted %} · budget exhausted{% endif %}</p><p class="field-help">Observed {{ record.black_box.fail|default(0) }} failures in {{ record.black_box.valid|default(0) }} valid trials. This characterization does not change the reduction acceptance decision.</p></section>{% endif %}
 {% endif %}
 
-<details class="artifact-json"><summary>Inspect complete persisted reduction record</summary><pre><code>{{ record|tojson(indent=2) }}</code></pre></details>
+<details class="artifact-json"><summary>Inspect complete persisted reduction record</summary><pre tabindex="0"><code>{{ record|tojson(indent=2) }}</code></pre></details>
 {% endblock %}

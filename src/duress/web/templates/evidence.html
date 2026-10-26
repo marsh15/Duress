@@ -6,7 +6,7 @@
 <aside class="notice notice-cyan"><strong>Retained observation</strong><span>These rows come from the supervisor's copied snapshot after target settlement. This page starts no execution and computes no new verdict. Consult the associated trial for validity and settlement. Each table is limited to 1,000 displayed rows.</span></aside>
 {% for name, rows in tables.items() %}
 <section class="content-section"><div class="section-heading compact-heading"><h2>{{ name|title }}</h2><span class="section-count">{{ rows|length }} rows</span></div>
-{% if rows %}<div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Retained {{ name }} table</caption><thead><tr>{% for column in rows[0] %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead><tbody>{% for row in rows %}<tr>{% for value in row.values() %}<td>{{ value }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+{% if rows %}<div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Retained {{ name }} table</caption><thead><tr>{% for column in rows[0] %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead><tbody>{% for row in rows %}<tr>{% for value in row.values() %}<td>{{ value }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
 {% else %}<p class="empty-note">No rows recorded.</p>{% endif %}</section>
 {% endfor %}
 {% endblock %}

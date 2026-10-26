@@ -71,6 +71,17 @@ def page(server):
         browser.close()
 
 
+def assert_populated_evidence_accessible(page):
+    """Exercise populated tables and badges, including horizontally scrolling data."""
+    page.add_script_tag(path=str(ROOT / 'tests/browser/vendor/axe.min.js'))
+    violations = page.evaluate("async()=> (await axe.run()).violations.filter(x=>['serious','critical'].includes(x.impact)).map(x=>({id:x.id,nodes:x.nodes.map(n=>n.target)}))")
+    assert violations == []
+    for width in [390, 768]:
+        page.set_viewport_size({'width': width, 'height': 844})
+        assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+    page.set_viewport_size({'width': 1440, 'height': 1000})
+
+
 def test_workspace_navigation_registry_and_available_workflows(page):
     from playwright.sync_api import expect
     errors = []
@@ -86,7 +97,7 @@ def test_workspace_navigation_registry_and_available_workflows(page):
     expect(page.get_by_text('Recorded M2 benchmark', exact=False).first).to_be_visible()
     page.goto('/investigations/showcase-m2')
     expect(page.get_by_role('heading', name='Characterization summary')).to_be_visible()
-    expect(page.get_by_text('not a live or autonomous investigation', exact=False)).to_be_visible()
+    expect(page.locator('.explanation-band')).to_contain_text('not a live or autonomous investigation')
     expect(page.get_by_role('heading', name='Recorded verify-fix comparison')).to_be_visible()
     assert errors == []
 
@@ -163,6 +174,7 @@ def test_new_investigation_replay_verify_reduce_and_differential(page, server):
     expect(page.locator('.status-meta')).to_contain_text('FAIL')
     expect(page.locator('main')).to_contain_text('authored cached fixture')
     expect(page.get_by_role('heading', name='Findings', exact=True)).to_be_visible()
+    assert_populated_evidence_accessible(page)
 
     record = httpx.get(server[0] + admission['status_url']).json()
     assert record['status'] == 'completed' and record['verdict'] == 'FAIL'
@@ -189,6 +201,7 @@ def test_new_investigation_replay_verify_reduce_and_differential(page, server):
     expect(snapshot_link).to_be_visible()
     snapshot_link.click()
     expect(page.get_by_role('heading', name='Observed business state')).to_be_visible()
+    assert_populated_evidence_accessible(page)
     assert page.locator('section').filter(has=page.get_by_role('heading', name='Fulfilments', exact=True)).locator('tbody tr').count() > 1
     page.goto('/dna/' + dna_id)
     page.locator('#api-token').fill('browser-test-only')
@@ -205,6 +218,7 @@ def test_new_investigation_replay_verify_reduce_and_differential(page, server):
     page.wait_for_url('**/reductions/' + reduction_admission['reduction_id'], timeout=120_000)
     expect(page.get_by_role('heading', name='NOT_REDUCED', exact=True)).to_be_visible()
     expect(page.locator('main')).to_contain_text('no admissible reductions')
+    assert_populated_evidence_accessible(page)
     reduction = httpx.get(server[0] + reduction_admission['status_url']).json()
     assert reduction['outcome'] == 'NOT_REDUCED'
     assert reduction['primary_dna_id'] == dna_id
@@ -222,6 +236,7 @@ def test_new_investigation_replay_verify_reduce_and_differential(page, server):
     page.wait_for_url('**/differential/diff-*')
     differential_id = page.url.rsplit('/', 1)[1]
     expect(page.get_by_role('heading', name='Scenario comparison matrix')).to_be_visible(timeout=180_000)
+    assert_populated_evidence_accessible(page)
     comparison = httpx.get(server[0] + '/api/differential/' + differential_id).json()
     assert comparison['differential_id'] == differential_id
     assert comparison['summary'] == {

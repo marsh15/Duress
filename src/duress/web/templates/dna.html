@@ -68,7 +68,7 @@
     <div class="section-heading compact-heading"><div><p class="eyebrow">Representative observation</p><h2 id="violations-title">Invariant violations</h2></div><span class="section-count">{{ view.violation_rows|length }} rows</span></div>
     {% if view.observations.trial_id and view.observations.trial_id in evidence_ids %}<p class="field-help"><a href="/evidence/{{ view.observations.trial_id }}">Inspect retained business state</a></p>{% endif %}
     {% if view.violation_rows %}
-    <div class="table-wrap"><table class="data-table violation-table"><caption class="visually-hidden">Recorded invariant violation rows</caption><thead><tr><th scope="col">Check</th><th scope="col">Kind</th><th scope="col">Roles</th><th scope="col">Entities</th></tr></thead><tbody>
+    <div class="table-wrap" tabindex="0"><table class="data-table violation-table"><caption class="visually-hidden">Recorded invariant violation rows</caption><thead><tr><th scope="col">Check</th><th scope="col">Kind</th><th scope="col">Roles</th><th scope="col">Entities</th></tr></thead><tbody>
       {% for violation in view.violation_rows %}<tr><th scope="row"><code>{{ violation.check|default('unknown') }}</code></th><td>{{ violation.kind|default('unknown') }}</td><td>{{ violation.roles|default([])|join(', ') }}</td><td>{{ violation.entity_ids|default([])|join(', ') }}</td></tr>{% endfor %}
     </tbody></table></div>
     {% else %}<p class="empty-note">No violation rows were included in this artifact.</p>{% endif %}
@@ -109,7 +109,7 @@
 {% if view.observations.attempts %}
 <section class="content-section observed-attempts" aria-labelledby="dna-attempts-title">
   <div class="section-heading compact-heading"><div><p class="eyebrow">Retained observation</p><h2 id="dna-attempts-title">Observed delivery attempts</h2></div><span class="section-count">{{ view.observations.attempts|length }} actual attempts</span></div>
-  <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts preserved in this Failure DNA artifact</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
+  <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts preserved in this Failure DNA artifact</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
     {% for attempt in view.observations.attempts %}<tr><th scope="row"><code>{{ attempt.delivery_id|default('') }}</code></th><td>{{ attempt.attempt|default('—') }}</td><td>{{ attempt.outcome|default('—') }}</td><td>{{ attempt.status_code|default('—') }}</td><td>{{ attempt.body_status|default('—') }}</td><td>{{ attempt.started_s|default('—') }}</td><td>{{ attempt.ended_s|default('—') }}</td></tr>{% endfor %}
   </tbody></table></div>
 </section>
@@ -149,5 +149,5 @@
   <p class="caveat-note">Verification is not a proof of correctness for other schedules, loads or environments.</p>
 </section>
 
-<details class="artifact-json"><summary>Inspect complete artifact JSON</summary><pre><code>{{ view.document|tojson(indent=2) }}</code></pre></details>
+<details class="artifact-json"><summary>Inspect complete artifact JSON</summary><pre tabindex="0"><code>{{ view.document|tojson(indent=2) }}</code></pre></details>
 {% endblock %}

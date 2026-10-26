@@ -135,7 +135,7 @@
   <div class="business-state-grid">
     <section aria-labelledby="orders-state-title">
       <h3 id="orders-state-title">Orders</h3>
-      <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Baseline and observed order status from the retained snapshot</caption><thead><tr><th scope="col">Order</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
+      <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Baseline and observed order status from the retained snapshot</caption><thead><tr><th scope="col">Order</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
       {% for order in baseline.orders|default([]) %}
         {% set observed_order = observed.orders|default([])|selectattr('id', 'equalto', order.id)|first %}
         <tr><th scope="row"><code>{{ order.id }}</code></th><td>{{ order.status|default('—') }}</td><td>{{ observed_order.status|default('—') }}</td></tr>
@@ -147,7 +147,7 @@
     </section>
     <section aria-labelledby="payments-state-title">
       <h3 id="payments-state-title">Payments</h3>
-      <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Baseline and observed payment status from the retained snapshot</caption><thead><tr><th scope="col">Payment</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
+      <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Baseline and observed payment status from the retained snapshot</caption><thead><tr><th scope="col">Payment</th><th scope="col">Baseline</th><th scope="col">Observed</th></tr></thead><tbody>
       {% for payment in baseline.payments|default([]) %}
         {% set observed_payment = observed.payments|default([])|selectattr('id', 'equalto', payment.id)|first %}
         <tr><th scope="row"><code>{{ payment.id }}</code></th><td>{{ payment.status|default('—') }}</td><td>{{ observed_payment.status|default('—') }}</td></tr>
@@ -160,7 +160,7 @@
   </div>
   <section class="fulfilment-state" aria-labelledby="fulfilments-state-title">
     <h3 id="fulfilments-state-title">Fulfilment rows</h3>
-    <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Baseline and observed fulfilment rows from the retained snapshot</caption><thead><tr><th scope="col">Snapshot</th><th scope="col">Row</th><th scope="col">Order</th><th scope="col">Payment</th><th scope="col">Amount</th></tr></thead><tbody>
+    <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Baseline and observed fulfilment rows from the retained snapshot</caption><thead><tr><th scope="col">Snapshot</th><th scope="col">Row</th><th scope="col">Order</th><th scope="col">Payment</th><th scope="col">Amount</th></tr></thead><tbody>
       {% if baseline.fulfilments|default([]) %}{% for row in baseline.fulfilments %}<tr><th scope="row">Baseline</th><td>{{ row.id|default('—') }}</td><td>{{ row.order_id|default('—') }}</td><td>{{ row.payment_id|default('—') }}</td><td>{{ row.amount|default('—') }}</td></tr>{% endfor %}{% else %}<tr><th scope="row">Baseline</th><td colspan="4">No fulfilment rows recorded</td></tr>{% endif %}
       {% if observed.fulfilments|default([]) %}{% for row in observed.fulfilments %}<tr><th scope="row">Observed</th><td>{{ row.id|default('—') }}</td><td>{{ row.order_id|default('—') }}</td><td>{{ row.payment_id|default('—') }}</td><td>{{ row.amount|default('—') }}</td></tr>{% endfor %}{% else %}<tr><th scope="row">Observed</th><td colspan="4">No fulfilment rows recorded</td></tr>{% endif %}
     </tbody></table></div>
@@ -176,7 +176,7 @@
       <span class="section-count">{% if view.scenario_count %}{{ view.scenario_count }} detail rows{% else %}No detail rows retained{% endif %}</span>
     </div>
     {% if view.scenarios %}
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0">
       <table class="data-table">
         <caption class="visually-hidden">Investigation scenario outcomes and trial counts</caption>
         <thead><tr><th scope="col">Scenario</th><th scope="col">Selected by</th><th scope="col">Lifecycle</th><th scope="col">Outcome</th><th scope="col">Valid</th><th scope="col">Fail</th><th scope="col">Trials</th></tr></thead>
@@ -340,7 +340,7 @@
 {% if view.observed_attempts %}
 <section class="content-section observed-attempts" aria-labelledby="attempts-title">
   <div class="section-heading compact-heading"><div><p class="eyebrow">Representative execution</p><h2 id="attempts-title">Observed delivery attempts</h2></div><span class="section-count">{{ view.observed_attempts|length }} recorded attempts</span></div>
-  <div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts from the retained representative DNA</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
+  <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts from the retained representative DNA</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
   {% for attempt in view.observed_attempts %}<tr><th scope="row"><code>{{ attempt.delivery_id|default('') }}</code></th><td>{{ attempt.attempt|default('—') }}</td><td>{{ attempt.outcome|default('—') }}</td><td>{{ attempt.status_code|default('—') }}</td><td>{{ attempt.body_status|default('—') }}</td><td>{{ attempt.started_s|default('—') }}</td><td>{{ attempt.ended_s|default('—') }}</td></tr>{% endfor %}
   </tbody></table></div>
 </section>
@@ -364,4 +364,4 @@
 </section>
 {% endif %}
 
-<details class="artifact-json"><summary>Inspect complete persisted investigation record</summary><pre><code>{{ view.record|tojson(indent=2) }}</code></pre></details>
+<details class="artifact-json"><summary>Inspect complete persisted investigation record</summary><pre tabindex="0"><code>{{ view.record|tojson(indent=2) }}</code></pre></details>
