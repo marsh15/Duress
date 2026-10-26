@@ -6,7 +6,7 @@
     "build": {
       "command": "docker build -t duress:web .",
       "exit_code": 0,
-      "image": "sha256:74e2279390869d3292f218fb8ee219579c01a073939fdca65573ffa0775d4e65"
+      "config_digest": "sha256:74e2279390869d3292f218fb8ee219579c01a073939fdca65573ffa0775d4e65"
     },
     "startup": {
       "command": "docker run -d --name duress-web-check-20261026 -p 18765:8080 -e PORT=8080 duress:web",

@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-10-26T14:58:08.570Z",
+  "commit": "4743a5e3ab611c8e2e6568006144af6b55456fb0",
+  "clean_checkout": {
+    "source": "https://github.com/marsh15/Duress.git",
+    "git_status_before_and_after": "clean",
+    "install_command": "uv sync --frozen",
+    "install_exit_code": 0,
+    "python": "3.14.7",
+    "tests_command": "uv run pytest -q tests/unit/test_web.py tests/unit/test_records.py tests/unit/test_measure.py tests/integration/test_web_api.py --junitxml=/tmp/duress-clean-web-junit.xml",
+    "tests_exit_code": 0,
+    "passed": 27,
+    "failed": 0,
+    "junit": "docs/measurements/clean-checkout/junit.xml",
+    "scope": "Focused frontend/record/API tests; this was not a full Python 3.14 engine regression."
+  },
+  "final_docker": {
+    "build_command": "docker build -t duress:web-final .",
+    "build_exit_code": 0,
+    "image_id": "sha256:d3cac31fb5041cb8f0eb14e449af020757c496953d28db228b94930bff3673bd",
+    "config_digest": "sha256:8f87a65e56d534f0a107a811fbc71f554be946a3d7357a62c1b8d1bfed1100d2",
+    "start_command": "docker run -d --name duress-web-final-20261026 -p 18765:8080 -e PORT=8080 duress:web-final",
+    "tests_command": "docker exec duress-web-final-20261026 uv run pytest -q tests/unit/test_web.py tests/unit/test_records.py tests/unit/test_measure.py tests/integration/test_web_api.py --junitxml=/tmp/duress-final-web-junit.xml",
+    "tests_exit_code": 0,
+    "passed": 27,
+    "failed": 0,
+    "junit": "docs/measurements/clean-checkout/container-junit.xml",
+    "smoke_command": "scripts/smoke.sh http://127.0.0.1:18765 --dna showcase/dna/e8007dd56adae8ae.json",
+    "smoke_exit_code": 0,
+    "smoke_output": "== public health API ==\nPASS health (version 0.1.0)\n== public target registry ==\nPASS targets: razorpay-vulnerable, razorpay-fixed\n== public pages ==\nPASS public page home (HTTP 200, HTML)\nPASS public page investigation detail (HTTP 200, HTML)\nPASS public page DNA detail (HTTP 200, HTML)\n== portable DNA replay ==\nPASS portable payload replay: REPRODUCED\n== verify-fix ==\nPASS verify-fix: VERIFIED\n== smoke passed ==\nNo cached or live investigation was started; only public reads and explicitly requested DNA operations ran.\n",
+    "cleanup": "duress sweep: nothing to sweep"
+  },
+  "trusted_backend_and_targets": "Unchanged from d08409c; confirmed with git diff --quiet over the execution services and targets.",
+  "hosted_deployment": "not verified"
+}
