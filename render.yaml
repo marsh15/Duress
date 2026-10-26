@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: duress
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: DURESS_HOSTED
+        value: "true"
+      - key: DURESS_ROOT
+        value: /app
+      # The container filesystem is ephemeral: hosted investigations and DNA
+      # disappear when the instance restarts. The showcase artifacts are baked
+      # into the image instead.
+      - key: DURESS_HOME
+        value: /tmp/duress
+      - key: DURESS_DEMO_TOKEN
+        generateValue: true
+      # An OpenAI-compatible endpoint. Optional: live mode falls back to cached
+      # and exhaustive when it is absent. Never commit a key.
+      - key: DURESS_LLM_BASE_URL
+        sync: false
+      - key: DURESS_LLM_API_KEY
+        sync: false
+      - key: DURESS_LLM_MODEL
+        sync: false

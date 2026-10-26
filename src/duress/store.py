@@ -321,3 +321,51 @@ def copy_evidence(source: Path, home: Path, trial_id: str) -> Path:
         shutil.rmtree(destination)
     shutil.copytree(source, destination)
     return destination
+
+# --------------------------------------------------------------------------- #
+# Failure DNA and investigations
+# --------------------------------------------------------------------------- #
+def dna_path(home: Path, dna_id: str) -> Path:
+    return home / "dna" / f"{dna_id}.json"
+
+
+def save_dna(home: Path, document: Any) -> Path:
+    payload = (
+        document.model_dump(mode="json")
+        if hasattr(document, "model_dump")
+        else document
+    )
+    path = dna_path(home, payload["dna_id"])
+    atomic_write_json(path, payload)
+    return path
+
+
+def load_dna_payload(home: Path, dna_id: str) -> Any:
+    path = dna_path(home, dna_id)
+    if not path.exists():
+        raise FileNotFoundError(dna_id)
+    return read_json(path)
+
+
+def list_dna(home: Path) -> list[dict[str, Any]]:
+    directory = home / "dna"
+    if not directory.is_dir():
+        return []
+    items: list[dict[str, Any]] = []
+    for path in sorted(directory.glob("*.json")):
+        try:
+            payload = read_json(path)
+        except (OSError, ValueError):
+            continue
+        items.append(
+            {
+                "dna_id": payload.get("dna_id"),
+                "signature": payload.get("reproducer", {}).get("failure_signature"),
+                "control_level": payload.get("reproducer", {}).get("control_level"),
+                "p0": payload.get("characterization", {}).get("p0"),
+                "template_id": payload.get("provenance_scenario", {}).get("template_id"),
+                "created_at": payload.get("provenance", {}).get("created_at"),
+                "reduction": payload.get("reduction"),
+            }
+        )
+    return items

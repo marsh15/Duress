@@ -24,6 +24,25 @@ In the container (`duress:m1`, `python:3.12-slim`): exit 0, 147 passed, 0 failed
 
 Known M1 limitations: the investigator, S5/S6/S9 templates, DNA, replay and verify-fix are M2–M3 and are not claimed here. The fixture-mode target is a control, not a realistic integration. PASS and FAIL are bounded empirical statements about the trials that ran.
 
+## M2 — DNA, replay, verify-fix and the API
+
+Command `uv run pytest -q tests/unit/test_verify_decisions.py tests/integration/test_matrix_m2.py tests/integration/test_replay_preflight.py tests/integration/test_dna_journey.py tests/e2e/test_verify_truth_table.py tests/integration/test_api.py`: exit 0, 51 passed, 0 failed in 161.04 s.
+
+| Artifact field | Observed value |
+|---|---|
+| dna_id | e8007dd56adae8ae |
+| failure signature | {'check': 'INV-1@1', 'kind': 'duplicate_fulfilment', 'roles': ['order:A']} |
+| p0 (valid trials) | 1.0 (10 valid) |
+| release condition | parties |
+| control level | environment_controlled |
+| embedded invariant members | 6 |
+
+Portability (`scripts/portability.sh`): exit 0; build in home A, copy only the artifact into home B, replay -> REPRODUCED, verify-fix -> VERIFIED.
+
+Container (`duress:m2`, public service on 0.0.0.0:8000): health ok, replay -> REPRODUCED, verify-fix -> VERIFIED, dna e8007dd56adae8ae.
+
+M2 acceptance files cover: S5 two-event race, S6 timeout-then-retry, S9 second payment after fulfilment (MP-1, 20 valid trials), MP-2 (`mark_duplicate_captured` -> INV-4), the five-row verify-fix truth table, every preflight rejection, a different valid secret still reproducing, and API authorization/admission control.
+
 ## Environment
 
 | Component | Local | Docker |

@@ -2,16 +2,15 @@
 
 Put your integrations under pressure. Keep the proof.
 
-**Status: M1 complete.** The repository contains the M0 experimental foundation
-and the M1 execution engine: a versioned `exec@1` runner, a phased process
-supervisor with confirmed termination, an isolated provider stub, the
-`payments-ref-v1` invariant pack, trial evaluation with the plan's precedence,
-aggregation, scenarios S1/S2/S3/S8, a fixture-mode control target, and the
-`duress run` / `duress sweep` CLI.
+**Status: M2 complete.** The repository contains the M0 experimental foundation,
+the M1 execution engine, and the M2 library layer: the full scenario registry
+(S1, S2, S3, S5, S6, S8, S9 and the seven-entry exhaustive set), portable
+Failure DNA with content-addressed identity, preflight, replay, verify-fix, an
+HTTP API, and the `duress dna build | list`, `replay` and `verify-fix` commands.
 
-The investigator, S5/S6/S9, Failure DNA, replay, verify-fix, reduction and the
-web UI are M2–M5 and are **not** implemented yet. Nothing in this README claims
-them.
+The autonomous investigator (M3), concurrency-preserving reduction and
+`naive_fix` (M4), the web application (M5) and the final release checks (M6) are
+**not** implemented yet. Nothing in this README claims them.
 
 The approved architecture and milestone plan is `plan.md` (Revision 4, frozen).
 Measured results are in `docs/EVIDENCE.md`; implementation decisions are in
@@ -31,16 +30,23 @@ src/duress/
   expectations.py    effects, evidence and pass-condition vocabulary
   oracle.py          evaluate_trial, C.6 precedence
   aggregation.py     FAIL / PASS quota / INCONCLUSIVE
-  scenarios.py       S1, S2, S3, S8
-  operations.py      trial loop, evidence retention
-  store.py           JSON writes, pidfile sweep
-  cli.py             targets, run, sweep
+  scenarios.py       S1, S2, S3, S5, S6, S8, S9; the seven-entry exhaustive set
+  operations.py      trial loop, evidence retention, candidate early stop
+  dna.py             characterisation, DNA identity, reconstruction
+  preflight.py       eight ordered rejection checks before any target starts
+  replay.py          REPRODUCED / NOT_REPRODUCED / DIFFERENT_FAILURE
+  verify.py          control-calibrated candidate sizing and the statement
+  services.py        the one execution path shared by CLI and API
+  api.py             health, targets, DNA, replay, verify-fix, admission control
+  store.py           JSON writes, DNA store, pidfile sweep
+  cli.py             targets, run, dna, replay, verify-fix, sweep, serve
 targets/razorpay_ref/  vulnerable, fixed, fixed_2w, profile-declared launch commands
 targets/fixture_modes/ eight oracle controls (no_sig_check, ack_without_effect, ...)
 tests/m0/              independent M0 harness and E1–E6
 tests/unit/            exec@1, limits, invariants, oracle, aggregation, phases
 tests/integration/     deadline, isolation, matrix, controls, E8, M0 agreement
-scripts/               m0_gate.sh, m0_evidence.py, m1_evidence.py
+scripts/               m0_gate.sh, m0_evidence.py, m1_evidence.py,
+                       m2_evidence.py, portability.sh, smoke.sh
 ```
 
 ## Run the tests
@@ -51,6 +57,8 @@ uv run pytest -q -m "not slow"        # fast suite (141 tests at the M1 checkpoi
 scripts/m0_gate.sh                    # M0 gate + measured experiments + EVIDENCE.md
 scripts/m0_gate.sh --gates-only       # M0 gate only
 uv run python scripts/m1_evidence.py  # run the fast suite and record M1 evidence
+uv run python scripts/m2_evidence.py --docker  # M2 acceptance + container smoke
+scripts/portability.sh                # artifact-only replay in a clean home
 ```
 
 The M0 gate fails if its files do not collect exactly four tests, if the target
@@ -64,10 +72,23 @@ uv run duress run razorpay-fixed --scenario S3 --copies 3 --fault rendezvous
 uv run duress run razorpay-vulnerable --scenario S3 --copies 3 --fault rendezvous
 uv run duress run fixture-ack_without_effect --scenario S1 --json
 uv run duress sweep
+
+# Failure DNA: characterise a real failure, replay it, verify a candidate
+uv run duress dna build razorpay-vulnerable --scenario S3 --copies 2
+uv run duress dna list
+uv run duress replay <dna_id>
+uv run duress verify-fix <dna_id>
+uv run duress serve --port 8000
 ```
 
-Exit codes follow C.13: `0` PASS, `1` FAIL, `2` INCONCLUSIVE, `3` usage.
-`--json` prints the full `ScenarioResult`, including every trial observation.
+Exit codes follow C.13: `0` PASS / NOT_REPRODUCED / VERIFIED, `1` FAIL /
+REPRODUCED / DIFFERENT_FAILURE / NOT_VERIFIED, `2` INCONCLUSIVE, `3` usage,
+`4` REJECTED. `--json` prints the full `ScenarioResult`, or the replay/verify
+outcome.
+
+A DNA is portable: `scripts/portability.sh` builds one in one home, copies only
+the JSON into a second home, and replays and verifies it there. The same DNA id
+is produced on macOS and Linux because the reproducer is canonical JSON.
 
 Each engine trial gets its own temporary directory, database, port, webhook
 secret, provider namespace and instance id. The target is spawned in a new

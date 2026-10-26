@@ -1,10 +1,9 @@
-"""Duress CLI (M1 slice: run, sweep, targets)."""
+"""Duress CLI: targets, run, dna, replay, verify-fix, sweep, serve (C.13)."""
 
 from __future__ import annotations
 
 import asyncio
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -12,34 +11,41 @@ import typer
 
 from . import limits as limits_module
 from .models import ScenarioResult
-from .operations import OperationConfig, run_scenario
-from .profiles import ProfileRegistry, load_seed, repo_root
-from .provider_stub import StubServer
-from .scenarios import build_scenario
-from .store import duress_home, sweep
+from .replay import replay_exit_code
+from .services import (
+    Workspace,
+    build_dna,
+    dna_index,
+    load_dna_document,
+    replay,
+    run_target_scenario,
+    verify_fix,
+)
+from .store import sweep
 
 app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
     help="Put your integrations under pressure. Keep the proof.",
 )
+dna_app = typer.Typer(no_args_is_help=True, help="Failure DNA artifacts.")
+app.add_typer(dna_app, name="dna")
 
 EXIT_CODES = {"PASS": 0, "FAIL": 1, "INCONCLUSIVE": 2}
+VERIFY_CODES = {"VERIFIED": 0, "NOT_VERIFIED": 1, "INCONCLUSIVE": 2, "REJECTED": 4}
 
 
-def _root() -> Path:
-    return repo_root(Path.cwd())
+def _workspace() -> Workspace:
+    return Workspace.discover(Path.cwd())
 
 
-def _home() -> Path:
-    return duress_home(_root())
-
-
-def _scenario_params(
+def scenario_params(
     template_id: str, copies: int, fault: str, latency_ms: int
 ) -> dict[str, Any]:
     if template_id == "S3":
         return {"copies": copies, "fault": fault, "latency_ms": latency_ms}
+    if template_id == "S5":
+        return {"fault": fault, "latency_ms": latency_ms}
     return {}
 
 
@@ -66,44 +72,13 @@ def _print_result(result: ScenarioResult) -> None:
         )
 
 
-def _run_operation(
-    target_id: str,
-    template_id: str,
-    params: dict[str, Any],
-    policy_name: str,
-) -> ScenarioResult:
-    registry = ProfileRegistry.discover(_root())
-    profile = registry.get(target_id)
-    seed = load_seed(profile)
-    scenario = build_scenario(template_id, params, profile.roles, seed)
-    policy = limits_module.POLICIES.get(policy_name)
-    if policy is None:
-        raise typer.BadParameter(
-            f"unknown policy {policy_name!r}; known: {', '.join(limits_module.POLICIES)}"
-        )
-
-    sweep(_home())
-    with StubServer() as stub:
-        config = OperationConfig(
-            profile=profile,
-            scenario=scenario,
-            stub=stub,
-            workdir_root=Path(_home()) / "tmp",
-            policy=policy,
-            home=_home(),
-            keep_evidence=True,
-        )
-        Path(config.workdir_root).mkdir(parents=True, exist_ok=True)
-        return asyncio.run(run_scenario(config))
-
-
 @app.command("targets")
 def targets_command() -> None:
     """List target profiles."""
-    registry = ProfileRegistry.discover(_root())
-    for profile in registry.all():
+    workspace = _workspace()
+    for profile in workspace.registry.all():
         typer.echo(
-            f"{profile.target_id:<28}{profile.profile_id:<18}{profile.variant:<14}"
+            f"{profile.target_id:<32}{profile.profile_id:<18}{profile.variant:<18}"
             f"contract v{profile.contract_version}  workers={profile.workers}"
         )
 
@@ -119,9 +94,13 @@ def run_command(
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     """Run one scenario against a target and print the aggregate verdict."""
-    params = _scenario_params(scenario, copies, fault, latency_ms)
+    params = scenario_params(scenario, copies, fault, latency_ms)
     try:
-        result = _run_operation(target, scenario, params, policy)
+        result = asyncio.run(
+            run_target_scenario(
+                _workspace(), target_id=target, template_id=scenario, params=params, policy=policy
+            )
+        )
     except (KeyError, ValueError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(3) from exc
@@ -132,10 +111,149 @@ def run_command(
     raise typer.Exit(EXIT_CODES[result.result.status])
 
 
+@dna_app.command("build")
+def dna_build_command(
+    target: str = typer.Argument(..., help="a target expected to fail"),
+    scenario: str = typer.Option("S3", "--scenario", "-s"),
+    copies: int = typer.Option(3, "--copies"),
+    fault: str = typer.Option("rendezvous", "--fault"),
+    latency_ms: int = typer.Option(200, "--latency-ms"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Characterise a real failure and write portable Failure DNA."""
+    params = scenario_params(scenario, copies, fault, latency_ms)
+    try:
+        document, characterisation = asyncio.run(
+            build_dna(
+                _workspace(),
+                target_id=target,
+                template_id=scenario,
+                params=params,
+            )
+        )
+    except KeyError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(3) from exc
+    except Exception as exc:
+        typer.echo(f"error: {type(exc).__name__}: {exc}", err=True)
+        raise typer.Exit(2) from exc
+    if json_output:
+        typer.echo(json.dumps(document.model_dump(mode="json"), indent=2))
+        return
+    signature = document.signature()
+    typer.echo(f"dna_id    {document.dna_id}")
+    typer.echo(f"signature {signature.check} {signature.kind} {', '.join(signature.roles)}")
+    typer.echo(
+        f"p0        {characterisation.p0} ({characterisation.fail}/{characterisation.valid} valid)"
+    )
+    typer.echo(f"release   {document.reproducer['release_condition']}")
+    typer.echo(f"control   {document.reproducer['control_level']}")
+
+
+@dna_app.command("list")
+def dna_list_command(json_output: bool = typer.Option(False, "--json")) -> None:
+    """List stored DNA artifacts."""
+    items = dna_index(_workspace())
+    if json_output:
+        typer.echo(json.dumps(items, indent=2))
+        return
+    if not items:
+        typer.echo("no DNA artifacts")
+        return
+    typer.echo(f"{'dna_id':<20}{'signature':<44}{'p0':<8}{'reduced'}")
+    for item in items:
+        signature = item.get("signature") or {}
+        key = f"{signature.get('check')}/{signature.get('kind')}"
+        typer.echo(
+            f"{str(item.get('dna_id')):<20}{key:<44}{str(item.get('p0')):<8}"
+            f"{'yes' if item.get('reduction') else 'no'}"
+        )
+
+
+@app.command("replay")
+def replay_command(
+    dna: str = typer.Argument(..., help="DNA id"),
+    target: str | None = typer.Option(None, "--target", help="target id (default: from DNA)"),
+    policy: str = typer.Option("replay", "--policy"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Replay a DNA against a fresh target process."""
+    workspace = _workspace()
+    try:
+        document = load_dna_document(workspace, dna)
+    except FileNotFoundError:
+        typer.echo(f"error: no DNA {dna!r}", err=True)
+        raise typer.Exit(3) from None
+    target_id = target or str(document.provenance.get("target_id") or "razorpay-vulnerable")
+    run = asyncio.run(
+        replay(workspace, dna_id=dna, target_id=target_id, policy=policy)
+    )
+    if json_output:
+        typer.echo(json.dumps(run.outcome.model_dump(mode="json"), indent=2))
+    else:
+        outcome = run.outcome
+        typer.echo(f"dna       {dna}")
+        typer.echo(f"target    {target_id}")
+        typer.echo(f"outcome   {outcome.outcome}")
+        if outcome.reason:
+            typer.echo(f"reason    {outcome.reason}")
+        typer.echo(
+            f"trials    valid={outcome.valid} fail={outcome.fail} "
+            f"inconclusive={outcome.inconclusive}"
+        )
+        if outcome.outcome == "REJECTED" and run.preflight:
+            typer.echo(f"preflight {run.preflight}")
+    raise typer.Exit(replay_exit_code(run.outcome))
+
+
+@app.command("verify-fix")
+def verify_fix_command(
+    dna: str = typer.Argument(..., help="DNA id"),
+    vulnerable: str = typer.Option("razorpay-vulnerable", "--vulnerable"),
+    candidate: str = typer.Option("razorpay-fixed", "--candidate"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Empirically verify a candidate against the characterised failure."""
+    run = asyncio.run(
+        verify_fix(
+            _workspace(),
+            dna_id=dna,
+            vulnerable_target_id=vulnerable,
+            candidate_target_id=candidate,
+        )
+    )
+    outcome = run.outcome
+    if json_output:
+        typer.echo(json.dumps(outcome.model_dump(mode="json"), indent=2))
+    else:
+        typer.echo(f"dna        {dna}")
+        typer.echo(f"control    {vulnerable}")
+        typer.echo(f"candidate  {candidate}")
+        typer.echo(f"outcome    {outcome.outcome}")
+        if outcome.reason:
+            typer.echo(f"reason     {outcome.reason}")
+        if outcome.control:
+            typer.echo(
+                "control    "
+                f"k={outcome.control.get('same_signature_failures')} "
+                f"v={outcome.control.get('valid')} p_hat={outcome.control.get('p_hat')}"
+            )
+        if outcome.candidate:
+            typer.echo(
+                "candidate  "
+                f"valid={outcome.candidate.get('valid')} "
+                f"n_c={outcome.candidate.get('required_valid')}"
+            )
+        if outcome.statement:
+            typer.echo("")
+            typer.echo(outcome.statement)
+    raise typer.Exit(VERIFY_CODES[outcome.outcome])
+
+
 @app.command("sweep")
 def sweep_command() -> None:
     """Kill process groups recorded by earlier trials whose start time matches."""
-    result = sweep(_home())
+    result = sweep(_workspace().home)
     for info in result.killed:
         typer.echo(f"killed pgid={info.pgid} instance={info.instance}")
     for info in result.stale:
@@ -147,6 +265,19 @@ def sweep_command() -> None:
         )
     if not result.killed and not result.stale and not result.unresolved:
         typer.echo("nothing to sweep")
+
+
+@app.command("serve")
+def serve_command(
+    host: str = typer.Option("127.0.0.1", "--host"),
+    port: int = typer.Option(8000, "--port"),
+) -> None:
+    """Serve the API and web application."""
+    import uvicorn
+
+    from .api import create_app
+
+    uvicorn.run(create_app(), host=host, port=port, log_level="info")
 
 
 def main() -> None:

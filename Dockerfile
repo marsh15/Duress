@@ -12,6 +12,12 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project
 
 COPY . .
-RUN uv sync --frozen && chmod +x scripts/m0_gate.sh
+RUN uv sync --frozen && chmod +x scripts/*.sh
 
-CMD ["scripts/m0_gate.sh"]
+ENV PATH="/app/.venv/bin:$PATH" \
+    DURESS_ROOT=/app \
+    DURESS_HOME=/tmp/duress
+
+# The public service is the only thing bound to 0.0.0.0. Managed targets are
+# loopback-only and refused otherwise (plan P4f).
+CMD ["sh", "-c", "duress serve --host 0.0.0.0 --port ${PORT:-8000}"]

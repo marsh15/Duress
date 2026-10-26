@@ -1,0 +1,61 @@
+{
+  "milestone": "M2",
+  "generated_at": "2026-10-26T13:37:55+00:00",
+  "environment": {
+    "python": "3.12.14",
+    "sqlite": "3.53.1",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "uvicorn": "0.54.0",
+    "fastapi": "0.162.0",
+    "httpx": "0.28.1",
+    "pydantic": "2.14.1"
+  },
+  "acceptance": {
+    "files": [
+      "tests/unit/test_verify_decisions.py",
+      "tests/integration/test_matrix_m2.py",
+      "tests/integration/test_replay_preflight.py",
+      "tests/integration/test_dna_journey.py",
+      "tests/e2e/test_verify_truth_table.py",
+      "tests/integration/test_api.py"
+    ],
+    "command": "uv run pytest -q tests/unit/test_verify_decisions.py tests/integration/test_matrix_m2.py tests/integration/test_replay_preflight.py tests/integration/test_dna_journey.py tests/e2e/test_verify_truth_table.py tests/integration/test_api.py",
+    "exit_code": 0,
+    "passed": 51,
+    "failed": null,
+    "seconds": 161.04,
+    "summary": "51 passed, 1 warning in 160.23s (0:02:40)",
+    "failure_output": ""
+  },
+  "artifact": {
+    "build_exit": 0,
+    "dna_id": "e8007dd56adae8ae",
+    "signature": {
+      "check": "INV-1@1",
+      "kind": "duplicate_fulfilment",
+      "roles": [
+        "order:A"
+      ]
+    },
+    "control_level": "environment_controlled",
+    "release_condition": "parties",
+    "p0": 1.0,
+    "valid": 10,
+    "invariant_members": 6
+  },
+  "portability": {
+    "exit_code": 0,
+    "passed": true,
+    "tail": "== build (home A) ==\ndna_id e8007dd56adae8ae\n== move only the artifact (home B) ==\ne8007dd56adae8ae.json\n== replay from the clean home ==\ndna       e8007dd56adae8ae\ntarget    razorpay-vulnerable\noutcome   REPRODUCED\ntrials    valid=10 fail=10 inconclusive=0\n== verify-fix from the clean home ==\ndna        e8007dd56adae8ae\ncontrol    razorpay-vulnerable\ncandidate  razorpay-fixed\noutcome    VERIFIED\ncontrol    k=5 v=5 p_hat=1.0\ncandidate  valid=20 n_c=20\n\nThe failure reproduced in 5/5 valid control trials on razorpay-vulnerable. It was not observed in 20 valid trials on razorpay-fixed under the same DNA conditions. If razorpay-fixed still failed independently with per-trial probability 0.9900, the chance of seeing no failures in 20 valid trials would be (1-0.9900)^20 = 1.00e-40 <= 1%. Under the same independence assumption, about 0.150 is an approximate 95% upper bound on razorpay-fixed's per-trial failure probability for this reproducer. This does not establish correctness for other schedules, loads or environments.\n== portability passed ==\n"
+  },
+  "docker": {
+    "attempted": true,
+    "build_exit": 0,
+    "build_seconds": 6.1,
+    "status": "pass",
+    "dna_id": "e8007dd56adae8ae",
+    "replay_outcome": "REPRODUCED",
+    "verify_outcome": "VERIFIED",
+    "host_bind": "0.0.0.0"
+  }
+}

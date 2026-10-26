@@ -1,6 +1,6 @@
 # Fixture-mode control target (plan C.1). Not a realistic integration.
 [profile]
-id = "fixture-modes"
+id = "razorpay-ref"
 contract_version = 1
 domain = "payments-webhook"
 

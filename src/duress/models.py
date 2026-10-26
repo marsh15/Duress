@@ -303,3 +303,100 @@ class SeedDocument:
 class HealthStatus(StrictModel):
     status: Literal["ok"] = "ok"
     version: str
+
+# --------------------------------------------------------------------------- #
+# Scenario registry specs (C.8)
+# --------------------------------------------------------------------------- #
+@dataclass(frozen=True)
+class ScenarioSpec:
+    """A registry entry. S3 appears twice with different parameters."""
+
+    template_id: str
+    params: dict[str, Any]
+
+    def build(self, roles: dict[str, str], seed: SeedDocument) -> "BuiltScenario":
+        from .scenarios import build_scenario
+
+        return build_scenario(self.template_id, self.params, roles, seed)
+
+    @property
+    def scenario_id(self) -> str:
+        from .scenarios import scenario_id_for
+
+        return scenario_id_for(self.template_id, self.params)
+
+
+# --------------------------------------------------------------------------- #
+# Failure DNA v1 (C.9)
+# --------------------------------------------------------------------------- #
+class DnaDocument(StrictModel):
+    """A portable failure reproducer.
+
+    ``reproducer`` is kept as the exact mapping that was loaded so the digest
+    check hashes the stored bytes' canonical form, not a re-serialised model.
+    """
+
+    schema_version: Literal[1] = 1
+    dna_id: str
+    reproducer_sha256: str
+    reproducer: dict[str, Any]
+    provenance_scenario: dict[str, Any]
+    environment: dict[str, Any]
+    characterization: dict[str, Any]
+    observations: dict[str, Any] = Field(default_factory=dict)
+    reduction: dict[str, Any] | None = None
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+    def expectation(self) -> "Expectation":
+        return Expectation.model_validate(self.reproducer["expectation"]["definition"])
+
+    def schedule(self) -> "Schedule":
+        return Schedule.model_validate(self.reproducer["schedule"])
+
+    def signature(self) -> FailureSignature:
+        return FailureSignature.model_validate(self.reproducer["failure_signature"])
+
+
+class PreflightOk(StrictModel):
+    ok: Literal[True] = True
+    reason: None = None
+    detail: str = ""
+
+
+class PreflightRejected(StrictModel):
+    ok: Literal[False] = False
+    reason: str
+    detail: str = ""
+
+
+PreflightResult = PreflightOk | PreflightRejected
+
+
+class ReplayOutcome(StrictModel):
+    outcome: Literal[
+        "REPRODUCED",
+        "NOT_REPRODUCED",
+        "DIFFERENT_FAILURE",
+        "INCONCLUSIVE",
+        "REJECTED",
+    ]
+    reason: str | None = None
+    dna_id: str
+    target_id: str
+    signature_matched: bool = False
+    valid: int = 0
+    fail: int = 0
+    inconclusive: int = 0
+    trials: int = 0
+    reasons: list[str] = Field(default_factory=list)
+
+
+class VerifyOutcome(StrictModel):
+    outcome: Literal["VERIFIED", "NOT_VERIFIED", "INCONCLUSIVE", "REJECTED"]
+    reason: str | None = None
+    dna_id: str
+    vulnerable_target_id: str
+    candidate_target_id: str
+    statement: str = ""
+    control: dict[str, Any] = Field(default_factory=dict)
+    candidate: dict[str, Any] = Field(default_factory=dict)

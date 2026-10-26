@@ -256,3 +256,97 @@ are documented in the test comments.
 **Consequence.** The retry path is exercised with roughly an order of magnitude
 more headroom, and a failure now means a real regression rather than a loaded
 host. The historical interrupted measurement is superseded in EVIDENCE.md.
+
+## M2 — Failure DNA, replay, verify-fix and the API
+
+### D-M2-1 — The registry has scenario *specs*, not just template names
+
+**Status:** implemented.
+
+`EXHAUSTIVE_SET` must contain S3 twice (rendezvous and 200 ms latency) while
+`TEMPLATES` contains each template once. `ScenarioSpec(template_id, params)`
+carries both, and `scenario_id_for` produces a stable human-legible id
+(`S3[copies=3,fault=rendezvous,latency_ms=200]`). The exhaustive fallback in M3
+therefore iterates the same registry objects the investigator selects from, not
+a parallel list.
+
+### D-M2-2 — The DNA hashes the loaded mapping, not a re-serialised model
+
+**Status:** implemented.
+
+`DnaDocument.reproducer` is `dict[str, Any]`. If it were a typed model, checking
+the digest after a Pydantic round trip would hash a normalised shape and could
+either accept a mutation or reject an untouched artifact. Preflight therefore
+parses the payload, checks `canonical_sha256(payload["reproducer"])` against the
+stored digest, and only then validates the schedule and expectation into models
+for execution.
+
+**Consequence.** A mutation to any embedded field without recomputing the outer
+digest is `tampered:digest`. `tampered:expectation` and
+`tampered:invariant_pack` are the honest outcomes when the outer digest is
+recomputed but an inner definition hash is stale, which is how the acceptance
+tests reach those branches.
+
+### D-M2-3 — The fixture control target declares the reference contract
+
+**Status:** implemented.
+
+The verify-fix truth table includes `reject_all` and `crash_on_boot`, which are
+fixture modes. Preflight step 6 compares the artifact's `target_contract.profile`
+with the runtime profile, so the fixture target would otherwise be rejected as
+`incompatible:target_contract` before producing the intended outcome. The
+fixture target implements the same schema and webhook contract as the reference
+integration, so its profile id is `razorpay-ref`; its *target ids* stay
+`fixture-*`, and README continues to say it is a control, not an integration.
+
+### D-M2-4 — Candidate sizing uses the observed control rate
+
+**Status:** implemented.
+
+`n_c = max(20, ceil(ln 0.01 / ln(1 - p_a)))` with `p_a = min(p_hat, 0.99)`. The
+direction matters and is easy to misread: a *high* observed control failure rate
+makes a candidate failure easy to rule out (2 trials at p_a = 0.9), while a rare
+failure needs many trials. If the formula needs more than 44 candidate trials,
+the operation is INCONCLUSIVE `reproduction_too_unreliable` rather than a weak
+VERIFIED. `tests/unit/test_verify_decisions.py` pins p_a = 0.1 -> 44 and
+p_a = 0.09 -> too unreliable.
+
+The candidate run stops at the first same-signature failure. A FAIL outcome
+therefore takes precedence over an incomplete run, and verification does not
+spend the remaining budget after the answer is known.
+
+### D-M2-5 — Secret resolution for managed replay
+
+**Status:** implemented, with one explicit interpretation.
+
+The DNA stores `secret_ref` and never a secret. A managed trial lets Duress
+provision the webhook secret: the supervisor generates one, injects it into the
+target environment and signs with it. Absence of the environment variable is
+therefore not an error in normal operation. Preflight accepts `env:NAME` and
+returns no fixed value, meaning "provision at trial time"; an unknown scheme
+always fails with `secret_unresolved`, and a caller that requires the environment
+value (`secret_required=True`) also fails when it is unset. Both branches are
+tested. A replay under a completely different environment secret still
+reproduces, which is the property that matters: signatures are regenerated, not
+stored.
+
+### D-M2-6 — API admission is explicit, not incidental
+
+**Status:** implemented.
+
+Write routes require a token when `DURESS_DEMO_TOKEN` is set; without one the
+service is a local development server and allows the caller. Admission is
+ordered: token (401), rate limit (429), single-operation gate (409), then target
+and artifact lookup (404). Unknown target ids and unknown DNA ids are refused;
+there is no path or command parameter anywhere in the API. Request bodies are
+capped at 1 MB. A refused admission is checked before the gate is acquired.
+
+### D-M2-7 — The container's only public bind is the web service
+
+**Status:** implemented.
+
+The Dockerfile's default command is `duress serve --host 0.0.0.0 --port $PORT`.
+The trial supervisor still refuses any managed target host other than
+`127.0.0.1` (M1 test), and preflight's `init-db` runs with `127.0.0.1`. The
+container smoke test observes the public API answering on `0.0.0.0` while the
+trial targets remain loopback-only.

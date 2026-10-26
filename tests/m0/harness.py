@@ -539,13 +539,21 @@ def environment() -> dict[str, str]:
 
 
 def write_measurement(name: str, payload: dict) -> Path:
+    """Persist a measurement only for an explicit evidence run.
+
+    The fast suite also collects the M0 experiments (they are not slow), and it
+    must not overwrite committed gate evidence with whatever host happened to run
+    `pytest` last. `scripts/m0_gate.sh` sets DURESS_RECORD_MEASUREMENTS=1.
+    """
+    path = MEASUREMENTS_DIR / f"{name}.json"
+    if os.environ.get("DURESS_RECORD_MEASUREMENTS") != "1":
+        return path
     MEASUREMENTS_DIR.mkdir(parents=True, exist_ok=True)
     document = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "environment": environment(),
         **payload,
     }
-    path = MEASUREMENTS_DIR / f"{name}.json"
     temporary = path.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(document, indent=2) + "\n")
     temporary.replace(path)

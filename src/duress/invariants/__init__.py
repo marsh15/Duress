@@ -12,3 +12,4 @@ from .payments_ref_v1 import (  # noqa: F401
     primary_violation,
     violation_key,
 )
+from .payments_ref_v1 import MEMBERS, Member, member_by_id  # noqa: F401

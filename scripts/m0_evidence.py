@@ -82,6 +82,7 @@ def render() -> None:
     gate_docker = load("gate-docker")
     m1 = load("m1")
     m1_docker = load("m1-docker")
+    m2 = load("m2")
 
     env_local = (gate_local or e1 or {}).get("environment")
     env_docker = (gate_docker or {}).get("environment")
@@ -143,6 +144,61 @@ def render() -> None:
             "statements about the trials that ran."
         )
     out.append("")
+    out.append("## M2 — DNA, replay, verify-fix and the API")
+    out.append("")
+    if m2 is None:
+        out.append("Not run. Run `uv run python scripts/m2_evidence.py --docker`.")
+        out.append("")
+    else:
+        acceptance = m2["acceptance"]
+        artifact = m2["artifact"]
+        out.append(
+            f"Command `{acceptance['command']}`: exit {acceptance['exit_code']}, "
+            f"{acceptance['passed']} passed, {acceptance['failed'] or 0} failed in "
+            f"{acceptance['seconds']} s."
+        )
+        out.append("")
+        out.append(md_table(
+            ["Artifact field", "Observed value"],
+            [
+                ["dna_id", artifact.get("dna_id")],
+                ["failure signature", artifact.get("signature")],
+                ["p0 (valid trials)", f"{artifact.get('p0')} ({artifact.get('valid')} valid)"],
+                ["release condition", artifact.get("release_condition")],
+                ["control level", artifact.get("control_level")],
+                ["embedded invariant members", artifact.get("invariant_members")],
+            ],
+        ))
+        out.append("")
+        portability = m2["portability"]
+        out.append(
+            f"Portability (`scripts/portability.sh`): exit {portability['exit_code']}; "
+            "build in home A, copy only the artifact into home B, replay -> REPRODUCED, "
+            "verify-fix -> VERIFIED."
+        )
+        docker = m2.get("docker") or {}
+        if docker.get("attempted"):
+            if docker.get("status") == "pass":
+                out.append("")
+                out.append(
+                    f"Container (`duress:m2`, public service on "
+                    f"{docker.get('host_bind')}:8000): health ok, replay -> "
+                    f"{docker.get('replay_outcome')}, verify-fix -> "
+                    f"{docker.get('verify_outcome')}, dna {docker.get('dna_id')}."
+                )
+            else:
+                out.append("")
+                out.append(f"Container: {docker.get('status')}. {docker.get('tail', '')}")
+        out.append("")
+        out.append(
+            "M2 acceptance files cover: S5 two-event race, S6 timeout-then-retry, "
+            "S9 second payment after fulfilment (MP-1, 20 valid trials), MP-2 "
+            "(`mark_duplicate_captured` -> INV-4), the five-row verify-fix truth table, "
+            "every preflight rejection, a different valid secret still reproducing, and "
+            "API authorization/admission control."
+        )
+        out.append("")
+
     out.append("## Environment")
     out.append("")
     if env_local or env_docker:

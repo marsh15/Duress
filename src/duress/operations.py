@@ -36,6 +36,8 @@ class OperationConfig:
     drain_verified: bool = True
     instance_override: str | None = None
     cleanup_passed: bool = True
+    # verify-fix stage 3 stops at the first failure with the original signature.
+    stop_on_signature: str | None = None
 
 
 async def run_scenario(config: OperationConfig, *, wall_deadline: float | None = None) -> ScenarioResult:
@@ -107,6 +109,10 @@ async def run_scenario(config: OperationConfig, *, wall_deadline: float | None =
                 except OSError:
                     pass
                 shutil.rmtree(workdir, ignore_errors=True)
+
+        if config.stop_on_signature and verdict.status == "FAIL":
+            if verdict.signature and verdict.signature.key == config.stop_on_signature:
+                break
 
         if aborted:
             break

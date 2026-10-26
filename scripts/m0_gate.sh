@@ -10,6 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 GATE_LABEL="${GATE_LABEL:-local}"
+export DURESS_RECORD_MEASUREMENTS=1
 START=$SECONDS
 GATES="tests/m0/test_e1_vulnerable_race.py tests/m0/test_e2_fixed_exactly_once.py tests/m0/test_e3_drain.py"
 

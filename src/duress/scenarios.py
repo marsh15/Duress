@@ -16,16 +16,15 @@ from .models import (
     LatencyFault,
     PassCondition,
     RendezvousFault,
+    ScenarioSpec,
     Schedule,
     SeedDocument,
     Step,
-    canonical_json,
 )
 from .profiles import captured_fixtures
 from .schedule import assert_valid_schedule
 
 TEMPLATE_VERSION = 1
-EXHAUSTIVE_SET: tuple[str, ...] = ()  # populated in M2 with S1, S2, S3x2, S5, S6, S8
 
 
 def _payment_id(roles: dict[str, str], role: str) -> str:
@@ -78,10 +77,16 @@ def _policy(**kwargs: Any) -> AttemptPolicy:
     return AttemptPolicy(**kwargs)
 
 
-def _scenario_id(template_id: str, params: dict[str, Any]) -> str:
+def scenario_id_for(template_id: str, params: dict[str, Any]) -> str:
+    """Stable, human-legible id: ``S3[copies=2,fault=rendezvous,latency_ms=200]``."""
     if not params:
         return template_id
-    return f"{template_id}[{canonical_json(params)}]"
+    parts = ",".join(f"{key}={params[key]}" for key in sorted(params))
+    return f"{template_id}[{parts}]"
+
+
+def _scenario_id(template_id: str, params: dict[str, Any]) -> str:
+    return scenario_id_for(template_id, params)
 
 
 def _build_s1(
@@ -276,14 +281,192 @@ def _build_s8(
     )
 
 
+def _build_s5(
+    params: dict[str, Any], roles: dict[str, str], seed: SeedDocument
+) -> BuiltScenario:
+    """A payment event and an order event for the same payment, released together."""
+    fault = params.get("fault", "rendezvous")
+    latency_ms = int(params.get("latency_ms", 200))
+    if fault not in {"none", "latency", "rendezvous"}:
+        raise ValueError("S5 fault must be one of none, latency, rendezvous")
+    d1 = DeliverySpec(
+        id="d1",
+        event=EventSpec(
+            type="payment.captured", order_role="order:A", payment_role="payment:A1"
+        ),
+        effect_intent="capture_and_fulfil",
+        event_id="evt_A1_payment_captured",
+    )
+    d2 = DeliverySpec(
+        id="d2",
+        event=EventSpec(type="order.paid", order_role="order:A", payment_role="payment:A1"),
+        effect_intent="capture_and_fulfil",
+        event_id="evt_A_order_paid",
+    )
+    faults = []
+    if fault == "rendezvous":
+        faults.append(RendezvousFault(parties=2, timeout_ms=2000))
+    elif fault == "latency":
+        faults.append(LatencyFault(ms=latency_ms))
+    schedule = Schedule(
+        deliveries=[d1, d2],
+        steps=[Step(deliveries=["d1", "d2"])],
+        faults=faults,
+        delivery_policy=_policy(attempt_timeout_ms=5000, max_attempts=1),
+    )
+    expectation = Expectation(
+        id="S5.exactly_once_two_events",
+        effects=[Effect(kind="exactly_once", order_role="order:A", payment_role="payment:A1")],
+        footprint=["order:A"],
+        required_evidence=[
+            EvidenceRequirement(kind="group_overlap"),
+            EvidenceRequirement(kind="answered", delivery="d1"),
+            EvidenceRequirement(kind="answered", delivery="d2"),
+        ],
+    )
+    return BuiltScenario(
+        template_id="S5",
+        template_version=TEMPLATE_VERSION,
+        scenario_id=_scenario_id("S5", {"fault": fault, "latency_ms": latency_ms}),
+        params={"fault": fault, "latency_ms": latency_ms},
+        schedule=schedule,
+        expectation=expectation,
+        fixtures=captured_fixtures(seed),
+        roles=roles,
+    )
+
+
+def _build_s6(
+    params: dict[str, Any], roles: dict[str, str], seed: SeedDocument
+) -> BuiltScenario:
+    """A slow provider turns the first attempt into a timeout, then a retry races it."""
+    if params:
+        raise ValueError("S6 takes no parameters")
+    latency_ms = 2000
+    attempt_timeout_ms = 1000
+    d1 = DeliverySpec(
+        id="d1",
+        event=EventSpec(
+            type="payment.captured", order_role="order:A", payment_role="payment:A1"
+        ),
+        effect_intent="capture_and_fulfil",
+        event_id="evt_A1_payment_captured",
+        attempt_timeout_ms=attempt_timeout_ms,
+        max_attempts=2,
+    )
+    schedule = Schedule(
+        deliveries=[d1],
+        steps=[Step(deliveries=["d1"])],
+        faults=[LatencyFault(ms=latency_ms)],
+        delivery_policy=_policy(
+            attempt_timeout_ms=5000,
+            max_attempts=1,
+            retry_on=["timeout"],
+            backoff_ms=[200],
+        ),
+    )
+    expectation = Expectation(
+        id="S6.retry_exactly_once",
+        effects=[Effect(kind="exactly_once", order_role="order:A", payment_role="payment:A1")],
+        footprint=["order:A"],
+        required_evidence=[
+            EvidenceRequirement(kind="attempt_timed_out", delivery="d1"),
+            EvidenceRequirement(kind="retried", delivery="d1"),
+        ],
+    )
+    return BuiltScenario(
+        template_id="S6",
+        template_version=TEMPLATE_VERSION,
+        scenario_id=_scenario_id("S6", params),
+        params=params,
+        schedule=schedule,
+        expectation=expectation,
+        fixtures=captured_fixtures(seed),
+        roles=roles,
+    )
+
+
+def _build_s9(
+    params: dict[str, Any], roles: dict[str, str], seed: SeedDocument
+) -> BuiltScenario:
+    """A second payment for an order already fulfilled by the first."""
+    if params:
+        raise ValueError("S9 takes no parameters")
+    d1 = DeliverySpec(
+        id="d1",
+        event=EventSpec(
+            type="payment.captured", order_role="order:A", payment_role="payment:A1"
+        ),
+        effect_intent="capture_and_fulfil",
+        event_id="evt_A1_payment_captured",
+    )
+    d2 = DeliverySpec(
+        id="d2",
+        event=EventSpec(
+            type="payment.captured", order_role="order:A", payment_role="payment:A2"
+        ),
+        effect_intent="order_duplicate",
+        event_id="evt_A2_payment_captured",
+    )
+    schedule = Schedule(
+        deliveries=[d1, d2],
+        steps=[Step(deliveries=["d1"]), Step(deliveries=["d2"])],
+        delivery_policy=_policy(attempt_timeout_ms=5000, max_attempts=1),
+    )
+    expectation = Expectation(
+        id="S9.second_payment_after_fulfilment",
+        effects=[
+            Effect(kind="exactly_once", order_role="order:A", payment_role="payment:A1"),
+            Effect(kind="payment_unchanged", payment_role="payment:A2"),
+        ],
+        footprint=["order:A"],
+        required_evidence=[
+            EvidenceRequirement(kind="answered", delivery="d1"),
+            EvidenceRequirement(kind="answered", delivery="d2"),
+            EvidenceRequirement(kind="send_after_end", delivery="d2", other="d1"),
+        ],
+        pass_conditions=[
+            PassCondition(delivery="d1", expected="2xx"),
+            PassCondition(delivery="d2", expected="2xx"),
+        ],
+    )
+    return BuiltScenario(
+        template_id="S9",
+        template_version=TEMPLATE_VERSION,
+        scenario_id=_scenario_id("S9", params),
+        params=params,
+        schedule=schedule,
+        expectation=expectation,
+        fixtures=captured_fixtures(seed),
+        roles=roles,
+    )
+
+
 _BUILDERS: dict[str, Callable[[dict[str, Any], dict[str, str], SeedDocument], BuiltScenario]] = {
     "S1": _build_s1,
     "S2": _build_s2,
     "S3": _build_s3,
+    "S5": _build_s5,
+    "S6": _build_s6,
     "S8": _build_s8,
+    "S9": _build_s9,
 }
 
 TEMPLATES = tuple(_BUILDERS)
+
+# C.8: seven entries, with S3 represented at two fault settings. S9 is a
+# domain-semantics scenario: selectable, in the matrix and verify suites, but
+# deliberately outside the exhaustive control set.
+EXHAUSTIVE_SPECS: tuple[ScenarioSpec, ...] = (
+    ScenarioSpec("S1", {}),
+    ScenarioSpec("S2", {}),
+    ScenarioSpec("S3", {"copies": 3, "fault": "rendezvous", "latency_ms": 200}),
+    ScenarioSpec("S3", {"copies": 3, "fault": "latency", "latency_ms": 200}),
+    ScenarioSpec("S5", {"fault": "rendezvous", "latency_ms": 200}),
+    ScenarioSpec("S6", {}),
+    ScenarioSpec("S8", {}),
+)
+EXHAUSTIVE_SET: tuple[str, ...] = tuple(spec.scenario_id for spec in EXHAUSTIVE_SPECS)
 
 
 def build_scenario(
@@ -301,3 +484,4 @@ def build_scenario(
     built = builder(dict(params), roles, seed)
     assert_valid_schedule(built.schedule, limits)
     return built
+
