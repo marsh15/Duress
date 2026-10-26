@@ -532,3 +532,25 @@ An operation record retains the exact response from the existing service togethe
 ### D-WEB-5 — UI labels never become portable artifact fields
 
 Final inspection caught a showcase label being attached to the DNA mapping used by the page. Although downloads remained unchanged, copying the displayed JSON could include an unsupported extra field. The label now lives exclusively in the view context. A regression compares embedded JSON with the actual download and validates the document schema. The reproducer and existing preflight logic were not changed.
+
+## Final integrated product delivery
+
+### D-RELEASE-1 — Forms use the existing asynchronous admission contract
+
+Investigation, reduction, and differential creation call their backend-owned routes. A 202 is admission only. Persisted records are the progress source; lifecycle completion does not override FAIL or INCONCLUSIVE. There is still one engine, one in-process operation gate, and one API worker. Visible polling errors distinguish an unavailable record from an unresolved experiment.
+
+### D-RELEASE-2 — Retain schedules rather than reconstructing history
+
+Investigation persistence now includes the actual built schedule and control level for each exact parameterized scenario ID. This is additive presentation evidence, not a change to execution semantics. Older records say their schedule was not retained. Authored fixtures remain labelled, and unexecuted/rejected hypotheses never become confirmed findings through presentation.
+
+### D-RELEASE-3 — Expose only settled business snapshots
+
+The UI reads the supervisor's copied SQLite snapshot in read-only mode and renders only orders, payments, and fulfilments. It refuses symlinks and missing/corrupt snapshots and computes no new verdict. Passing-trial evidence is normally removed. This preserves the execution boundary while making the committed effects inspectable.
+
+### D-RELEASE-4 — Consistent record reads and honest reduction claims
+
+Reduction and differential records now share the constrained, object-only, symlink-refusing JSON reader. Malformed records return unavailable rather than a response-validation crash. Reduction pages distinguish candidate search claims, replay revalidation, and the retained primary artifact. NOT_REDUCED does not imply that revalidation failed: there may have been no admissible candidate to test.
+
+### D-RELEASE-5 — Container shutdown reaches the application
+
+The Docker shell command uses `exec` to pass stop signals directly to the single API process. Its lifespan cancels and drains owned operations through the existing cleanup path. Registered targets remain bound to loopback. No replacement queue, frontend framework, or arbitrary execution interface was introduced.

@@ -5,7 +5,7 @@ The backend branch is `feat/investigator-reduction`, based on `d08409c`.
 passing the existing workspace factory, admission functions and operation gate.
 CLI and HTTP operations call `services.py`; neither owns an independent engine.
 All targets are project-owned synthetic integrations, launched on loopback in
-fresh isolated process groups. This document does not request an M5 UI change.
+fresh isolated process groups. This opening section records the original backend handoff; the final integration below documents the completed web controls.
 
 ## Routes
 
@@ -209,3 +209,11 @@ after relevant source/prompt edits. Genuine hosted inference and the five-run
 live-versus-exhaustive experiment have not been verified; controlled HTTP
 fixtures verify client behavior. See `M3_M4.md` and `IMPLEMENTATION_LOG.md` for
 executed acceptance evidence and remaining deployment limitations.
+
+## Final product integration
+
+The integrated Jinja/HTMX application now exposes investigation creation and monitoring, source-grounded hypotheses and actual findings, reduction, and differential comparison. Browser forms use the API contracts above and the existing admission gate. Replay/verification remain synchronous saved operations. No backend execution logic was duplicated.
+
+Browser routes added: `/reductions/{id}`, `/differential`, `/differential/{id}`, and read-only retained `/evidence/{trial_id}` business snapshots. Investigation pages retain the existing progress fragment. New scenario records include the exact normalized `schedule` and `control_level` built for execution; older records are not retroactively reconstructed. Reduction and differential readers now use the same corruption/symlink boundary as other records.
+
+Live availability in the creation page means server base URL/model configuration is present, not that provider authentication or hosted inference has been verified. Authored fixture provenance remains visible. Full release observations are recorded separately in `EVIDENCE.md` and `FINAL_RUNTIME.md`.

@@ -111,3 +111,11 @@ This section describes the frontend release before the M3/M4 backend branch was 
 Open `/dna` to browse artifacts and import a portable JSON file for replay. Each artifact page exposes its embedded delivery schedule, effect intents, release condition, invariant rows, representative responses and full JSON. **Download portable JSON** exports the stored document. Replay and fix verification use the existing M2 services and show their actual response and conditional statement; the result page is a saved local record, not a portable artifact.
 
 The bundled `showcase/dna/e8007dd56adae8ae.json` is the recorded M2 artifact. The workbench labels the showcase as historical evidence. Installing it into an empty runtime home preserves its reproducer and digest and does not replace an existing artifact. Failure reduction is pending; the web interface does not claim a smaller or minimal reproducer.
+
+## Final integrated web workflow
+
+The final web application enables **Start bounded reduction** on artifact pages. The operation returns 202 and a persisted reduction ID; its page displays lifecycle separately from REDUCED/NOT_REDUCED/SKIPPED/REJECTED/INCONCLUSIVE, original/candidate schedules, preserved faults, removal decisions, preflight, revalidation, and fault-free characterization. Only an accepted revalidated candidate with matching primary ID is promoted in the result UI. The original artifact links to the saved result even when no delivery was removed. Derived artifacts identify their original through `provenance.reduced_from`.
+
+Artifact inspection and download preserve the stored document. The reducer may append unhashed reduction/characterization metadata as described above; it never edits the original hashed reproducer. The browser does not add UI fields to the artifact. Retained-state links expose only the supervisor's copied business tables when present, never a live target database.
+
+Import/replay stays a submitted-artifact operation: it does not silently install the file into the library. Preflight rejection is rendered as rejection before execution, and the persisted operation carries the same service response.
