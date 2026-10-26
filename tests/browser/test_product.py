@@ -71,12 +71,12 @@ def page(server):
         browser.close()
 
 
-def test_workspace_navigation_registry_and_pending_features(page):
+def test_workspace_navigation_registry_and_available_workflows(page):
     from playwright.sync_api import expect
     errors = []
     page.on('pageerror', lambda exc: errors.append(str(exc)))
     page.goto('/')
-    expect(page.get_by_role('button', name='Investigation unavailable')).to_be_disabled()
+    expect(page.get_by_role('link', name='New investigation', exact=True)).to_have_attribute('href', '/investigations#new-investigation')
     expect(page.locator('#target-registry-list')).to_contain_text('razorpay-fixed')
     expect(page.locator('#investigation-history')).to_contain_text('showcase-m2')
     page.get_by_role('link', name='Targets', exact=True).click()
@@ -94,7 +94,7 @@ def test_workspace_navigation_registry_and_pending_features(page):
 def test_download_replay_and_fix_verification_use_actual_api(page, server):
     from playwright.sync_api import expect
     page.goto('/dna/' + DNA_ID)
-    expect(page.get_by_role('button', name='Reduction unavailable')).to_be_disabled()
+    expect(page.get_by_role('button', name='Start bounded reduction')).to_be_enabled()
     with page.expect_download() as info:
         page.get_by_role('link', name='Download portable JSON').click()
     downloaded = json.loads(Path(info.value.path()).read_text())
@@ -142,7 +142,100 @@ def test_form_errors_tamper_rejection_and_token_stays_in_memory(page, tmp_path):
     assert page.evaluate('JSON.stringify(localStorage)') == '{}'
 
 
-@pytest.mark.parametrize('route', ['/', '/investigations/showcase-m2', '/dna/' + DNA_ID])
+def test_new_investigation_replay_verify_reduce_and_differential(page, server):
+    """One real user journey, reconciled against the persisted service records."""
+    from playwright.sync_api import expect
+
+    page.goto('/investigations')
+    expect(page.locator('#investigation-mode option[value="live"]')).to_be_disabled()
+    page.locator('#investigation-target').select_option('razorpay-vulnerable')
+    with page.expect_response(lambda r: r.url.endswith('/api/investigations') and r.request.method == 'POST') as accepted:
+        page.get_by_role('button', name='Start investigation', exact=True).click()
+    assert accepted.value.status == 202
+    admission = accepted.value.json()
+    assert admission['status'] == 'queued'
+    investigation_id = admission['investigation_id']
+    page.wait_for_url('**/investigations/' + investigation_id)
+    # Progress lives in persisted records and survives browser navigation.
+    page.goto('/')
+    page.goto('/investigations/' + investigation_id)
+    expect(page.get_by_role('heading', name='Lifecycle · Completed')).to_be_visible(timeout=180_000)
+    expect(page.locator('.status-meta')).to_contain_text('FAIL')
+    expect(page.locator('main')).to_contain_text('authored cached fixture')
+    expect(page.get_by_role('heading', name='Findings', exact=True)).to_be_visible()
+
+    record = httpx.get(server[0] + admission['status_url']).json()
+    assert record['status'] == 'completed' and record['verdict'] == 'FAIL'
+    assert record['mode_effective'] == 'cached'
+    assert record['model']['provenance']['source'] == 'authored_fixture'
+    assert record['trials_used'] == 30
+    assert all(item['status']['outcome'] == 'confirmed' for item in record['hypotheses'])
+    hypotheses = httpx.get(server[0] + admission['status_url'] + '/hypotheses').json()
+    findings = httpx.get(server[0] + admission['status_url'] + '/findings').json()
+    assert hypotheses['hypotheses'] == record['hypotheses']
+    assert findings['findings'] == record['findings']
+    assert all('schedule' in scenario for scenario in record['scenarios'])
+    dna_id = record['dna_ids'][0]
+    page.locator(f'a[href="/dna/{dna_id}"]').first.click()
+    expect(page.get_by_role('heading', name='Failure DNA', exact=True)).to_be_visible()
+    with page.expect_download() as info:
+        page.get_by_role('link', name='Download portable JSON').click()
+    downloaded = json.loads(Path(info.value.path()).read_text())
+    stored = json.loads((server[1] / 'dna' / (dna_id + '.json')).read_text())
+    assert downloaded == stored
+    assert stored['reproducer']['failure_signature']['kind'] == 'duplicate_fulfilment'
+    # Inspect the actual settled business rows, not HTTP acknowledgments alone.
+    snapshot_link = page.get_by_role('link', name='Inspect retained business state')
+    expect(snapshot_link).to_be_visible()
+    snapshot_link.click()
+    expect(page.get_by_role('heading', name='Observed business state')).to_be_visible()
+    assert page.locator('section').filter(has=page.get_by_role('heading', name='Fulfilments', exact=True)).locator('tbody tr').count() > 1
+    page.goto('/dna/' + dna_id)
+    page.locator('#api-token').fill('browser-test-only')
+    page.locator('#replay-existing').click()
+    expect(page.locator('#replay-result')).to_contain_text('REPRODUCED', timeout=90_000)
+    expect(page.locator('#replay-result')).to_contain_text('Preflight: passed')
+    page.get_by_role('button', name='Verify fix', exact=True).click()
+    expect(page.locator('#verify-result')).to_contain_text('VERIFIED', timeout=120_000)
+    expect(page.locator('#verify-result')).to_contain_text('independence assumption')
+    with page.expect_response(lambda r: r.url.endswith('/reduce') and r.request.method == 'POST') as reduced:
+        page.get_by_role('button', name='Start bounded reduction').click()
+    assert reduced.value.status == 202
+    reduction_admission = reduced.value.json()
+    page.wait_for_url('**/reductions/' + reduction_admission['reduction_id'], timeout=120_000)
+    expect(page.get_by_role('heading', name='NOT_REDUCED', exact=True)).to_be_visible()
+    expect(page.locator('main')).to_contain_text('no admissible reductions')
+    reduction = httpx.get(server[0] + reduction_admission['status_url']).json()
+    assert reduction['outcome'] == 'NOT_REDUCED'
+    assert reduction['primary_dna_id'] == dna_id
+    assert reduction['black_box'] is not None
+    assert all(not candidate['admissible'] for candidate in reduction['result']['candidates'])
+
+    page.goto('/differential')
+    page.locator('#api-token').fill('browser-test-only')
+    page.locator('#differential-policy').select_option('explore')
+    with page.expect_response(lambda r: r.url.endswith('/api/differential') and r.request.method == 'POST') as compared:
+        page.get_by_role('button', name='Run differential', exact=True).click()
+    assert compared.value.status == 202
+    # The page immediately navigates on acceptance; Chromium can discard the
+    # previous response body. Read the persisted ID from that real navigation.
+    page.wait_for_url('**/differential/diff-*')
+    differential_id = page.url.rsplit('/', 1)[1]
+    expect(page.get_by_role('heading', name='Scenario comparison matrix')).to_be_visible(timeout=180_000)
+    comparison = httpx.get(server[0] + '/api/differential/' + differential_id).json()
+    assert comparison['differential_id'] == differential_id
+    assert comparison['summary'] == {
+        'cells': 9, 'compared': 9, 'agree': 9, 'disagree': 0,
+        'inconclusive': 0, 'unexpected_cells': [],
+    }
+    cells = {(x['scenario_id'].split('[')[0], x['variant']): x['observed'] for x in comparison['cells']}
+    assert cells[('S3', 'naive_fix')] == 'PASS'
+    assert cells[('S5', 'naive_fix')] == 'FAIL'
+    assert cells[('S5', 'fixed')] == 'PASS'
+    assert not list((server[1] / 'run').glob('*.pid'))
+
+
+@pytest.mark.parametrize('route', ['/', '/investigations', '/investigations/showcase-m2', '/dna/' + DNA_ID, '/differential'])
 def test_axe_accessibility_mobile_and_keyboard(page, route):
     from playwright.sync_api import expect
     page.goto(route)

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Investigation {{ view.id }} · Duress{% endblock %}
 {% block content %}
-<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Investigation</span></nav>
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><a href="/investigations">Investigations</a><span aria-hidden="true">/</span><span>Record</span></nav>
 <header class="page-heading investigation-heading">
   <div>
     <p class="eyebrow">Investigation record{% if view.showcase %} · recorded benchmark{% endif %}</p>
     <h1>{{ view.target_id }}</h1>
-    <p class="heading-detail">{{ view.id }} <span aria-hidden="true">/</span> requested {{ view.mode_requested }}{% if view.mode_effective != view.mode_requested %}, running {{ view.mode_effective }}{% endif %}</p>
+    <p class="heading-detail"><code>{{ view.id }}</code> · requested {{ view.mode_requested }}{% if view.mode_effective and view.mode_effective != view.mode_requested %}, effective {{ view.mode_effective }}{% endif %}</p>
   </div>
-  <a class="button button-secondary" href="/">New investigation</a>
+  <a class="button button-secondary" href="/investigations">Start or browse investigations</a>
 </header>
 {% set poll_url = "/investigations/" ~ view.id ~ "/progress" %}
 {% include "_investigation_live.html" %}

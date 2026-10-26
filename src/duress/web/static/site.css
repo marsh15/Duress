@@ -23,6 +23,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 html { min-width: 320px; background: var(--paper); scroll-behavior: smooth; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-size: 15px; line-height: 1.55; }
@@ -493,13 +494,39 @@ button:disabled { cursor: not-allowed; color: #334d56; background: #dce6e7; bord
 
 .report-page { padding-top: 35px; }
 
+/* Execution forms and evidence keep the same restrained workbench vocabulary. */
+.target-choice-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stack-form fieldset { min-width: 0; margin: 0 0 20px; padding: 15px; border: 1px solid var(--line); border-radius: 4px; }
+.stack-form legend { padding: 0 6px; color: var(--ink-soft); font-size: .82rem; font-weight: 680; }
+.target-choice { display: flex; align-items: center; gap: 10px; min-height: 68px; margin: 0 !important; padding: 10px; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; overflow-wrap: anywhere; }
+.target-choice:has(input:checked) { background: var(--surface-blue); border-color: #7eb6bc; }
+.target-choice input { flex: 0 0 18px; width: 18px; min-height: 18px; height: 18px; margin: 0; padding: 0; accent-color: var(--cyan-dark); }
+.target-choice span { min-width: 0; }
+.target-choice strong, .target-choice small { display: block; }
+.target-choice small { color: var(--muted); font-size: .72rem; font-weight: 400; }
+.differential-matrix { min-width: 740px; table-layout: fixed; }
+.differential-matrix th, .differential-matrix td { overflow-wrap: anywhere; }
+.differential-matrix thead th { white-space: normal; }
+.differential-matrix td > div { margin-bottom: 4px; }
+.differential-matrix td small { display: block; margin-top: 8px; color: var(--muted); }
+.result-claim { padding: 12px 16px; border-left: 3px solid var(--cyan); background: var(--surface-blue); overflow-wrap: anywhere; }
+.content-section, .hypothesis-main, .step-content, .status-copy, .status-meta, .history-record-main { min-width: 0; }
+.status-list dd, .heading-detail, .trial-reason, .result-statement, .record-id { overflow-wrap: anywhere; }
+.status-meta .business-verdict { font-size: .95rem; padding: 4px 10px; }
+.scenario-schedule { margin: 15px 0; }
+.scenario-schedule summary { cursor: pointer; color: var(--cyan-dark); font-weight: 650; }
+.scenario-schedule pre { overflow-x: auto; font-size: .76rem; }
+
 @media (max-width: 900px) {
+  .topbar-note { display: none; }
+  .target-choice-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .welcome-grid { grid-template-columns: minmax(0, 1fr) minmax(300px, .86fr); gap: 38px; }
   .investigation-columns { grid-template-columns: 1fr; }
   .dna-detail-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 680px) {
+  .target-choice-list { grid-template-columns: 1fr; }
   .topbar-inner, .footer-inner, .page-shell { width: min(100% - 32px, 540px); }
   .topbar-inner { min-height: 58px; flex-wrap: wrap; gap: 0 8px; padding: 7px 0 0; }
   .topbar-note { display: none; }

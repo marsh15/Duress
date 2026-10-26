@@ -395,9 +395,12 @@ async def _investigate(
     for spec in specs:
         built = spec.build(profile.roles, seed)
         built_list.append((spec, built))
-        record["scenarios"].append(
-            _scenario_entry(spec, built.scenario_id, selected_by.get(spec.scenario_id, "exhaustive"))
-        )
+        entry = _scenario_entry(spec, built.scenario_id, selected_by.get(spec.scenario_id, "exhaustive"))
+        # Preserve the actual normalized schedule for presentation. A later UI
+        # must not reconstruct historical ordering/faults from a newer registry.
+        entry["schedule"] = canonical_dict(built.schedule)
+        entry["control_level"] = dna_module.control_level(built.schedule)
+        record["scenarios"].append(entry)
     record["selected_scenarios"] = [built.scenario_id for _, built in built_list]
     recorder.save()
 

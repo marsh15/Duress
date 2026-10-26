@@ -118,7 +118,13 @@ async def build_dna(
 
 
 def load_dna_document(workspace: Workspace, dna_id: str) -> DnaDocument:
-    return dna_module.document_from_json(load_dna_payload(workspace.home, dna_id))
+    try:
+        return dna_module.document_from_json(load_dna_payload(workspace.home, dna_id))
+    except ValueError:
+        # A malformed stored record is unavailable for presentation/admission.
+        # Submitted artifacts still reach the shared preflight and return its
+        # precise REJECTED outcome; valid stored mappings are hashed unchanged.
+        raise FileNotFoundError(dna_id) from None
 
 
 def dna_index(workspace: Workspace) -> list[dict[str, Any]]:
@@ -409,12 +415,9 @@ async def reduce_dna(
 
 
 def load_reduction(workspace: Workspace, reduction_id: str) -> dict[str, Any]:
-    from .store import read_json
+    from .records import read_record
 
-    path = workspace.home / "reductions" / f"{reduction_id}.json"
-    if not path.exists():
-        raise FileNotFoundError(reduction_id)
-    return read_json(path)
+    return read_record(workspace.home / "reductions", reduction_id)
 
 
 async def differential(
@@ -493,9 +496,6 @@ async def differential(
 
 
 def load_differential(workspace: Workspace, differential_id: str) -> dict[str, Any]:
-    from .store import read_json
+    from .records import read_record
 
-    path = workspace.home / "differentials" / f"{differential_id}.json"
-    if not path.exists():
-        raise FileNotFoundError(differential_id)
-    return read_json(path)
+    return read_record(workspace.home / "differentials", differential_id)

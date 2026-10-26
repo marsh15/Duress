@@ -217,8 +217,9 @@ def test_home_and_recorded_showcase_links(tmp_path: Path) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "Investigation creation" in response.text
-    assert "Investigation unavailable" in response.text
-    assert "pending" in response.text
+    assert 'href="/investigations#new-investigation"' in response.text
+    assert "New investigation" in response.text
+    assert "Investigation unavailable" not in response.text
     assert "Recorded benchmark" in response.text
     assert "/investigations/run-01" in response.text
     assert "/dna/dna-001" in response.text
@@ -302,8 +303,10 @@ def test_dna_page_shows_intents_release_violations_and_reduction(tmp_path: Path)
     assert "3 deliveries" in response.text
     assert "2 deliveries" in response.text
     assert "Verify a fix" in response.text
-    assert "Reduction unavailable" in response.text
-    assert "disabled" in response.text
+    assert 'id="reduce-dna-form"' in response.text
+    assert "Start bounded reduction" in response.text
+    assert "Reduction unavailable" not in response.text
+    assert '<button class="button button-primary" type="submit">Start bounded reduction</button>' in response.text
     assert "Import portable JSON" in response.text
     assert "/dna/dna-001/download" in response.text
 

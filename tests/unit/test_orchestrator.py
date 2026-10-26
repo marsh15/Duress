@@ -42,6 +42,13 @@ async def test_failed_characterization_trials_count_toward_investigation_cap(reg
     assert record["trials_used"] == 7 * 5 + 10
     assert record["findings"][0]["dna_error"].startswith("characterization_did_not_fail")
     assert record["dna_ids"] == []
+    # Presentation retains exactly what was built for execution, including
+    # parameterized identity, ordering, and the controlled fault configuration.
+    rendezvous = next(item for item in record["scenarios"]
+                      if item["template_id"] == "S3" and item["params"].get("fault") == "rendezvous")
+    assert rendezvous["schedule"]["steps"][0]["deliveries"]
+    assert any(fault["kind"] == "provider_rendezvous" for fault in rendezvous["schedule"]["faults"])
+    assert rendezvous["control_level"] == "environment_controlled"
 
 
 @pytest.mark.asyncio

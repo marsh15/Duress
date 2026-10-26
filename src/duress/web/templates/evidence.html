@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Retained snapshot {{ trial_id }} · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Trial evidence</span></nav>
+<header class="page-heading"><div><p class="eyebrow">Post-settlement SQLite copy</p><h1>Observed business state</h1><p class="heading-detail"><code>{{ trial_id }}</code></p></div></header>
+<aside class="notice notice-cyan"><strong>Retained observation</strong><span>These rows come from the supervisor's copied snapshot after target settlement. This page starts no execution and computes no new verdict. Consult the associated trial for validity and settlement. Each table is limited to 1,000 displayed rows.</span></aside>
+{% for name, rows in tables.items() %}
+<section class="content-section"><div class="section-heading compact-heading"><h2>{{ name|title }}</h2><span class="section-count">{{ rows|length }} rows</span></div>
+{% if rows %}<div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Retained {{ name }} table</caption><thead><tr>{% for column in rows[0] %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead><tbody>{% for row in rows %}<tr>{% for value in row.values() %}<td>{{ value }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+{% else %}<p class="empty-note">No rows recorded.</p>{% endif %}</section>
+{% endfor %}
+{% endblock %}

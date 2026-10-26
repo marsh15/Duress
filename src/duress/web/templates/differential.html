@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{% if record %}Differential {{ record.differential_id|default('record') }}{% else %}Compare fixes{% endif %} · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Compare fixes</span></nav>
+{% if record %}<script id="analysis-record" type="application/json">{{ record|tojson }}</script>{% endif %}
+<header class="page-heading">
+  <div><p class="eyebrow">Observed versus expected · bounded scenario matrix</p><h1>{% if record %}Differential result{% else %}Compare reference fixes{% endif %}</h1>{% if record %}<p class="heading-detail"><code>{{ record.differential_id|default('unknown differential') }}</code> <span aria-hidden="true">/</span> policy {{ record.policy|default('not recorded') }}</p>{% else %}<p class="heading-detail">Run the documented S3, S5 and S9 scenarios against selected local target variants.</p>{% endif %}</div>
+</header>
+
+{% if not record %}
+<section class="content-section action-section" aria-labelledby="differential-start-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">New comparison</p><h2 id="differential-start-title">Choose target builds</h2></div><span class="verification-note">1–5 targets</span></div>
+  <p class="section-intro">The default scenarios exercise the same-event race (S3), cross-event race (S5) and safety case (S9). Expected verdicts are scenario-specific references; null agreement stays inconclusive.</p>
+  <div class="token-row"><label for="api-token">Access token</label><input id="api-token" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Optional token for this session"><span>Memory only · clears on reload</span></div>
+  <form id="differential-form" class="stack-form">
+    <fieldset><legend>Targets</legend><div class="target-choice-list">
+      {% set default_targets = ['razorpay-vulnerable', 'razorpay-naive-fix', 'razorpay-fixed'] %}
+      {% for target in targets|default([]) %}<label class="target-choice"><input type="checkbox" name="target_ids" value="{{ target.target_id }}"{% if target.target_id in default_targets %} checked{% endif %}><span><strong>{{ target.target_id }}</strong><small>{{ target.profile|default('profile') }} · {{ target.variant|default('variant') }}</small></span></label>{% else %}<p class="empty-note">No local target profiles are available.</p>{% endfor %}
+    </div></fieldset>
+    <div><label for="differential-policy">Execution policy</label><select id="differential-policy" name="policy"><option value="explore" selected>Explore · 5 valid trials per cell (45 total for the default targets)</option><option value="matrix">Matrix · 20 valid trials per cell (180 total for the default targets)</option></select></div>
+    <button class="button button-primary" type="submit">Run differential</button>
+    <p class="field-help">The record compares observed aggregate verdicts with expected verdicts. It is evidence for these target builds and scenarios, not a proof for other conditions.</p>
+  </form>
+  <p id="differential-message" class="form-message" role="status" aria-live="polite"></p>
+</section>
+{% else %}
+<section class="content-section status-band status-band--{{ record.status|default('queued') }}" aria-labelledby="differential-status-title" data-analysis-poll="{{ 'true' if poll else 'false' }}" data-status-url="/api/differential/{{ record.differential_id|default('') }}" data-record-url="/differential/{{ record.differential_id|default('') }}">
+  <div class="status-copy"><p class="eyebrow">Persisted comparison</p><h2 id="differential-status-title">{{ record.status|default('queued')|replace('_', ' ')|title }}</h2>
+  {% if record.status in ['queued', 'running'] %}<p id="analysis-poll-message" role="status" aria-live="polite">The comparison is running asynchronously. This page will refresh as soon as its saved record is ready.</p>
+  {% elif record.status == 'failed' %}<p id="analysis-poll-message" role="status">{{ record.error|default('The comparison failed before producing a final record.') }}</p>
+  {% else %}<p id="analysis-poll-message" role="status" aria-live="polite">The persisted matrix has {{ record.summary.cells|default(record.cells|length) }} cells, {{ record.summary.agree|default(0) }} agreements, {{ record.summary.disagree|default(0) }} disagreements and {{ record.summary.inconclusive|default(0) }} inconclusive observations.</p>{% endif %}
+  </div>
+</section>
+
+{% if record.status == 'completed' %}
+<section class="content-section" aria-labelledby="matrix-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Observed / expected</p><h2 id="matrix-title">Scenario comparison matrix</h2></div><span class="section-count">{{ record.cells|default([])|length }} cells</span></div>
+  <p class="section-intro">Each cell shows observed and expected verdicts. INCONCLUSIVE observations and cells without an expected reference are not counted as agreement.</p>
+  {% if record.scenarios and record.targets %}<div class="table-wrap"><table class="data-table differential-matrix"><caption class="visually-hidden">Expected and observed verdicts by scenario and target</caption><thead><tr><th scope="col">Scenario</th>{% for target_id in record.targets %}<th scope="col">{{ target_id }}</th>{% endfor %}</tr></thead><tbody>
+    {% for scenario_id in record.scenarios %}<tr><th scope="row"><code>{{ scenario_id }}</code></th>{% for target_id in record.targets %}{% set found = namespace(cell=none) %}{% for cell in record.cells|default([]) %}{% if cell.scenario_id == scenario_id and cell.target_id == target_id %}{% set found.cell = cell %}{% endif %}{% endfor %}<td>{% if found.cell %}<div><strong>Observed</strong> {{ found.cell.observed|default('not recorded') }}</div><div><strong>Expected</strong> {{ found.cell.expected|default('—', true) }}</div>{% if found.cell.agrees is sameas true %}<span class="finding-badge">AGREES</span>{% elif found.cell.agrees is sameas false %}<span class="finding-badge">DISAGREES</span>{% else %}<span class="finding-badge">INCONCLUSIVE / UNGRADED</span>{% endif %}{% if found.cell.valid is not none or found.cell.fail is not none %}<small>{{ found.cell.fail|default(0) }} fail / {{ found.cell.valid|default(0) }} valid</small>{% endif %}{% if found.cell.reasons %}<details><summary>Reasons</summary><ul>{% for reason in found.cell.reasons %}<li>{{ reason }}</li>{% endfor %}</ul></details>{% endif %}{% else %}<span class="empty-inline">No cell recorded</span>{% endif %}</td>{% endfor %}</tr>{% endfor %}
+  </tbody></table></div>{% else %}<p class="empty-note">No completed matrix cells are recorded.</p>{% endif %}
+</section>
+
+<section class="content-section" aria-labelledby="differential-summary-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Bounded result</p><h2 id="differential-summary-title">Summary</h2></div></div>
+  {% if record.summary %}<ul class="result-counts">{% for key, label in [('cells', 'Cells'), ('compared', 'Compared'), ('agree', 'Agree'), ('disagree', 'Disagree'), ('inconclusive', 'Inconclusive')] %}<li><strong>{{ record.summary[key]|default(0) }}</strong><span>{{ label }}</span></li>{% endfor %}</ul>{% if record.summary.unexpected_cells %}<h3>Unexpected cells</h3><ul>{% for item in record.summary.unexpected_cells %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}{% else %}<p class="empty-note">No summary has been saved.</p>{% endif %}
+  <p class="caveat-note">This comparison describes only the recorded target builds, scenario parameters and policy. It does not establish correctness for other schedules, loads or environments.</p>
+</section>
+{% endif %}
+{% endif %}
+
+<section class="content-section records-section" aria-labelledby="differential-history-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Saved records</p><h2 id="differential-history-title">Differential history</h2></div><span class="section-count">{{ records|default([])|length }} records</span></div>
+  {% if records %}<ul class="record-list">{% for item in records %}{% if item.differential_id %}{% set saved_cells = item.cells|default([]) %}{% set saved_summary = item.summary|default({}) %}{% set cell_count = saved_summary.cells|default(saved_cells|length) %}<li class="record-list-row"><a class="record-list-main" href="/differential/{{ item.differential_id }}"><strong>{{ item.status|default('saved')|title }}</strong><span>{{ item.policy|default('policy not recorded') }} · {{ (item.targets|default([]))|join(', ') }}</span><code>{{ item.differential_id }}</code></a><span class="record-list-stat">{{ cell_count }} cells</span><span class="record-list-open">Inspect record</span></li>{% endif %}{% endfor %}</ul>{% else %}<p class="empty-note">No differential records are saved yet.</p>{% endif %}
+</section>
+
+{% if record %}<details class="artifact-json"><summary>Inspect complete persisted differential record</summary><pre><code>{{ record|tojson(indent=2) }}</code></pre></details>{% endif %}
+{% endblock %}

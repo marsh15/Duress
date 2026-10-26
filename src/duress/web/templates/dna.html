@@ -10,6 +10,9 @@
   </div>
   <a class="button button-secondary" href="/dna/{{ view.id }}/download" download>Download portable JSON</a>
 </header>
+{% if view.derived_from %}
+<aside class="notice notice-cyan"><strong>Derived artifact</strong><span>This DNA has its own reproducer identity. Derived from <a href="/dna/{{ view.derived_from }}">{{ view.derived_from }}</a>. Inspect its reduction record for acceptance and revalidation evidence.</span></aside>
+{% endif %}
 <script id="dna-document" type="application/json">{{ view.document|tojson }}</script>
 
 <section class="dna-signature-band" aria-labelledby="signature-title">
@@ -63,6 +66,7 @@
 <div class="dna-detail-grid">
   <section class="content-section violation-section" aria-labelledby="violations-title">
     <div class="section-heading compact-heading"><div><p class="eyebrow">Representative observation</p><h2 id="violations-title">Invariant violations</h2></div><span class="section-count">{{ view.violation_rows|length }} rows</span></div>
+    {% if view.observations.trial_id and view.observations.trial_id in evidence_ids %}<p class="field-help"><a href="/evidence/{{ view.observations.trial_id }}">Inspect retained business state</a></p>{% endif %}
     {% if view.violation_rows %}
     <div class="table-wrap"><table class="data-table violation-table"><caption class="visually-hidden">Recorded invariant violation rows</caption><thead><tr><th scope="col">Check</th><th scope="col">Kind</th><th scope="col">Roles</th><th scope="col">Entities</th></tr></thead><tbody>
       {% for violation in view.violation_rows %}<tr><th scope="row"><code>{{ violation.check|default('unknown') }}</code></th><td>{{ violation.kind|default('unknown') }}</td><td>{{ violation.roles|default([])|join(', ') }}</td><td>{{ violation.entity_ids|default([])|join(', ') }}</td></tr>{% endfor %}
@@ -77,21 +81,29 @@
 </div>
 
 <section class="content-section reduction-section" aria-labelledby="reduction-title">
-  <div class="section-heading compact-heading"><div><p class="eyebrow">Minimized reproducer</p><h2 id="reduction-title">Original and reduced</h2></div><span class="section-count">{{ view.reduction.original_delivery_count }} original deliveries</span></div>
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Bounded reducer</p><h2 id="reduction-title">Reduce this schedule</h2></div><span class="section-count">{{ view.reduction.original_delivery_count }} original deliveries</span></div>
+  <p class="section-intro">Test bounded single-delivery removals against the recorded failure. A reduced artifact becomes primary only after a separate replay revalidation; the result does not claim global minimality.</p>
   {% if view.reduction.available %}
-    {% if view.reduction.claim %}<p class="claim-line">{{ view.reduction.claim }}</p>{% endif %}
+    {% if view.reduction.outcome %}<p class="result-statement">Previous reduction outcome: <strong>{{ view.reduction.outcome }}</strong></p>{% endif %}
+    {% if view.reduction.claim %}<p class="claim-line">{{ view.reduction.claim }}</p>{% if view.reduction.outcome and view.reduction.outcome != 'REDUCED' %}<p class="field-help">This is the candidate search claim. No accepted smaller primary reproducer is recorded; the original remains primary.</p>{% elif not view.reduction.outcome %}<p class="field-help">This older record does not include an outcome or replay revalidation status, so the candidate is not identified as primary here.</p>{% endif %}{% endif %}
     {% if view.reduction.reduced_schedule %}
     <div class="reduction-compare">
       <div><span>Original schedule</span><strong>{{ view.reduction.original_delivery_count }} deliveries</strong><p>{{ view.reduction.original_delivery_ids|join(' · ') }}</p></div>
       <span class="compare-divider" aria-hidden="true">→</span>
       <div><span>Reduced schedule</span><strong>{{ view.reduction.reduced_delivery_count }} deliveries</strong><p>{{ view.reduction.reduced_delivery_ids|join(' · ') }}</p></div>
     </div>
-    {% elif view.reduction.reduced_dna_id %}<p class="field-help">Reduced artifact: <a href="/dna/{{ view.reduction.reduced_dna_id }}"><code>{{ view.reduction.reduced_dna_id }}</code></a></p>
-    {% else %}<p class="empty-note">Reduction result is recorded; the reduced schedule is not embedded in this document.</p>{% endif %}
-  {% else %}
-    <p class="empty-note">No reduced schedule is recorded. Reduction is pending in this build; the original artifact remains available for replay and verification.</p>
+    {% if view.reduction.outcome == 'REDUCED' and view.reduction.primary_dna_id == view.reduction.reduced_dna_id %}<p class="result-artifact-link"><a href="/dna/{{ view.reduction.primary_dna_id }}">Open accepted primary DNA <code>{{ view.reduction.primary_dna_id }}</code></a></p>{% endif %}
+
+    {% elif view.reduction.reduced_dna_id %}<p class="field-help">Candidate artifact <code>{{ view.reduction.reduced_dna_id }}</code></p>
+    {% else %}<p class="empty-note">A previous reduction record is linked, but it has no accepted reduced schedule.</p>{% endif %}
   {% endif %}
-  <div class="pending-inline"><button class="button button-secondary" type="button" disabled>Reduction unavailable</button><p>Reduction is pending in this build. No reduction request is sent.</p></div>
+  {% if view.reduction.reduction_id %}<p class="field-help"><a href="/reductions/{{ view.reduction.reduction_id }}">Inspect saved reduction record</a></p>{% endif %}
+  <form id="reduce-dna-form" class="stack-form" data-dna-id="{{ view.id }}" data-target-id="{{ view.target_id }}">
+    <button class="button button-primary" type="submit">Start bounded reduction</button>
+    <p class="field-help">Fault-free characterization and candidate replay revalidation are included. The operation runs asynchronously and saves a separate record.</p>
+  </form>
+  <p id="reduce-message" class="form-message" role="status" aria-live="polite"></p>
+  <p id="reduce-record-link" class="operation-result" hidden></p>
 </section>
 
 {% if view.observations.attempts %}

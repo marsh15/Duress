@@ -20,7 +20,7 @@ _PACKAGE = Path(__file__).resolve().parent
 _TEMPLATES = _PACKAGE / "templates"
 _STATIC = _PACKAGE / "static"
 _SAFE_ID = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
-_TERMINAL = {"completed", "error", "failed", "cancelled"}
+_ACTIVE = {"queued", "running"}
 
 
 def _jinja_environment():
@@ -52,6 +52,23 @@ def _valid_id(value: str) -> bool:
     return bool(_SAFE_ID.fullmatch(value))
 
 
+def _snapshot_path(workspace: Any, trial_id: str) -> Path | None:
+    if not _valid_id(trial_id):
+        return None
+    root = Path(workspace.home) / "evidence"
+    path = root / trial_id / "snapshot" / "app.db"
+    # Read only the supervisor's post-settlement copy, never the target's live DB.
+    # Refuse symlinks in every component beneath the workspace.
+    if any(part.is_symlink() for part in (root, path.parent.parent, path.parent, path)):
+        return None
+    return path.resolve() if path.is_file() else None
+
+
+def _evidence_ids(workspace: Any) -> set[str]:
+    root = Path(workspace.home) / "evidence"
+    return {path.name for path in root.iterdir() if _snapshot_path(workspace, path.name)} if root.is_dir() else set()
+
+
 def _load_investigation(workspace: Any, investigation_id: str) -> dict[str, Any] | None:
     _, home = _workspace_paths(workspace)
     if not _valid_id(investigation_id):
@@ -66,6 +83,24 @@ def _load_investigation(workspace: Any, investigation_id: str) -> dict[str, Any]
             record = load_investigation_record(workspace, investigation_id)
     except FileNotFoundError:
         return None
+    for key in ("hypotheses", "scenarios", "trials", "findings", "events", "dna_ids"):
+        if key in record and record[key] is not None and not isinstance(record[key], (list, dict)):
+            return None
+    if "status" in record and not isinstance(record["status"], str):
+        return None
+    bundle = record.get("bundle")
+    if bundle is not None and (not isinstance(bundle, dict) or
+                               ("files" in bundle and not isinstance(bundle["files"], list))):
+        return None
+    model = record.get("model")
+    if model is not None:
+        if not isinstance(model, dict):
+            return None
+        if "calls" in model and not isinstance(model["calls"], list):
+            return None
+        if any(model.get(key) is not None and not isinstance(model[key], dict)
+               for key in ("budget", "provenance")):
+            return None
     if str(record.get("record_type", "")).startswith("recorded_"):
         record.setdefault("showcase", True)
     return record
@@ -94,10 +129,25 @@ def _load_dna(workspace: Any, dna_id: str) -> dict[str, Any] | None:
 
 def _dna_shape_valid(document: Mapping[str, Any]) -> bool:
     """Reject malformed presentation records; execution preflight stays in M2."""
-    return isinstance(document.get("reproducer"), dict) and all(
+    if not isinstance(document.get("reproducer"), dict) or not all(
         key not in document or isinstance(document[key], dict)
         for key in ("characterization", "provenance_scenario", "provenance", "observations")
-    )
+    ):
+        return False
+    reproducer = document["reproducer"]
+    schedule = reproducer.get("schedule", {})
+    if not isinstance(schedule, dict):
+        return False
+    if any(key in reproducer and not isinstance(reproducer[key], dict)
+           for key in ("failure_signature", "target_contract")):
+        return False
+    for key in ("deliveries", "steps", "faults"):
+        rows = schedule.get(key, [])
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            return False
+    if not isinstance(schedule.get("delivery_policy", {}), dict):
+        return False
+    return all(isinstance(step.get("deliveries", []), list) for step in schedule.get("steps", []))
 
 
 def _items(value: Any) -> list[Any]:
@@ -196,7 +246,10 @@ def _investigation_view(document: Mapping[str, Any]) -> dict[str, Any]:
                 "citation_status": _status(status.get("citation", item.get("citation_status"))),
                 "structure_status": _status(status.get("structure", item.get("structure_status"))),
                 "linkage_status": _status(status.get("linkage", item.get("linkage_status"))),
-                "outcome": _hypothesis_outcome(item),
+                "outcome": "rejected" if item.get("usable") is False else _hypothesis_outcome(item),
+                "usable": item.get("usable", True),
+                "outcome_detail": status.get("outcome_detail", ""),
+                "structure_detail": status.get("structure_detail", ""),
             }
         )
         citations = draft.get("citations", item.get("citations", item.get("mechanism_citations", [])))
@@ -211,9 +264,9 @@ def _investigation_view(document: Mapping[str, Any]) -> dict[str, Any]:
             if isinstance(citation, dict)
         ]
         if isinstance(status, dict):
-            normalized["rejections"] = list(item.get("rejections", [])) + list(
-                status.get("citation_errors", [])
-            ) + list(status.get("linkage_errors", []))
+            normalized["rejections"] = _items(item.get("rejections")) + _items(
+                status.get("citation_errors")
+            ) + _items(status.get("linkage_errors"))
         hypotheses.append(normalized)
     confirmed = [item for item in hypotheses if item["outcome"].lower() == "confirmed"]
     trials = _flatten_trials(document, scenarios)
@@ -229,6 +282,11 @@ def _investigation_view(document: Mapping[str, Any]) -> dict[str, Any]:
                 "scenario_id": scenario.get("scenario_id", ""),
                 "params": scenario.get("params", {}),
                 "status": result.get("status", "recorded"),
+                "lifecycle": _status(scenario.get("status", "recorded")),
+                "selected_by": scenario.get("selected_by", "not recorded"),
+                "result": result,
+                "schedule": scenario.get("schedule") if isinstance(scenario.get("schedule"), dict) else {},
+                "control_level": scenario.get("control_level", "not recorded"),
                 "valid": result.get("valid", 0),
                 "fail": result.get("fail", 0),
                 "inconclusive": result.get("inconclusive", 0),
@@ -244,6 +302,17 @@ def _investigation_view(document: Mapping[str, Any]) -> dict[str, Any]:
         "mode_requested": document.get("mode_requested", "unknown"),
         "mode_effective": document.get("mode_effective", document.get("mode_requested", "unknown")),
         "fallback_reason": document.get("fallback_reason"),
+        "fallback_detail": document.get("fallback_detail"),
+        "verdict": document.get("verdict"),
+        "model": document.get("model") if isinstance(document.get("model"), dict) else {},
+        "findings": [item for item in _items(document.get("findings")) if isinstance(item, dict)],
+        "selected_scenarios": _items(document.get("selected_scenarios")),
+        "trials_used": document.get("trials_used", 0),
+        "trial_cap": document.get("trial_cap"),
+        "wall_cap_s": document.get("wall_cap_s"),
+        "duration_s": document.get("duration_s"),
+        "budget_exhausted": document.get("budget_exhausted", False),
+        "record": dict(document),
         "status": document.get("status", "unknown"),
         "phase": document.get("phase", ""),
         "created_at": document.get("created_at", ""),
@@ -252,6 +321,10 @@ def _investigation_view(document: Mapping[str, Any]) -> dict[str, Any]:
         "confirmed_count": len(confirmed),
         "scenarios": scenario_rows,
         "scenario_count": len(scenario_rows),
+        "scenarios_completed": sum(row["lifecycle"] == "done" for row in scenario_rows),
+        "scenarios_pending": sum(row["lifecycle"] in {"pending", "queued"} for row in scenario_rows),
+        "scenarios_running": sum(row["lifecycle"] == "running" for row in scenario_rows),
+        "scenarios_skipped": sum(row["lifecycle"] == "skipped" for row in scenario_rows),
         "scenario_count_label": len(scenario_rows) if scenario_rows else None,
         "trials": trials,
         "trial_count_label": len(trials) if trials else None,
@@ -268,7 +341,7 @@ def _investigation_view(document: Mapping[str, Any]) -> dict[str, Any]:
         "observed_attempts": [item for item in _items(document.get("observed_attempts")) if isinstance(item, dict)],
         "dna_ids": [str(value) for value in _items(document.get("dna_ids")) if value],
         "explanation": document.get("explanation", ""),
-        "errors": _items(document.get("errors")),
+        "errors": _items(document.get("errors")) + ([document["error"]] if document.get("error") else []),
     }
 
 
@@ -316,8 +389,13 @@ def _reduction_view(document: Mapping[str, Any]) -> dict[str, Any]:
     removed = [value for value in original_ids if value not in reduced_ids] if reduced_schedule is not None else []
     return {
         "available": bool(reduction),
+        "role": (reduction or {}).get("role"),
+        "original_dna_id": (reduction or {}).get("original_dna_id"),
         "claim": claim,
         "reduced_dna_id": (reduced or {}).get("dna_id") or (reduction or {}).get("reduced_dna_id"),
+        "reduction_id": (reduction or {}).get("reduction_id"),
+        "outcome": (reduction or {}).get("outcome"),
+        "primary_dna_id": (reduction or {}).get("primary_dna_id"),
         "reduced_schedule": reduced_schedule,
         "original_delivery_ids": original_ids,
         "reduced_delivery_ids": reduced_ids,
@@ -350,6 +428,7 @@ def _dna_view(document: Mapping[str, Any], *, showcase: bool = False) -> dict[st
         "violation_rows": _items(observations.get("violation_rows")),
         "reduction": _reduction_view(document),
         "provenance": document.get("provenance", {}),
+        "derived_from": (document.get("provenance") or {}).get("reduced_from"),
         "target_id": (document.get("provenance") or {}).get("target_id", "razorpay-vulnerable"),
         "showcase": showcase,
     }
@@ -503,11 +582,16 @@ def install_web(app: FastAPI, workspace: Callable[[], Any]) -> FastAPI:
 
     @router.get("/investigations", response_class=HTMLResponse, include_in_schema=False)
     async def investigation_history(request: Request) -> Response:
+        from ..llm import LlmConfig
+
+        store = workspace()
         return HTMLResponse(
             _render(
                 "investigations.html",
                 request=request,
-                records=_investigation_records(workspace()),
+                records=_investigation_records(store),
+                capabilities={"live_available": LlmConfig.from_env() is not None,
+                              "targets": _target_views(store)},
             )
         )
 
@@ -521,7 +605,8 @@ def install_web(app: FastAPI, workspace: Callable[[], Any]) -> FastAPI:
                 "investigation.html",
                 request=request,
                 view=_investigation_view(document),
-                poll=str(document.get("status", "unknown")).lower() not in _TERMINAL,
+                evidence_ids=_evidence_ids(workspace()),
+                poll=str(document.get("status", "unknown")).lower() in _ACTIVE,
             )
         )
 
@@ -536,10 +621,48 @@ def install_web(app: FastAPI, workspace: Callable[[], Any]) -> FastAPI:
                 "_investigation_live.html",
                 request=request,
                 view=view,
+                evidence_ids=_evidence_ids(workspace()),
                 poll_url=f"/investigations/{investigation_id}/progress",
-                poll=str(view["status"]).lower() not in _TERMINAL,
+                poll=str(view["status"]).lower() in _ACTIVE,
             )
         )
+
+    @router.get("/reductions/{reduction_id}", response_class=HTMLResponse, include_in_schema=False)
+    async def reduction_page(reduction_id: str, request: Request) -> Response:
+        from ..records import read_record
+
+        store = workspace()
+        try:
+            record = read_record(store.home / "reductions", reduction_id)
+        except FileNotFoundError:
+            return _not_found_page(request, "reduction")
+        original = _load_dna(store, str(record.get("original_dna_id", "")))
+        return HTMLResponse(_render("reduction.html", request=request, record=record,
+                                    original=original or {},
+                                    poll=record.get("status") in {"queued", "running"}))
+
+    @router.get("/differential", response_class=HTMLResponse, include_in_schema=False)
+    @router.get("/differential/{differential_id}", response_class=HTMLResponse, include_in_schema=False)
+    async def differential_page(request: Request, differential_id: str | None = None) -> Response:
+        from ..records import read_record
+
+        store = workspace()
+        record = None
+        if differential_id is not None:
+            try:
+                record = read_record(store.home / "differentials", differential_id)
+            except FileNotFoundError:
+                return _not_found_page(request, "differential comparison")
+        history = []
+        for path in (store.home / "differentials").glob("*.json"):
+            try:
+                history.append(read_record(path.parent, path.stem))
+            except FileNotFoundError:
+                continue
+        history.sort(key=lambda item: str(item.get("created_at", "")), reverse=True)
+        return HTMLResponse(_render("differential.html", request=request, record=record,
+                                    records=history, targets=_target_views(store),
+                                    poll=bool(record and record.get("status") in {"queued", "running"})))
 
     @router.get("/dna/{dna_id}", response_class=HTMLResponse, include_in_schema=False)
     async def dna_page(dna_id: str, request: Request) -> Response:
@@ -553,7 +676,27 @@ def install_web(app: FastAPI, workspace: Callable[[], Any]) -> FastAPI:
         except FileNotFoundError:
             bundled = None
         return HTMLResponse(_render("dna.html", request=request,
-                                    view=_dna_view(document, showcase=document == bundled)))
+                                    view=_dna_view(document, showcase=document == bundled),
+                                    evidence_ids=_evidence_ids(store)))
+
+    @router.get("/evidence/{trial_id}", response_class=HTMLResponse, include_in_schema=False)
+    def evidence_page(trial_id: str, request: Request) -> Response:
+        import sqlite3
+
+        store = workspace()
+        path = _snapshot_path(store, trial_id)
+        if path is None:
+            return _not_found_page(request, "retained trial snapshot")
+        try:
+            with sqlite3.connect(f"{path.as_uri()}?mode=ro", uri=True, timeout=1) as connection:
+                connection.row_factory = sqlite3.Row
+                tables = {name: [dict(row) for row in connection.execute(
+                    f"SELECT * FROM {name} ORDER BY rowid LIMIT 1000"
+                )] for name in ("orders", "payments", "fulfilments")}
+        except (sqlite3.Error, OSError):
+            return _not_found_page(request, "readable retained trial snapshot")
+        return HTMLResponse(_render("evidence.html", request=request,
+                                    trial_id=trial_id, tables=tables))
 
     @router.get("/dna", response_class=HTMLResponse, include_in_schema=False)
     async def dna_library(request: Request) -> Response:

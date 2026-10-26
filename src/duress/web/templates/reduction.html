@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Reduction {{ record.reduction_id|default('record') }} · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><a href="/dna">Failure DNA</a><span aria-hidden="true">/</span><span>Reduction</span></nav>
+<script id="analysis-record" type="application/json">{{ record|tojson }}</script>
+<script id="analysis-original" type="application/json">{{ original|default({})|tojson }}</script>
+<header class="page-heading">
+  <div><p class="eyebrow">Bounded schedule reduction · {{ record.target_id|default('target not recorded') }}</p><h1>Reduction result</h1><p class="heading-detail"><code>{{ record.reduction_id|default('unknown reduction') }}</code> <span aria-hidden="true">/</span> original DNA <a href="/dna/{{ record.original_dna_id|default('') }}"><code>{{ record.original_dna_id|default('not recorded') }}</code></a></p></div>
+  <a class="button button-secondary" href="/dna/{{ record.original_dna_id|default('') }}">Return to original DNA</a>
+</header>
+
+<section class="content-section status-band status-band--{{ record.status|default('queued') }}" aria-labelledby="reduction-status-title" data-analysis-poll="{{ 'true' if poll else 'false' }}" data-status-url="/api/reductions/{{ record.reduction_id|default('') }}" data-record-url="/reductions/{{ record.reduction_id|default('') }}">
+  <div class="status-copy"><p class="eyebrow">Persisted operation</p><h2 id="reduction-status-title">{{ record.status|default('queued')|replace('_', ' ')|title }}</h2>
+  {% if record.status in ['queued', 'running'] %}<p id="analysis-poll-message" role="status" aria-live="polite">This reduction is running asynchronously. This page will refresh when its saved record is ready.</p>
+  {% elif record.status == 'failed' %}<p id="analysis-poll-message" role="status">{{ record.error|default('The reduction operation failed before producing a final record.') }}</p>
+  {% else %}<p id="analysis-poll-message" role="status" aria-live="polite">Reduction outcome: <strong>{{ record.outcome|default('INCONCLUSIVE') }}</strong>{% if record.reason %} · {{ record.reason }}{% endif %}</p>{% endif %}
+  </div>
+</section>
+
+{% if record.status == 'completed' %}
+{% set result = record.result|default({}, true) %}
+{% set summary = record.summary|default({}, true) %}
+<section class="content-section result-summary" aria-labelledby="outcome-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Recorded outcome</p><h2 id="outcome-title">{{ record.outcome|default('INCONCLUSIVE') }}</h2></div><span class="section-count">{{ summary.trials|default(result.trials|default(0)) }} total trials</span></div>
+  {% if record.outcome == 'REDUCED' %}
+    <p class="result-statement">A candidate passed the recorded replay revalidation and is the primary reproducer for this result. The claim is bounded to the persisted checks below; no global minimality is claimed.</p>
+  {% elif record.outcome == 'NOT_REDUCED' %}
+    <p class="result-statement">No delivery was removed while retaining the required failure signature and release behavior. The original DNA remains primary.</p>
+  {% elif record.outcome == 'SKIPPED' %}
+    <p class="result-statement">Reduction was skipped because its characterization preconditions were not met.</p>
+  {% elif record.outcome == 'REJECTED' %}
+    <p class="result-statement">The original DNA was rejected by preflight. No reduction trials were run.</p>
+  {% elif record.outcome == 'INCONCLUSIVE' %}
+    <p class="result-statement">The saved evidence did not establish a reduced primary reproducer. The original DNA remains primary unless the record explicitly says otherwise.</p>
+  {% else %}
+    <p class="result-statement">The record contains an unrecognized outcome. Review its saved reason and evidence.</p>
+  {% endif %}
+  {% if record.claim %}<p class="result-claim">{{ record.claim }}</p>{% endif %}
+  {% if record.reason %}<p class="result-statement"><strong>Reason:</strong> {{ record.reason }}</p>{% endif %}
+  {% set accepted_candidate = record.outcome == 'REDUCED' and record.revalidation and record.revalidation.accepted and record.reduced_dna_id and record.primary_dna_id == record.reduced_dna_id %}
+  {% if accepted_candidate %}
+    <p class="result-artifact-link"><a href="/dna/{{ record.primary_dna_id }}">Open accepted primary DNA <code>{{ record.primary_dna_id }}</code></a></p>
+    <p class="field-help">Acceptance is limited to the stored replay revalidation for this candidate and this target. It does not establish global minimality.</p>
+  {% else %}
+    <p class="result-artifact-link"><a href="/dna/{{ record.original_dna_id }}">Open original DNA <code>{{ record.original_dna_id }}</code></a></p>
+  {% endif %}
+</section>
+
+<div class="dna-detail-grid">
+  <section class="content-section" aria-labelledby="original-schedule-title">
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Persisted input</p><h2 id="original-schedule-title">Original schedule</h2></div><span class="section-count">{{ (result.original_deliveries|default([]))|length }} deliveries</span></div>
+    {% set original_schedule = {} %}{% if original.reproducer|default({}) %}{% set original_schedule = original.reproducer.schedule|default({}) %}{% endif %}
+    {% if original.reproducer|default({}) %}<div class="schedule-context"><p><span>Release condition</span><strong>{{ original.reproducer.release_condition|default('not recorded') }}</strong></p><p><span>Faults</span><strong>{{ original_schedule.faults|default([])|length }}</strong></p></div>{% endif %}
+    {% if original_schedule.steps %}
+      <ol class="schedule-track">{% for step in original_schedule.steps %}<li class="schedule-step"><div class="step-rail"><span>{{ loop.index }}</span></div><div class="step-content"><div class="step-heading"><strong>{% if step.deliveries|length > 1 %}Concurrent group{% else %}Delivery{% endif %}</strong>{% if step.delay_before_ms %}<span>{{ step.delay_before_ms }} ms delay before group</span>{% endif %}</div><div class="delivery-group">{% for delivery_id in step.deliveries %}<article class="delivery-row"><span class="delivery-name">{{ delivery_id }}</span>{% set delivery = original_schedule.deliveries|selectattr('id', 'equalto', delivery_id)|first %}{% if delivery %}<span class="intent-tag intent-{{ delivery.effect_intent|default('none') }}">{{ delivery.effect_intent|default('none')|replace('_', ' ') }}</span><span class="delivery-event">{{ delivery.event.type|default('event') }}<small>{{ delivery.event.order_role|default('') }}{% if delivery.event.payment_role %} / {{ delivery.event.payment_role }}{% endif %}</small></span>{% endif %}</article>{% endfor %}</div></div></li>{% endfor %}</ol>
+    {% elif result.original_deliveries %}<p class="empty-note">Full schedule details are unavailable. Recorded delivery IDs: {{ result.original_deliveries|join(' · ') }}</p>
+    {% else %}<p class="empty-note">No original schedule details were retained in this record.</p>{% endif %}
+    {% if original_schedule.faults %}<div class="fault-strip"><strong>Injected faults</strong>{% for fault in original_schedule.faults %}<span>{{ fault.kind|default('fault')|replace('_', ' ') }}{% if fault.ms is defined %} · {{ fault.ms }} ms{% endif %}{% if fault.parties is defined %} · {{ fault.parties }} parties{% endif %}</span>{% endfor %}</div>{% endif %}
+  </section>
+  <section class="content-section" aria-labelledby="candidate-schedule-title">
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Candidate schedule</p><h2 id="candidate-schedule-title">Reduced candidate</h2></div><span class="section-count">{{ (result.reduced_deliveries|default([]))|length }} deliveries</span></div>
+    {% set candidate_schedule = result.reduced_schedule|default({}) %}{% if record.reduced_document and record.reduced_document.reproducer %}{% set candidate_schedule = record.reduced_document.reproducer.schedule|default(candidate_schedule) %}{% endif %}
+    {% if record.reduced_document and record.reduced_document.reproducer %}<div class="schedule-context"><p><span>Release condition</span><strong>{{ record.reduced_document.reproducer.release_condition|default('not recorded') }}</strong></p><p><span>Faults</span><strong>{{ candidate_schedule.faults|default([])|length }}</strong></p></div>{% endif %}
+    {% if candidate_schedule.steps %}
+      <ol class="schedule-track">{% for step in candidate_schedule.steps %}<li class="schedule-step"><div class="step-rail"><span>{{ loop.index }}</span></div><div class="step-content"><div class="step-heading"><strong>{% if step.deliveries|length > 1 %}Concurrent group{% else %}Delivery{% endif %}</strong>{% if step.delay_before_ms %}<span>{{ step.delay_before_ms }} ms delay before group</span>{% endif %}</div><div class="delivery-group">{% for delivery_id in step.deliveries %}<article class="delivery-row"><span class="delivery-name">{{ delivery_id }}</span>{% set delivery = candidate_schedule.deliveries|selectattr('id', 'equalto', delivery_id)|first %}{% if delivery %}<span class="intent-tag intent-{{ delivery.effect_intent|default('none') }}">{{ delivery.effect_intent|default('none')|replace('_', ' ') }}</span><span class="delivery-event">{{ delivery.event.type|default('event') }}<small>{{ delivery.event.order_role|default('') }}{% if delivery.event.payment_role %} / {{ delivery.event.payment_role }}{% endif %}</small></span>{% endif %}</article>{% endfor %}</div></div></li>{% endfor %}</ol>
+    {% elif result.reduced_deliveries %}<p class="empty-note">Candidate delivery IDs: {{ result.reduced_deliveries|join(' · ') }}</p>
+    {% else %}<p class="empty-note">No reduced candidate schedule was produced.</p>{% endif %}
+    {% if candidate_schedule.faults %}<div class="fault-strip"><strong>Preserved faults</strong>{% for fault in candidate_schedule.faults %}<span>{{ fault.kind|default('fault')|replace('_', ' ') }}{% if fault.ms is defined %} · {{ fault.ms }} ms{% endif %}{% if fault.parties is defined %} · {{ fault.parties }} parties{% endif %}</span>{% endfor %}</div>{% endif %}
+  </section>
+</div>
+
+<section class="content-section" aria-labelledby="delivery-diff-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Schedule changes</p><h2 id="delivery-diff-title">Retained and removed deliveries</h2></div></div>
+  {% set original_ids = result.original_deliveries|default([]) %}{% set retained_ids = result.reduced_deliveries|default([]) %}
+  <div class="reduction-compare"><div><span>Retained</span><strong>{{ retained_ids|length }} deliveries</strong><p>{% if retained_ids %}{{ retained_ids|join(' · ') }}{% else %}No candidate delivery list recorded{% endif %}</p></div><span class="compare-divider" aria-hidden="true">→</span><div><span>Removed</span><strong>{{ (original_ids|reject('in', retained_ids)|list)|length }} deliveries</strong><p>{% set removed_ids = original_ids|reject('in', retained_ids)|list %}{% if removed_ids %}{{ removed_ids|join(' · ') }}{% else %}None recorded{% endif %}</p></div></div>
+</section>
+
+<section class="content-section" aria-labelledby="candidate-audit-title">
+  <div class="section-heading compact-heading"><div><p class="eyebrow">Candidate audit</p><h2 id="candidate-audit-title">Tested removals and reasons</h2></div><span class="section-count">{{ result.candidates|default([])|length }} candidates</span></div>
+  {% if result.candidates %}<div class="table-wrap"><table class="data-table"><caption class="visually-hidden">Each delivery removal candidate and its recorded admissibility and verdict</caption><thead><tr><th scope="col">Removed delivery</th><th scope="col">Remaining</th><th scope="col">Verdict</th><th scope="col">Trials</th><th scope="col">Candidate reasons</th></tr></thead><tbody>
+    {% for candidate in result.candidates %}<tr><th scope="row"><code>{{ candidate.removed }}</code></th><td>{{ candidate.remaining|default([])|join(', ') or 'none' }}</td><td>{{ candidate.verdict|default('unknown') }}{% if not candidate.admissible %}<small> · inadmissible</small>{% endif %}</td><td>{{ candidate.trials|default(0) }}</td><td>{% set reasons = candidate.inadmissible_reasons|default([]) + candidate.reasons|default([]) %}{% if reasons %}<ul>{% for reason in reasons %}<li>{{ reason }}</li>{% endfor %}</ul>{% else %}<span class="empty-inline">No rejection reason recorded</span>{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<p class="empty-note">No removal candidates were tested.</p>{% endif %}
+</section>
+
+<div class="dna-detail-grid">
+  <section class="content-section" aria-labelledby="preflight-title"><div class="section-heading compact-heading"><div><p class="eyebrow">Artifact checks</p><h2 id="preflight-title">Preflight</h2></div></div>
+    {% if record.preflight %}<p class="result-statement">{{ 'Passed' if record.preflight.ok else 'Rejected' }}{% if record.preflight.reason %} · {{ record.preflight.reason }}{% endif %}{% if record.preflight.detail %} · {{ record.preflight.detail }}{% endif %}</p>{% if record.preflight.errors %}<ul>{% for issue in record.preflight.errors %}<li>{{ issue }}</li>{% endfor %}</ul>{% endif %}{% else %}<p class="empty-note">No preflight result is recorded.</p>{% endif %}
+    {% if record.outcome == 'INCONCLUSIVE' and record.reason and 'preflight' in record.reason %}<p class="field-help">Candidate preflight detail: {{ record.reason }}</p>{% endif %}
+  </section>
+  <section class="content-section" aria-labelledby="revalidation-title"><div class="section-heading compact-heading"><div><p class="eyebrow">Independent replay</p><h2 id="revalidation-title">Candidate revalidation</h2></div></div>
+    {% if record.revalidation %}<p class="result-statement"><strong>{{ 'Accepted' if record.revalidation.accepted else 'Not accepted' }}</strong>{% if record.revalidation.reason %} · {{ record.revalidation.reason }}{% endif %}</p>
+      <ul class="result-counts">{% for key, label in [('trials', 'Trials'), ('valid', 'Valid'), ('fail', 'Failures'), ('same_signature', 'Same signature'), ('p', 'Observed p') ] %}{% if record.revalidation[key] is not none %}<li><strong>{{ record.revalidation[key] }}</strong><span>{{ label }}</span></li>{% endif %}{% endfor %}</ul>
+      {% if record.revalidation.release_conditions %}<p class="field-help">Observed release conditions: {% for condition, count in record.revalidation.release_conditions.items() %}{{ condition }} {{ count }}{% if not loop.last %} · {% endif %}{% endfor %}{% if record.revalidation.uniform_release is not none %} · uniform: {{ 'yes' if record.revalidation.uniform_release else 'no' }}{% endif %}</p>{% endif %}
+    {% else %}<p class="empty-note">Candidate replay revalidation did not run or is not included in this record.</p>{% endif %}
+  </section>
+</div>
+{% if record.black_box %}<section class="content-section" aria-labelledby="black-box-title"><div class="section-heading compact-heading"><div><p class="eyebrow">Fault-free characterization</p><h2 id="black-box-title">Original schedule without injected faults</h2></div><span class="section-count">{{ record.black_box.trials|default(0) }} trials</span></div><p class="result-statement">Same-signature failures: <strong>{{ record.black_box.rate|default('not recorded') }}</strong>{% if record.black_box.budget_exhausted %} · budget exhausted{% endif %}</p><p class="field-help">Observed {{ record.black_box.fail|default(0) }} failures in {{ record.black_box.valid|default(0) }} valid trials. This characterization does not change the reduction acceptance decision.</p></section>{% endif %}
+{% endif %}
+
+<details class="artifact-json"><summary>Inspect complete persisted reduction record</summary><pre><code>{{ record|tojson(indent=2) }}</code></pre></details>
+{% endblock %}
