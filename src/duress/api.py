@@ -54,7 +54,7 @@ class RateLimiter:
     hour: dict[str, deque[float]] = field(default_factory=lambda: defaultdict(deque))
     day: dict[str, deque[float]] = field(default_factory=lambda: defaultdict(deque))
 
-    def allow(self, key: str) -> bool:
+    def allow(self, key: str, *, consume: bool = True) -> bool:
         now = self.clock()
         for bucket, window in ((self.hour, 3600.0), (self.day, 86400.0)):
             entries = bucket[key]
@@ -64,8 +64,9 @@ class RateLimiter:
             return False
         if len(self.day[key]) >= self.per_day:
             return False
-        self.hour[key].append(now)
-        self.day[key].append(now)
+        if consume:
+            self.hour[key].append(now)
+            self.day[key].append(now)
         return True
 
 
@@ -158,11 +159,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return await call_next(request)
 
     def begin_operation(request: Request) -> None:
-        if not rate.allow(client_key(request)):
+        key = client_key(request)
+        if not rate.allow(key, consume=False):
             raise HTTPException(status_code=429, detail="rate_limited")
         if not gate.acquire():
-            # A refused admission must not consume the caller's quota twice.
             raise HTTPException(status_code=409, detail="operation_in_progress")
+        # There is no await between checking and consuming admission.
+        rate.allow(key)
 
     @app.get("/api/health")
     def health() -> dict[str, Any]:
@@ -273,4 +276,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         finally:
             gate.release()
 
+    from .api_backend import install_backend_routes
+
+    install_backend_routes(
+        app,
+        settings=settings,
+        workspace=workspace,
+        authorize=authorize,
+        begin_operation=begin_operation,
+        gate=gate,
+    )
     return app

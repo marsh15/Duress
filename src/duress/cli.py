@@ -1,4 +1,5 @@
-"""Duress CLI: targets, run, dna, replay, verify-fix, sweep, serve (C.13)."""
+"""Duress CLI: targets, run, dna, replay, verify-fix, investigate, reduce,
+differential, sweep, serve (C.13)."""
 
 from __future__ import annotations
 
@@ -248,6 +249,165 @@ def verify_fix_command(
             typer.echo("")
             typer.echo(outcome.statement)
     raise typer.Exit(VERIFY_CODES[outcome.outcome])
+
+
+INVESTIGATION_CODES = {"PASS": 0, "FAIL": 1, "INCONCLUSIVE": 2}
+REDUCE_CODES = {
+    "REDUCED": 0,
+    "NOT_REDUCED": 0,
+    "SKIPPED": 2,
+    "INCONCLUSIVE": 2,
+    "REJECTED": 4,
+}
+
+
+@app.command("investigate")
+def investigate_command(
+    target: str = typer.Argument(..., help="target id, e.g. razorpay-vulnerable"),
+    mode: str = typer.Option("cached", "--mode", help="live | cached | exhaustive"),
+    reduce: bool = typer.Option(False, "--reduce", help="reduce each new DNA (M4)"),
+    wall_cap_s: float | None = typer.Option(None, "--wall-cap-s", help="override the wall cap"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Investigate a target: hypotheses, confirming runs, Failure DNA."""
+    from .orchestrator import MODES
+    from .services import investigate
+
+    if mode not in MODES:
+        typer.echo(f"error: --mode must be one of {', '.join(MODES)}", err=True)
+        raise typer.Exit(3)
+    workspace = _workspace()
+    try:
+        workspace.registry.get(target)
+    except KeyError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(3) from exc
+    record = asyncio.run(
+        investigate(workspace, target_id=target, mode=mode, reduce=reduce, wall_cap_s=wall_cap_s)
+    )
+    if json_output:
+        typer.echo(json.dumps(record, indent=2))
+    else:
+        typer.echo(f"investigation {record['investigation_id']}  ({record['status']})")
+        typer.echo(f"mode          requested={record['mode_requested']} effective={record['mode_effective']}")
+        if record.get("fallback_reason"):
+            typer.echo(f"fallback      {record['fallback_reason']}")
+        hypotheses = record.get("hypotheses") or []
+        if hypotheses:
+            typer.echo(f"hypotheses    {len(hypotheses)} (usable {record.get('usable_hypotheses')})")
+            for item in hypotheses:
+                status = item["status"]
+                typer.echo(
+                    f"  [{item['draft']['id']}] citation={status['citation']} "
+                    f"structure={status['structure']} linkage={status['linkage']} "
+                    f"outcome={status['outcome']}  (model text) {item['draft']['title']}"
+                )
+        typer.echo("")
+        for entry in record.get("scenarios") or []:
+            result = entry.get("result") or {}
+            typer.echo(
+                f"{entry['scenario_id']:<52}{str(result.get('status') or entry['status']):<14}"
+                f"valid={result.get('valid')} fail={result.get('fail')}"
+            )
+        for finding in record.get("findings") or []:
+            signature = finding["signature"]
+            typer.echo(
+                f"finding  {signature['check']} {signature['kind']} {','.join(signature['roles'])}"
+                f"  dna={finding.get('dna_id') or finding.get('dna_error')}"
+            )
+        for item in record.get("reductions") or []:
+            typer.echo(f"reduction {item.get('original_dna_id')}: {item.get('outcome')} {item.get('claim') or item.get('reason') or ''}")
+        typer.echo(f"trials        {record.get('trials_used')} / {record.get('trial_cap')}")
+        typer.echo(f"verdict       {record.get('verdict')}")
+    if record["status"] != "completed":
+        raise typer.Exit(2)
+    raise typer.Exit(INVESTIGATION_CODES.get(record.get("verdict") or "INCONCLUSIVE", 2))
+
+
+@app.command("reduce")
+def reduce_command(
+    dna: str = typer.Argument(..., help="DNA id"),
+    target: str | None = typer.Option(None, "--target", help="target id (default: from DNA)"),
+    black_box: bool = typer.Option(True, "--black-box", help="characterise without faults (required by C.11)"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Reduce a DNA by single-delivery removal (bounded, release-preserving)."""
+    from .services import reduce_dna, reduction_summary
+
+    workspace = _workspace()
+    try:
+        load_dna_document(workspace, dna)
+    except FileNotFoundError:
+        typer.echo(f"error: no DNA {dna!r}", err=True)
+        raise typer.Exit(3) from None
+    try:
+        run = asyncio.run(reduce_dna(workspace, dna_id=dna, target_id=target, black_box=black_box))
+    except KeyError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(3) from exc
+    summary = reduction_summary(run)
+    if json_output:
+        typer.echo(json.dumps({**run.to_json(), "summary": summary}, indent=2))
+    else:
+        typer.echo(f"reduction  {summary['reduction_id']}")
+        typer.echo(f"dna        {dna}")
+        typer.echo(f"outcome    {run.outcome}")
+        if run.reason:
+            typer.echo(f"reason     {run.reason}")
+        if summary.get("claim"):
+            typer.echo(f"claim      {summary['claim']}")
+        if run.result is not None:
+            typer.echo(
+                f"deliveries {', '.join(run.result.original_deliveries)} -> "
+                f"{', '.join(run.result.reduced_deliveries)}"
+            )
+            for candidate in run.result.candidates:
+                typer.echo(
+                    f"  -{candidate.removed:<6}{candidate.verdict:<14}"
+                    f"{', '.join(candidate.inadmissible_reasons or candidate.reasons)}"
+                )
+        if run.revalidation:
+            typer.echo(
+                f"revalidate p={run.revalidation.get('p')} valid={run.revalidation.get('valid')} "
+                f"accepted={run.revalidation.get('accepted')}"
+            )
+        if summary.get("reduced_dna_id"):
+            typer.echo(f"reduced    {summary['reduced_dna_id']}")
+        typer.echo(f"primary    {summary.get('primary_dna_id')}")
+    raise typer.Exit(REDUCE_CODES.get(run.outcome, 2))
+
+
+@app.command("differential")
+def differential_command(
+    targets: list[str] = typer.Option(None, "--target", help="repeatable; default vulnerable, naive_fix, fixed"),
+    policy: str = typer.Option("explore", "--policy", help="explore | matrix"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Run S3-rendezvous, S5 and S9 across variants and compare with plan E.1."""
+    from .services import differential
+
+    if policy not in {"explore", "matrix"}:
+        typer.echo("error: --policy must be explore or matrix", err=True)
+        raise typer.Exit(3)
+    try:
+        record = asyncio.run(differential(_workspace(), target_ids=targets or None, policy=policy))
+    except KeyError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(3) from exc
+    if json_output:
+        typer.echo(json.dumps(record, indent=2))
+    else:
+        typer.echo(f"differential {record['differential_id']}  policy={policy}")
+        for cell in record["cells"]:
+            mark = {True: "ok", False: "UNEXPECTED", None: "-"}[cell["agrees"]]
+            typer.echo(
+                f"{cell['scenario_id']:<48}{cell['target_id']:<22}"
+                f"expected={str(cell['expected']):<6} observed={cell['observed']:<13}{mark}"
+            )
+        typer.echo(f"summary {record['summary']}")
+    if record["summary"]["disagree"]:
+        raise typer.Exit(1)
+    raise typer.Exit(2 if record["summary"].get("inconclusive", 0) else 0)
 
 
 @app.command("sweep")

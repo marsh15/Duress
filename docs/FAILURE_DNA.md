@@ -80,3 +80,25 @@ failure needs more than the 44-trial cap and is reported as
 The result is `VERIFIED` only when the candidate produced no same-signature and
 no other failure across the required valid trials. The statement printed with
 the result is conditional and includes the independence assumption.
+
+## Reduction (M4)
+
+Reduction removes deliveries while retaining the original failure signature,
+execution semantics, seed/business roles, fixtures, expectation and invariant
+pack. It preserves the surviving delivery order, affected-role concurrency and
+rendezvous release requirements. Each accepted removal needs three valid
+same-signature, release-preserving failures; unknown evidence keeps the delivery.
+The claim concerns admissible single-delivery removal under this predicate,
+never global minimality.
+
+A changed schedule produces a new digest and DNA ID. The artifact passes
+preflight and independent replay revalidation (at least ten valid trials,
+p >= 0.9, uniform original release) before becoming primary. Failed revalidation
+returns INCONCLUSIVE and retains the original primary; the proposed artifact may
+remain available for inspection. The required fault-free characterization of the
+original schedule records `characterization.black_box_rate` outside its hashed
+reproducer. Reduction metadata links original, candidate, primary and reduction
+record IDs without changing the original identity.
+
+See [M3/M4 backend](M3_M4.md) for the bounded algorithm and
+[backend handoff](BACKEND_HANDOFF.md) for API/CLI schemas and retrieval.

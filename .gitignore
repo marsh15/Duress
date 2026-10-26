@@ -5,3 +5,6 @@ __pycache__/
 .ruff_cache/
 .duress/
 .DS_Store
+
+# Local recovery archives and test evidence
+.recovery/

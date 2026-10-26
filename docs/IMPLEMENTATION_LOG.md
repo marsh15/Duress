@@ -100,3 +100,164 @@ verify-fix; the API slice; `duress dna build|list`, `replay`, `verify-fix`,
 
 The DNA id is identical across independent builds and across the macOS host and
 the Linux container, which is the intended canonical-identity property.
+
+## M3/M4 interrupted-session recovery
+
+Work resumed in `/Users/santoshkumar/myprojects/Duress-core` on
+`feat/investigator-reduction`, with HEAD `d08409c`. The initial status/diff and
+all 31 changed/untracked files were preserved in
+`.recovery/20261026-202011/uncommitted-files.tar.gz`, alongside the binary patch,
+HEAD, status and inventory. Archive SHA-256:
+`209d5f10bbbfd387cb6610c476fd3204b211511f967a86d6a579d1687ef81d15`.
+No interrupted work was discarded. The primary frontend checkout was only read
+to inspect overlapping API routes; it was not modified or merged.
+
+`uv sync --python 3.12` selected CPython 3.12.12, recreated this worktree's
+virtualenv and installed the locked dependencies. `uv pip check` reported all
+29 installed packages compatible. No hosted model credentials were present.
+Luna subagents at `xhigh` independently checked the client, reducer and API/CLI;
+the parent inspected their changes and integrated the corrections.
+
+### Diagnosis and corrections
+
+- Initial `uv run pytest -q tests/integration/test_investigation_e2e.py`:
+  **2 passed, 2 failed**, 11.95 s. Saved outcome_detail and trial rows showed
+  correctly matched parameterized scenario IDs but zero valid trials. The
+  fixture's global AsyncClient monkeypatch blocked local readiness/delivery,
+  producing `harness_error:AssertionError` throughout. The investigator's
+  inconclusive classifications were honest; manufacturing a confirmation would
+  have hidden the harness failure. The corrected guard blocks provider calls
+  and non-loopback HTTP, and the fixed-target assertion now requires PASS.
+- E2E rerun: **4 passed**, 101.89 s. Vulnerable H1/H2 each confirmed in 5/5
+  exploration trials; naive_fix H1 refuted with 5 valid S3 passes and H2
+  confirmed in 5/5 S5 trials; fixed PASS with both refuted. Vulnerable and
+  naive_fix each produced one DNA from 30 total trials; fixed used 20 with no
+  DNA. The final acceptance also exercises investigation-triggered reduction.
+- A separate regression exposed refutation after only a subset of linked
+  scenarios ran. Missing experiments now retain an inconclusive outcome.
+  Failed characterization trials are counted, and a different characterization
+  signature cannot be attached as the original finding's DNA. A separate
+  attribution regression confirmed that a hypothesis confirmed by one scenario
+  must not be attached to a different failure from another linked scenario;
+  finding linkage now also matches the predicted check, kind and role.
+  Investigator/orchestrator/mode rerun after that fix: **111 passed**, 3.07 s.
+- HTTP-fixture review fixed total timeout, reported-token budget enforcement in
+  live/cached modes, corrupt-cache search and secret redaction before error
+  truncation. Standalone client check: **50 passed**. Parent mode tests verify
+  timeout and token-overrun fallback mappings.
+- Reducer review fixed non-finite/inconsistent preconditions, exact surviving
+  step order/concurrency checks, incomplete trial evidence, false REDUCED on
+  failed replay revalidation, and missing revalidation/black-box trial counts.
+  Delegated checks: **172 unit tests passed**, **8 integration tests passed**
+  (69.02 s). Parent added shared investigation deadlines and a zero-trial
+  expired-deadline regression; the final unit reducer count is 173.
+- API review fixed queued/running reduction records and terminal error
+  persistence for unexpected investigation/differential service errors.
+  Delegated API/CLI/naive_fix check: **38 passed**, 44.98 s. Parent fixed busy
+  refusals consuming quota, validated differential parameters before admission,
+  and returned CLI exit 2 for inconclusive differential cells.
+- Real differential/S5 verification plus the CLI inconclusive regression:
+  **3 passed**, 66.28 s. All nine explore cells agreed; S5 DNA on naive_fix was
+  NOT_VERIFIED with `still_reproduces`.
+
+The initial failures and newly exposed regression failures were diagnosed and
+fixed; no assertions were relaxed, no engine verdict was overridden, and no
+committed measurements were rewritten. See `DECISIONS.md`, `M3_M4.md` and
+`BACKEND_HANDOFF.md` for the contracts, artifact semantics and frontend merge
+resolution. The genuine hosted live inference/five-run comparison remains
+unverified; authored cache provenance and controlled HTTP responses do not
+substitute for that experiment.
+
+
+### Independent final review and C.11/lifecycle closure
+
+The first consolidated M3/M4 acceptance command passed **390 tests**, with one
+Starlette/httpx deprecation warning, in 295.04 s. A broad run collected before
+the final review fixes completed with **580 passed, 3 deselected**, 657.18 s;
+it is retained locally as earlier evidence, not the final-code sign-off.
+
+The independent Luna review identified three real gaps: group concurrency
+counted unrelated deliveries, the required fault-free experiment was opt-in,
+and cancelled/stale API records could remain queued/running. New regressions
+failed at each seam before correction. Static admissibility now counts each
+affected role; public reduction includes fault-free characterization and stores
+black_box_rate; investigation admission reserves all 62 possible reduction
+stage trials. API lifespan composition cancels/drains tasks on shutdown and
+marks stale records failed on startup. The re-review found all three blockers
+resolved with no remaining finding in that scope. No process-liveness or
+preflight-digest rules changed.
+
+The final reducer unit suite contains 175 cases; lifecycle regressions cover
+all three asynchronous operation types plus restart reconciliation. Final
+consolidated acceptance, full regression and matrix results follow below.
+
+
+### Final consolidated acceptance
+
+The frozen-code command below completed with **402 passed, 0 failed**, one
+Starlette/httpx deprecation warning, in **314.44 s**:
+
+```sh
+env DURESS_RECORD_MEASUREMENTS=0 uv run pytest -q \
+  tests/unit/test_llm.py tests/unit/test_investigator.py \
+  tests/unit/test_orchestrator.py tests/unit/test_reduce.py \
+  tests/unit/test_cli_outcomes.py \
+  tests/integration/test_investigation_e2e.py \
+  tests/integration/test_investigation_modes.py \
+  tests/e2e/test_exhaustive_fallback.py tests/integration/test_reduce.py \
+  tests/integration/test_differential.py tests/integration/test_api.py \
+  tests/integration/test_api_backend.py tests/integration/test_api_admission.py \
+  tests/integration/test_api_lifecycle.py tests/integration/test_cli_backend.py \
+  tests/integration/test_naive_fix_matrix.py \
+  targets/razorpay_ref/tests/test_naive_fix.py \
+  --basetemp=.recovery/acceptance-release
+```
+
+This includes **50 client**, **96 investigator**, **3 orchestrator**, **175
+reducer unit**, **8 reducer integration**, **4 investigation E2E**, and **4 API
+lifecycle** cases, plus modes, real exhaustive fallback, differential/S5
+verification, target, admission and CLI contracts. The investigation with
+reduction used 40 trials: 20 exploration, 10 failure characterization and 10
+fault-free characterization. Its rendezvous candidates were all statically
+pinned; the original DNA stayed primary with the claim "no admissible
+reductions". Its observed black_box_rate was 10/10 in this test run; this is
+recorded empirical evidence for this synthetic schedule and host, not a claim
+about other schedules or environments. The latency reduction fixture separately
+produced a reduced artifact, revalidated it and independently replayed it.
+
+The separate longer CLI command also passed with exit code 0:
+
+```sh
+env DURESS_HOME="$PWD/.recovery/matrix-20-home" \
+  DURESS_RECORD_MEASUREMENTS=0 \
+  uv run duress differential --policy matrix --json
+```
+
+Its persisted record contains **9/9 agreeing cells**, **180 valid trials** (20
+per cell), no disagreements or inconclusive trials, and no remaining pidfiles.
+Observed cells: S3 vulnerable FAIL / naive_fix PASS / fixed PASS; S5 vulnerable
+FAIL / naive_fix FAIL / fixed PASS; S9 PASS on all three. The full emitted JSON
+and persisted matrix record are retained under `.recovery/` locally. This is
+synthetic reference-target evidence, not hosted-model evidence.
+
+
+### Final full regression and integrity checks
+
+```sh
+env DURESS_RECORD_MEASUREMENTS=0 uv run pytest -q -m "not slow" \
+  --basetemp=.recovery/fast-release
+```
+
+Result: **592 passed, 3 deselected, 0 failed**, one Starlette/httpx deprecation
+warning, **714.99 s**. The three deselected tests are the pre-existing measured
+M0 experiments; the longer M4 matrix was run separately as above. The full
+suite includes the M0–M2 oracle, isolation, preflight, replay and verify-fix
+regressions. The final command ran on the frozen code alongside the independently
+isolated matrix; no code edits followed.
+
+`uv pip check` passed with all 29 installed packages compatible. Route
+method/path inventory found no duplicates. Diff and secret-pattern reviews
+passed. SHA-256 comparison verified all **12 committed measurement JSON files
+unchanged**, and the 31-file recovery archive still matches its recorded digest.
+Genuine hosted live inference and the five-run hosted comparison remain
+unverified; no local model weights or unrelated cleanup were used.

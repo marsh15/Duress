@@ -21,7 +21,7 @@ def duress_home(root: Path | None = None) -> Path:
 
 
 def ensure_dirs(home: Path) -> None:
-    for name in ("investigations", "dna", "evidence", "run"):
+    for name in ("investigations", "dna", "evidence", "run", "reductions", "differentials"):
         (home / name).mkdir(parents=True, exist_ok=True)
 
 
