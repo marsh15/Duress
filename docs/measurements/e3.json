@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26T12:26:59+00:00",
+  "generated_at": "2026-10-26T13:07:57+00:00",
   "environment": {
     "python": "3.12.15",
     "sqlite": "3.46.1",
@@ -20,20 +20,20 @@
   "clean_settlement": 10,
   "problems": {},
   "drain_seconds": [
-    0.17976532600005157,
-    0.17517505000068923,
-    0.18672150999918813,
-    0.17892537100124173,
-    0.18784742200114124,
-    0.18492701600007422,
-    0.1782388310002716,
-    0.17551013200136367,
-    0.28515878800135397,
-    0.28571432799981267
+    0.18236566700034018,
+    0.18387370799973723,
+    0.18458999900030904,
+    0.18216970799949195,
+    0.1249278459999914,
+    0.1734113359998446,
+    0.13142513599996164,
+    0.1798342509991926,
+    0.12464517999978852,
+    0.1317410950014164
   ],
   "trials": [
     {
-      "trial_id": "t819e8089c088",
+      "trial_id": "t43205a5c7dc5",
       "variant": "fixed",
       "copies": 1,
       "payment_id": "pay_A1",
@@ -47,7 +47,7 @@
           "body": {
             "status": "processed"
           },
-          "elapsed_s": 2.0528,
+          "elapsed_s": 2.0763,
           "error": null
         }
       ],
@@ -61,14 +61,14 @@
       "stub_calls": 1,
       "stale_calls": 0,
       "phase_timings": {
-        "prepare": 0.0813,
-        "readiness": 0.3809,
-        "execute": 2.0534,
-        "drain": 0.1798,
+        "prepare": 0.0602,
+        "readiness": 0.558,
+        "execute": 2.077,
+        "drain": 0.1824,
         "kill_confirm": 0.0,
-        "evaluate": 0.0018
+        "evaluate": 0.0035
       },
-      "total_s": 2.6973,
+      "total_s": 2.8813,
       "fulfilment_count": 1,
       "linked_count": 1,
       "payment": {
@@ -86,7 +86,7 @@
       }
     },
     {
-      "trial_id": "t9c538db216fc",
+      "trial_id": "tbabb69c60f32",
       "variant": "fixed",
       "copies": 1,
       "payment_id": "pay_A1",
@@ -100,7 +100,431 @@
           "body": {
             "status": "processed"
           },
-          "elapsed_s": 2.0582,
+          "elapsed_s": 2.0508,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0745,
+        "readiness": 0.4684,
+        "execute": 2.0512,
+        "drain": 0.1839,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0016
+      },
+      "total_s": 2.7798,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "t69731c446da2",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.0508,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0621,
+        "readiness": 0.3859,
+        "execute": 2.0512,
+        "drain": 0.1846,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0017
+      },
+      "total_s": 2.6855,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "tcd47ab23da8b",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.0576,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0674,
+        "readiness": 0.3911,
+        "execute": 2.0579,
+        "drain": 0.1822,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0018
+      },
+      "total_s": 2.7003,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "t8fbd05956a1a",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.0549,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0573,
+        "readiness": 0.3847,
+        "execute": 2.0552,
+        "drain": 0.1249,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0016
+      },
+      "total_s": 2.6238,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "tdf32f9396f01",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.0499,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0589,
+        "readiness": 0.3818,
+        "execute": 2.0502,
+        "drain": 0.1734,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0021
+      },
+      "total_s": 2.6665,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "t4bb66aa22b57",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.055,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0585,
+        "readiness": 0.3271,
+        "execute": 2.0572,
+        "drain": 0.1314,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0019
+      },
+      "total_s": 2.5762,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "t68e5a997551a",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.0573,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0617,
+        "readiness": 0.3937,
+        "execute": 2.0577,
+        "drain": 0.1798,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0021
+      },
+      "total_s": 2.695,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "ta6b65352f86a",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.0512,
+          "error": null
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "group_gone": true,
+      "instance_ok": true,
+      "state_readable": true,
+      "released_by": null,
+      "arrivals": 0,
+      "stub_calls": 1,
+      "stale_calls": 0,
+      "phase_timings": {
+        "prepare": 0.0581,
+        "readiness": 0.3952,
+        "execute": 2.052,
+        "drain": 0.1246,
+        "kill_confirm": 0.0,
+        "evaluate": 0.0017
+      },
+      "total_s": 2.6317,
+      "fulfilment_count": 1,
+      "linked_count": 1,
+      "payment": {
+        "id": "pay_A1",
+        "order_id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "captured"
+      },
+      "order": {
+        "id": "order_A",
+        "amount": 5000,
+        "currency": "INR",
+        "status": "fulfilled"
+      }
+    },
+    {
+      "trial_id": "tac75d93b2ae3",
+      "variant": "fixed",
+      "copies": 1,
+      "payment_id": "pay_A1",
+      "valid": true,
+      "invalid_reasons": [],
+      "responses": [
+        {
+          "delivery_id": "d1",
+          "outcome": "response",
+          "status_code": 200,
+          "body": {
+            "status": "processed"
+          },
+          "elapsed_s": 2.0473,
           "error": null
         }
       ],
@@ -115,437 +539,13 @@
       "stale_calls": 0,
       "phase_timings": {
         "prepare": 0.0594,
-        "readiness": 0.3848,
-        "execute": 2.0588,
-        "drain": 0.1752,
-        "kill_confirm": 0.0,
-        "evaluate": 0.0029
-      },
-      "total_s": 2.6813,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "t4d5dacbd7b2e",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.0818,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.0803,
-        "readiness": 0.7143,
-        "execute": 2.0829,
-        "drain": 0.1867,
+        "readiness": 0.3278,
+        "execute": 2.0476,
+        "drain": 0.1317,
         "kill_confirm": 0.0001,
-        "evaluate": 0.0065
+        "evaluate": 0.0021
       },
-      "total_s": 3.0711,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "t0257ba527486",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.0686,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.0804,
-        "readiness": 0.4634,
-        "execute": 2.0696,
-        "drain": 0.1789,
-        "kill_confirm": 0.0001,
-        "evaluate": 0.0037
-      },
-      "total_s": 2.7963,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "td5e03b766c16",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.0586,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.0654,
-        "readiness": 0.4008,
-        "execute": 2.0591,
-        "drain": 0.1878,
-        "kill_confirm": 0.0,
-        "evaluate": 0.003
-      },
-      "total_s": 2.7163,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "t979c6051c6e5",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.0602,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.0612,
-        "readiness": 0.3892,
-        "execute": 2.0607,
-        "drain": 0.1849,
-        "kill_confirm": 0.0,
-        "evaluate": 0.0033
-      },
-      "total_s": 2.6995,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "t3a28339b2252",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.0626,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.0582,
-        "readiness": 0.3831,
-        "execute": 2.0629,
-        "drain": 0.1782,
-        "kill_confirm": 0.0,
-        "evaluate": 0.0022
-      },
-      "total_s": 2.6848,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "tc722a42f1448",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.0566,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.0682,
-        "readiness": 0.5391,
-        "execute": 2.0569,
-        "drain": 0.1755,
-        "kill_confirm": 0.0,
-        "evaluate": 0.0016
-      },
-      "total_s": 2.8413,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "t6f85bc941a3c",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.0893,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.0611,
-        "readiness": 0.3926,
-        "execute": 2.0899,
-        "drain": 0.2852,
-        "kill_confirm": 0.0003,
-        "evaluate": 0.0236
-      },
-      "total_s": 2.8531,
-      "fulfilment_count": 1,
-      "linked_count": 1,
-      "payment": {
-        "id": "pay_A1",
-        "order_id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "captured"
-      },
-      "order": {
-        "id": "order_A",
-        "amount": 5000,
-        "currency": "INR",
-        "status": "fulfilled"
-      }
-    },
-    {
-      "trial_id": "tb4fdebe6f9c4",
-      "variant": "fixed",
-      "copies": 1,
-      "payment_id": "pay_A1",
-      "valid": true,
-      "invalid_reasons": [],
-      "responses": [
-        {
-          "delivery_id": "d1",
-          "outcome": "response",
-          "status_code": 200,
-          "body": {
-            "status": "processed"
-          },
-          "elapsed_s": 2.1516,
-          "error": null
-        }
-      ],
-      "exit_code": 0,
-      "forced": false,
-      "group_gone": true,
-      "instance_ok": true,
-      "state_readable": true,
-      "released_by": null,
-      "arrivals": 0,
-      "stub_calls": 1,
-      "stale_calls": 0,
-      "phase_timings": {
-        "prepare": 0.2112,
-        "readiness": 1.8669,
-        "execute": 2.1546,
-        "drain": 0.2857,
-        "kill_confirm": 0.0001,
-        "evaluate": 0.006
-      },
-      "total_s": 4.5249,
+      "total_s": 2.5688,
       "fulfilment_count": 1,
       "linked_count": 1,
       "payment": {

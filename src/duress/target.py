@@ -40,6 +40,7 @@ from .runner import ExecutionResult, run_schedule
 from .store import (
     Pidfile,
     duress_home,
+    force_kill_members,
     group_exists,
     group_members,
     process_start_time,
@@ -415,6 +416,7 @@ class TrialSupervisor:
         start = time.monotonic()
         if crash_before_drain:
             self._signal_group(signal.SIGKILL)
+            force_kill_members(self.pgid)
             try:
                 await asyncio.wait_for(self.proc.wait(), timeout=5.0)
             except asyncio.TimeoutError:
@@ -426,6 +428,7 @@ class TrialSupervisor:
             except asyncio.TimeoutError:
                 forced = True
                 self._signal_group(signal.SIGKILL)
+                force_kill_members(self.pgid)
                 try:
                     await asyncio.wait_for(self.proc.wait(), timeout=5.0)
                 except asyncio.TimeoutError:
@@ -465,12 +468,22 @@ class TrialSupervisor:
     async def _confirm_group_gone(self) -> bool:
         if self.pgid is None:
             return True
-        deadline = time.monotonic() + self.limits.phase("kill_confirm")
+        if await self._wait_group_gone(1.0):
+            return True
+        # A group can stay alive because killpg was refused (macOS reports EPERM
+        # for some groups), so signal the remaining members directly before
+        # declaring the termination unconfirmed.
+        force_kill_members(self.pgid)
+        remaining = max(0.0, self.limits.phase("kill_confirm") - 1.0)
+        return await self._wait_group_gone(remaining)
+
+    async def _wait_group_gone(self, timeout_s: float) -> bool:
+        deadline = time.monotonic() + timeout_s
         while time.monotonic() < deadline:
             if not group_exists(self.pgid):
                 return True
             await asyncio.sleep(0.02)
-        return False
+        return not group_exists(self.pgid)
 
     async def _evaluate(self) -> None:
         start = time.monotonic()
@@ -547,11 +560,17 @@ class TrialSupervisor:
             return
         try:
             os.killpg(self.pgid, sig)
-        except ProcessLookupError:
+        except (ProcessLookupError, PermissionError):
+            # EPERM is not evidence that the group is gone: macOS returns it
+            # while members are zombies or exiting, and occasionally even when a
+            # live member remains. Termination is decided by group_exists(), and
+            # _confirm_group_gone() escalates per pid when a member survives.
             pass
 
     def _force_kill_sync(self) -> None:
         self._signal_group(signal.SIGKILL)
+        if self.pgid is not None:
+            force_kill_members(self.pgid)
 
     def _stub_stats(self) -> dict[str, Any]:
         try:

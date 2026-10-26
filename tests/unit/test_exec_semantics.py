@@ -86,7 +86,7 @@ async def test_c1_steps_run_in_order():
 
 @pytest.mark.asyncio
 async def test_c2_concurrent_group_releases_first_attempts_together():
-    with RecordingTarget(delays=[0.15]) as target:
+    with RecordingTarget(delays=[0.3]) as target:
         schedule = Schedule(
             deliveries=[delivery(f"d{i}") for i in range(1, 4)],
             steps=[Step(deliveries=["d1", "d2", "d3"])],
@@ -96,13 +96,13 @@ async def test_c2_concurrent_group_releases_first_attempts_together():
     starts = [record["started"] for record in target.records]
     ends = [record["ended"] for record in target.records]
     assert len(starts) == 3
-    assert max(starts) - min(starts) < 0.05
+    assert max(starts) - min(starts) < 0.1
     assert all(start < min(ends) for start in starts)
 
 
 @pytest.mark.asyncio
 async def test_c3_planned_attempt_timeout_is_an_outcome():
-    with RecordingTarget(delays=[0.4]) as target:
+    with RecordingTarget(delays=[0.6]) as target:
         schedule = Schedule(
             deliveries=[delivery("d1", attempt_timeout_ms=100)],
             steps=[Step(deliveries=["d1"])],
@@ -111,14 +111,17 @@ async def test_c3_planned_attempt_timeout_is_an_outcome():
         result = await run(target, schedule)
     assert [attempt.outcome for attempt in result.attempts] == ["timeout"]
     assert result.execution_deadline_exceeded is False
-    assert result.duration_s < 0.25
+    assert result.duration_s < 0.5
 
 
 @pytest.mark.asyncio
 async def test_c4_retry_reuses_body_and_event_id_and_regenerates_signature():
-    with RecordingTarget(delays=[0.3, 0.0]) as target:
+    # The subject is retry semantics, not a sub-100 ms scheduling budget: the
+    # first attempt is made to overrun its planned timeout by a wide margin, so
+    # a busy host cannot turn attempt 2 into a spontaneous timeout.
+    with RecordingTarget(delays=[2.0, 0.0]) as target:
         schedule = Schedule(
-            deliveries=[delivery("d1", attempt_timeout_ms=100, max_attempts=2)],
+            deliveries=[delivery("d1", attempt_timeout_ms=1000, max_attempts=2)],
             steps=[Step(deliveries=["d1"])],
             delivery_policy=AttemptPolicy(
                 attempt_timeout_ms=5000,

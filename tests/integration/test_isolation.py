@@ -34,6 +34,8 @@ from duress.target import TrialConfig, TrialSupervisor, run_trial
 
 from ..engine import built
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def make_config(registry, stub, workdir, target_id="razorpay-fixed", scenario=None, **kwargs):
     profile = registry.get(target_id)
@@ -77,6 +79,63 @@ async def test_spawn_orphan_leaves_no_process_and_no_write(registry, stub, tmp_p
     assert not any(
         row["id"] == "orphan_marker" for row in observation.snapshot.rows("payments")
     )
+
+
+def test_sigint_cleanup(tmp_path):
+    """SIGINT to the CLI drains the target group and removes the pidfile."""
+    home = tmp_path / ".duress"
+    env = os.environ.copy()
+    env["DURESS_HOME"] = str(home)
+    env["DURESS_ROOT"] = str(REPO_ROOT)
+    env["PYTHONPATH"] = os.pathsep.join(
+        [str(REPO_ROOT / "src"), str(REPO_ROOT / "targets")]
+    )
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "duress.cli",
+            "run",
+            "fixture-hang_on_shutdown",
+            "--scenario",
+            "S1",
+            "--policy",
+            "explore",
+        ],
+        cwd=str(REPO_ROOT),
+        env=env,
+        start_new_session=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    pgid = None
+    pidfile = None
+    try:
+        run_dir = home / "run"
+        for _ in range(500):
+            files = list(run_dir.glob("*.pid")) if run_dir.exists() else []
+            if files:
+                pidfile = files[0]
+                pgid = json.loads(pidfile.read_text())["pgid"]
+                break
+            time.sleep(0.02)
+        assert pidfile is not None, "the CLI never started a target"
+        os.kill(process.pid, signal.SIGINT)
+        process.communicate(timeout=20)
+        assert process.returncode in {0, 2, 130}
+        for _ in range(250):
+            if not group_exists(pgid):
+                break
+            time.sleep(0.02)
+        assert not group_exists(pgid)
+        assert not pidfile.exists()
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=5)
+        if pgid is not None and group_exists(pgid):
+            os.killpg(pgid, signal.SIGKILL)
 
 
 @pytest.mark.asyncio

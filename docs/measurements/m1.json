@@ -1,7 +1,7 @@
 {
   "milestone": "M1",
   "label": "local",
-  "generated_at": "2026-10-26T12:20:49+00:00",
+  "generated_at": "2026-10-26T13:01:54+00:00",
   "environment": {
     "python": "3.12.14",
     "sqlite": "3.53.1",
@@ -14,11 +14,11 @@
   "fast_suite": {
     "command": "uv run pytest -q -m \"not slow\"",
     "exit_code": 0,
-    "passed": 141,
+    "passed": 147,
     "failed": null,
     "deselected": 3,
-    "seconds": 206.76,
-    "summary": "141 passed, 3 deselected, 1 warning in 205.74s (0:03:25)",
+    "seconds": 187.53,
+    "summary": "147 passed, 3 deselected, 1 warning in 186.66s (0:03:06)",
     "failure_output": ""
   },
   "acceptance_tests": {
@@ -40,7 +40,7 @@
       "tests/integration/test_e8_two_workers.py",
       "tests/integration/test_declared_launch.py"
     ],
-    "collected": 114,
+    "collected": 115,
     "collection_exit_code": 0
   }
 }

@@ -200,3 +200,59 @@ S5/S6/S9 templates, Failure DNA, preflight, replay, verify-fix, reduction, the
 investigator and the web UI are M2–M5. `EXHAUSTIVE_SET` is intentionally empty
 until M2 adds the registry entries. The M1 lets the DL-3 test build an S6-shaped
 schedule directly; it is not a registry template yet.
+
+## M1 recovery — process termination is read from the process table
+
+### D-M1-10 — `EPERM` from `killpg` is never evidence of termination
+
+**Status:** implemented and tested.
+
+**Context.** The first M1 verification run failed `test_wal_copy_after_sigkill_is_readable`
+with `PermissionError` from `killpg`. The immediate fix was to treat `EPERM` as
+"already exited", in both `TrialSupervisor._signal_group` and `group_exists`.
+A direct probe of this host showed that assumption is wrong in the dangerous
+direction: macOS returns `EPERM` from `killpg(pgid, 0)` while members are
+zombies, and `killpg(pgid, SIGKILL)` has been observed to return `EPERM` even
+though the signal landed. A zombie-only group is not reachable by a signal
+probe, but a group with a live member can also report `EPERM` in the middle of
+teardown.
+
+**Decision.** Liveness is never inferred from a signal's return code.
+`store.group_exists` reads the process table: `/proc` on Linux, `ps -o
+pid=,pgid=,stat=` on macOS. A member counts as alive only when its state is not
+`Z`; a zombie cannot run user code or write. `EPERM`/`ESRCH` from `killpg` are
+only failed signal attempts. `force_kill_members` escalates to a direct
+`os.kill(pid, SIGKILL)` for live members, which closes the case where a group
+signal is refused while the target is alive; it refuses to signal Duress's own
+process group. `_confirm_group_gone` waits, escalates, then waits again, and a
+group that survives both stays `unconfirmed` — state is not read and the trial
+does not become a verdict.
+
+**Consequence.** The pidfile sweep no longer deletes a record on `EPERM`; a group
+that survives escalation is reported as `unresolved` and its pidfile is kept so
+the next sweep retries. `tests/unit/test_group_liveness.py` pins every case:
+a refused signal over a live group, a zombie-only group, per-pid escalation,
+own-group refusal, and a sweep that must not claim an undead group was killed.
+
+### D-M1-11 — A flaky exec@1 retry test is fixed at its cause, not its margin
+
+**Status:** implemented.
+
+**Context.** `test_c4_retry_reuses_body_and_event_id_and_regenerates_signature`
+failed once in a full verification run with `["timeout", "timeout"]`, then
+passed repeatedly with the same parameters (10/10 on a quiet host). The test
+designed its own sub-100 ms round-trip budget: a 100 ms planned attempt timeout
+for a retry whose second attempt needed some of that budget for the socket
+round trip. The subject of the test is retry semantics — same body, same event
+id, fresh signature, backoff — not a scheduler-latency bound.
+
+**Decision.** The first handler now sleeps 2 s against a 1000 ms planned
+timeout, so the first attempt times out by design and the second attempt has a
+1 s budget for an immediate response. No assertion was removed or weakened:
+outcomes, backoff ordering, body equality and both signatures are still
+checked. The timing-only margins in C2/C3 were widened for the same reason and
+are documented in the test comments.
+
+**Consequence.** The retry path is exercised with roughly an order of magnitude
+more headroom, and a failure now means a real regression rather than a loaded
+host. The historical interrupted measurement is superseded in EVIDENCE.md.

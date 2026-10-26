@@ -1,7 +1,7 @@
 {
   "milestone": "M1",
   "label": "docker",
-  "generated_at": "2026-10-26T12:25:14+00:00",
+  "generated_at": "2026-10-26T13:08:13+00:00",
   "environment": {
     "python": "3.12.15",
     "sqlite": "3.46.1",
@@ -14,11 +14,11 @@
   "fast_suite": {
     "command": "uv run pytest -q -m \"not slow\"",
     "exit_code": 0,
-    "passed": 141,
+    "passed": 147,
     "failed": null,
     "deselected": 3,
-    "seconds": 240.29,
-    "summary": "141 passed, 3 deselected, 1 warning in 238.29s (0:03:58)",
+    "seconds": 182.53,
+    "summary": "147 passed, 3 deselected, 1 warning in 181.12s (0:03:01)",
     "failure_output": ""
   },
   "acceptance_tests": {
@@ -40,7 +40,7 @@
       "tests/integration/test_e8_two_workers.py",
       "tests/integration/test_declared_launch.py"
     ],
-    "collected": 114,
+    "collected": 115,
     "collection_exit_code": 0
   }
 }

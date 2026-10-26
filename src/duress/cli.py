@@ -140,7 +140,12 @@ def sweep_command() -> None:
         typer.echo(f"killed pgid={info.pgid} instance={info.instance}")
     for info in result.stale:
         typer.echo(f"stale  pgid={info.pgid} instance={info.instance}")
-    if not result.killed and not result.stale:
+    for info in result.unresolved:
+        typer.echo(
+            f"unresolved pgid={info.pgid} instance={info.instance} "
+            "(still alive; pidfile kept)"
+        )
+    if not result.killed and not result.stale and not result.unresolved:
         typer.echo("nothing to sweep")
 
 
