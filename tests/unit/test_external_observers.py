@@ -318,3 +318,12 @@ def test_postgres_observer_uses_repeatable_read_and_never_retains_dsn(monkeypatc
     assert "top-secret" not in repr(snapshot.model_dump())
     assert "alice" not in repr(snapshot.provenance)
     assert all(";" not in query for query, _ in connection.cursor_instance.queries)
+
+
+def test_schema_fingerprint_is_portable_across_fresh_trial_namespaces():
+    from duress.external.observers import _provenance
+    fields=[{'entity':'things','table':'things','key':'id','columns':[{'name':'id','present':True,'type':'integer','nullable':False}]}]
+    first=_provenance('postgresql','duress_trial_a',fields)
+    second=_provenance('postgresql','duress_trial_b',fields)
+    assert first['schema']!=second['schema']
+    assert first['schema_fingerprint']==second['schema_fingerprint']

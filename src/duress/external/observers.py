@@ -327,7 +327,6 @@ def _provenance(kind: str, schema: str, schema_rows: list[dict[str, Any]]) -> di
     canonical = json.dumps(
         {
             "adapter": kind,
-            "schema": schema,
             "entities": sorted(schema_rows, key=lambda item: item["entity"]),
         },
         sort_keys=True,
