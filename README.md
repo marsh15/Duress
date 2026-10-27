@@ -136,9 +136,9 @@ The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [
 
 ## Stack, scope, and limitations
 
-Python 3.12, FastAPI, Pydantic, SQLite, HTTPX, Typer, Jinja, HTMX, pytest, and Playwright. Assets are bundled and require no CDN.
+Python 3.12, FastAPI, Pydantic, SQLite, optional PostgreSQL/psycopg, HTTPX, Typer, Jinja, HTMX, pytest, and Playwright. Assets are bundled and require no CDN.
 
-The payment demonstration is a controlled synthetic contract, not a finding about Razorpay. External integration adapters support explicitly configured owned local applications; they do not authorize arbitrary production testing. Fault-controlled experiments are labelled separately from fault-free observations. Digests detect alteration, not authorship. The application is a single-workspace developer tool; reads are public if exposed. Use one API worker because admission and background tasks are process-local. Hosted storage is ephemeral; download artifacts to retain them across redeploys.
+The payment demonstration is a controlled synthetic contract, not a finding about Razorpay. External integration adapters support explicitly configured owned local applications; they do not authorize arbitrary production testing. Fault-controlled experiments are labelled separately from fault-free observations. Digests detect alteration, not authorship. The bundled hosted demonstration uses a single workspace with public evidence reads. External local projects have separate records and loopback-only web access. Use one API worker because admission and background tasks are process-local. Hosted storage is ephemeral; download artifacts to retain them across redeploys.
 
 Genuine hosted inference, the multi-run hosted live-versus-exhaustive comparison, and Render capacity remain unverified. Cached and exhaustive modes remain fully usable. No local model weights are required or downloaded.
 
