@@ -4,10 +4,20 @@ on:
   workflow_call:
     inputs:
       application-path:
-        description: Path to the trusted caller application checkout, relative to its repository root.
+        description: Path to the trusted caller application, relative to the checkout or cloned bundle root.
         type: string
         required: false
         default: .
+      application-bundle:
+        description: Optional trusted Git bundle path, relative to the caller repository root.
+        type: string
+        required: false
+        default: ""
+      install-application:
+        description: Install the caller application package into the Duress virtual environment.
+        type: boolean
+        required: false
+        default: false
       app-requirements-path:
         description: Optional trusted requirements.txt path, relative to application-path.
         type: string
@@ -64,6 +74,37 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Clone trusted caller application bundle
+        if: ${{ inputs.application-bundle != '' }}
+        shell: bash
+        env:
+          APPLICATION_BUNDLE: ${{ inputs.application-bundle }}
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+
+          workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve(strict=True)
+          bundle_input = Path(os.environ["APPLICATION_BUNDLE"])
+          if bundle_input.is_absolute():
+              raise SystemExit("application-bundle must be relative to the caller checkout")
+          bundle = (workspace / bundle_input).resolve(strict=True)
+          if not bundle.is_file() or not bundle.is_relative_to(workspace):
+              raise SystemExit("application-bundle must name a file inside the caller checkout")
+          subprocess.run(["git", "bundle", "verify", str(bundle)], check=True)
+
+          target = Path(os.environ["RUNNER_TEMP"]) / (
+              f"duress-caller-application-{os.environ['GITHUB_RUN_ID']}-"
+              f"{os.environ['GITHUB_RUN_ATTEMPT']}"
+          )
+          if target.exists():
+              raise SystemExit("temporary caller application path already exists")
+          subprocess.run(["git", "clone", "--no-hardlinks", str(bundle), str(target)], check=True)
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"DURESS_APPLICATION_ROOT={target.resolve(strict=True)}\n")
+          PY
+
       - name: Validate caller paths
         shell: bash
         env:
@@ -76,12 +117,14 @@ jobs:
           from pathlib import Path
 
           workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve(strict=True)
+          app_root_value = os.environ.get("DURESS_APPLICATION_ROOT", "")
+          app_root = Path(app_root_value).resolve(strict=True) if app_root_value else workspace
           app_input = Path(os.environ["APP_PATH"])
           if app_input.is_absolute():
-              raise SystemExit("application-path must be relative to the caller checkout")
-          app = (workspace / app_input).resolve(strict=True)
-          if not app.is_dir() or not app.is_relative_to(workspace):
-              raise SystemExit("application-path must be a directory inside the caller checkout")
+              raise SystemExit("application-path must be relative to the caller application root")
+          app = (app_root / app_input).resolve(strict=True)
+          if not app.is_dir() or not app.is_relative_to(app_root):
+              raise SystemExit("application-path must be a directory inside the caller application root")
 
           config_input = Path(os.environ["CONFIG_PATH"])
           if config_input.is_absolute():
@@ -154,6 +197,14 @@ jobs:
           set -Eeuo pipefail
           "$RUNNER_TEMP/duress-ci-venv/bin/python" -m pip install \
             --disable-pip-version-check -r "$DURESS_REQUIREMENTS_PATH"
+
+      - name: Install trusted caller application package
+        if: ${{ inputs.install-application }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          "$RUNNER_TEMP/duress-ci-venv/bin/python" -m pip install \
+            --disable-pip-version-check "$DURESS_APP_PATH"
 
       - name: Run Duress business-state gate
         shell: bash

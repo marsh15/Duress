@@ -10,11 +10,18 @@ Python 3.12, a per-run PostgreSQL container, and a database named with the
 `.github/workflows/external-ci.yml` is a `workflow_call` workflow. A caller
 checks out its own trusted application repository, installs Duress from the
 configured public source ref, optionally installs a caller-owned
-`requirements.txt`, and runs `duress check` against the caller's config.
-`application-path`, `app-requirements-path`, and `config-path` are checked to
-stay inside the caller checkout or application directory. Only pass a
-requirements file from a repository you trust; installing it runs its package
-build and dependency code.
+`requirements.txt`, and runs `duress check` against the caller's config. By
+default the app is in the caller checkout. Set `application-bundle` to a
+relative path for a trusted Git bundle in that checkout to have the workflow
+clone it into `RUNNER_TEMP`, outside the Duress source checkout. In bundle mode,
+`application-path` and `config-path` are relative to the cloned bundle; without
+a bundle, `application-path` is relative to the caller checkout. The workflow
+validates `application-path`, `app-requirements-path`, and `config-path` to
+remain under their selected application root. Only pass a bundle and
+requirements file from repositories you trust; pip installing either can run
+application build and dependency code. `install-application: true`
+installs the app package into the same virtual environment as Duress, and is
+off by default.
 
 Pin the workflow and the Duress source to the same immutable commit:
 
@@ -26,10 +33,12 @@ jobs:
     uses: marsh15/Duress/.github/workflows/external-ci.yml@<duress-commit-sha>
     with:
       duress-ref: <duress-commit-sha>
+      application-bundle: examples/ticketing.bundle
       application-path: .
       app-requirements-path: requirements-ci.txt
       config-path: duress/duress.toml
       scenario: concurrent-duplicate
+      install-application: true
 ```
 
 `duress-ref` is required because the called workflow runs in the caller's GitHub
@@ -57,17 +66,27 @@ for `REJECTED`.
 ## Internal regression and independent ticketing controls
 
 `.github/workflows/productization.yml` runs on pull requests and pushes to
-`main`, `feature`, `feature/**`, and `feat/**`. It syncs the lockfile with
-`uv sync --locked`, runs the complete pytest suite, builds the wheel and source
-distribution, installs the wheel with its PostgreSQL extra in a fresh virtual
-environment, then checks the installed `duress` command from outside the
-source checkout.
+`main`. Its `reusable-fixed` job calls `.github/workflows/external-ci.yml` with
+the current commit, `examples/ticketing.bundle`, and the independent app's
+`duress/fixed.toml`. It installs that app package in the reusable workflow's
+Duress environment, starts the workflow's isolated PostgreSQL runtime, and
+runs the actual `duress check --scenario concurrent-duplicate` gate. This
+selftest exercises the reusable workflow itself and uploads its JSON, JUnit,
+and Failure DNA artifacts even when the check fails.
 
-The workflow clones `examples/ticketing.bundle` into `RUNNER_TEMP`. That Git
-bundle is produced from the standalone sibling ticketing repository, which
-does not import Duress. The workflow installs the application into the clean
-Duress environment, runs `scripts/setup_ticketing_example.py APP`, and invokes
-`scripts/ci_ticketing.py APP`. The latter runs the selected
+The separate `productization` job syncs the lockfile with `uv sync --locked`,
+runs the complete pytest suite, builds the wheel and source distribution,
+installs the wheel with its PostgreSQL extra in a fresh virtual environment,
+then checks the installed `duress` command from outside the source checkout.
+
+The standalone acceptance steps also clone `examples/ticketing.bundle` into
+`RUNNER_TEMP`. That Git bundle is produced from the standalone sibling
+ticketing repository, which does not import Duress. Those steps install the
+application into the clean Duress environment, run
+`scripts/setup_ticketing_example.py APP`, and invoke
+`scripts/ci_ticketing.py APP`. This script is a broader acceptance control; it
+does not call the reusable workflow and does not replace the `reusable-fixed`
+selftest. It runs the selected
 `concurrent-duplicate` scenario and requires:
 
 - The flawed application returns `FAIL` (exit 1) and produces real
