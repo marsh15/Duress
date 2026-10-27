@@ -6,9 +6,11 @@ Duress is a local-first reliability-testing tool for developer-owned webhook int
 
 An HTTP acknowledgment can hide duplicate tickets, missing business effects, and incorrect state transitions. Duress checks declared business entities after managed processes have drained and their termination has been confirmed.
 
-![Duress workbench](docs/screenshots/workbench.png)
+![Duress workspace overview](docs/design/screenshots/overview-dark.png)
 
-[Executed investigation](docs/screenshots/investigation.png) · [Business-state evidence](docs/screenshots/business-state.png) · [Comparison](docs/screenshots/comparison.png) · [Accepted reduction](docs/screenshots/accepted-reduction.png) · [Silent walkthrough](docs/screenshots/duress-walkthrough.webm) · [Demo outline](docs/DEMO.md)
+[Light theme](docs/design/screenshots/overview-light.png) · [Executed investigation](docs/design/screenshots/investigation-completed.png) · [Failure DNA](docs/design/screenshots/failure-dna.png) · [Delivery sequence](docs/design/screenshots/delivery-sequence.png) · [Mobile setup](docs/design/screenshots/mobile-setup.png) · [Silent walkthrough](docs/design/screenshots/walkthrough.mp4) · [Design and validation](docs/design/redesign.md)
+
+The workspace includes dark, light and system appearance, keyboard navigation with **Cmd/Ctrl+K**, a local project setup guide at `/guide`, and a shared component reference at `/design-system`. Execution lifecycle and business verdict remain separate. Historical release screenshots and measurements remain in `docs/screenshots` and `docs/release`.
 
 ## Use your own application
 
