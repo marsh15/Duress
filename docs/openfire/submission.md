@@ -24,7 +24,7 @@ local-first developer beta; a hosted demo must execute bundled trusted targets o
 - Final video: [90-second captioned silent demonstration](duress-openfire-90s.mp4), with
   [script, provenance and playback review](demo-script.md).
 - Alan contribution: [verified evidence and exact boundaries](alan.md).
-- Official X announcement: identify the actual 19:30 launch post; no URL is assumed.
+- Official launch post: https://x.com/prasad_pilla/status/2115081039970463783 — organizer/founder launch video, observed in a signed-out browser at 19:29 IST on 27 October. This is the quote-post target; no quote-post has been published by this release session.
 - X quote-post: **not published**. Quote the official post; do not replace it with a standalone post.
 - Form: inspect actual fields when it opens; **not submitted**. Do not infer organizer acceptance.
 

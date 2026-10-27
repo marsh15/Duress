@@ -126,13 +126,14 @@ jobs:
             --publish 127.0.0.1::5432 \
             postgres:16-alpine >/dev/null
           port="$(docker port "$container_name" 5432/tcp | sed 's/.*://')"
+          # The image's temporary init server is socket-only; wait for final TCP readiness.
           for attempt in {1..60}; do
-            if docker exec "$container_name" pg_isready -U postgres -d duress_ticketing_test >/dev/null; then
+            if docker exec "$container_name" pg_isready -h 127.0.0.1 -p 5432 -U postgres -d duress_ticketing_test >/dev/null; then
               break
             fi
             sleep 1
           done
-          docker exec "$container_name" pg_isready -U postgres -d duress_ticketing_test >/dev/null
+          docker exec "$container_name" pg_isready -h 127.0.0.1 -p 5432 -U postgres -d duress_ticketing_test >/dev/null
           printf 'DURESS_TICKETING_DB=postgresql://postgres:%s@127.0.0.1:%s/duress_ticketing_test\n' \
             "$password" "$port" >> "$GITHUB_ENV"
 

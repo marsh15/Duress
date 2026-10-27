@@ -1,0 +1,98 @@
+{
+  "image": "postgres:16-alpine",
+  "observations": [
+    {
+      "elapsed_s": 0.34,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 0.562,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 0.822,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 1.028,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 1.224,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 1.418,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 1.602,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 1.789,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 2.018,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 2.243,
+      "unix_socket": 2,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 2.417,
+      "unix_socket": 0,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 2.599,
+      "unix_socket": 1,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 2.798,
+      "unix_socket": 1,
+      "tcp_loopback": 2
+    },
+    {
+      "elapsed_s": 2.986,
+      "unix_socket": 0,
+      "tcp_loopback": 0
+    },
+    {
+      "elapsed_s": 3.178,
+      "unix_socket": 0,
+      "tcp_loopback": 0
+    },
+    {
+      "elapsed_s": 3.363,
+      "unix_socket": 0,
+      "tcp_loopback": 0
+    },
+    {
+      "elapsed_s": 3.539,
+      "unix_socket": 0,
+      "tcp_loopback": 0
+    },
+    {
+      "elapsed_s": 3.744,
+      "unix_socket": 0,
+      "tcp_loopback": 0
+    }
+  ],
+  "premature_socket_ready": true,
+  "stable_tcp_ready": true,
+  "scope": "One fresh local Docker PostgreSQL initialization; no Duress experiment or real credentials."
+}
