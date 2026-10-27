@@ -243,3 +243,16 @@ def test_ui_investigation_submission_persists_and_polls_with_mock_execution(
     assert poll.json()["payload"]["investigation_id"] == "i1234567890abcdef"
     assert "config_path" not in json.dumps(poll.json())
     assert client.get(accepted["operation_url"]).status_code == 200
+
+
+def test_workbench_reconciles_registered_orphaned_queue_on_start(tmp_path,monkeypatch):
+    from duress.external import storage
+    config,home=_registered_project(tmp_path,monkeypatch)
+    store=ProjectStore('ticket-service',home)
+    store.save('operations',{'status':'queued'},'orphan-queue')
+    path=store.home/'operations'/'orphan-queue.json'
+    record=json.loads(path.read_text());record['owner']={'pid':2_000_000_000,'start_time':'gone'}
+    path.write_text(json.dumps(storage._seal_record(record)))
+    client=_client(home=home)
+    assert client.app.state.external_recovery['ticket-service']['count']==1
+    assert store.load('operations','orphan-queue')['status']=='interrupted'

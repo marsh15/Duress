@@ -268,3 +268,16 @@ def test_export_destination_symlink_is_rejected(tmp_path, monkeypatch):
     with pytest.raises(UnsafeStoragePath):
         store.export_to(link)
     assert target.read_text() == "leave me alone"
+
+
+def test_reconcile_also_recovers_orphaned_queued_work(tmp_path,monkeypatch):
+    store=ProjectStore('queued-recovery',tmp_path/'state')
+    store.save('operations',{'status':'queued'},'queued')
+    path=store.home/'operations'/'queued.json'
+    record=json.loads(path.read_text())
+    record['owner']={'pid':2_000_000_000,'start_time':'gone'}
+    path.write_text(json.dumps(storage._seal_record(record)))
+    monkeypatch.setattr(storage,'process_start_time',lambda pid:None)
+    result=store.reconcile()
+    assert result['interrupted']==['operations/queued']
+    assert store.load('operations','queued')['payload']['status']=='interrupted'

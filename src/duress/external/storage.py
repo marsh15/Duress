@@ -543,7 +543,9 @@ class ProjectStore:
                 if record is None:
                     continue
                 payload = record["payload"]
-                running = record.get("status") == "running" or payload.get("status") == "running" or payload.get("state") == "running"
+                running = (record.get("status") in {"queued", "running"}
+                           or payload.get("status") in {"queued", "running"}
+                           or payload.get("state") in {"queued", "running"})
                 if not running:
                     continue
                 owner = record["owner"]
@@ -555,9 +557,9 @@ class ProjectStore:
                     uncertain.append(label)
                     continue
                 record["status"] = "interrupted"
-                if payload.get("status") == "running":
+                if payload.get("status") in {"queued", "running"}:
                     payload["status"] = "interrupted"
-                if payload.get("state") == "running":
+                if payload.get("state") in {"queued", "running"}:
                     payload["state"] = "interrupted"
                 record["updated_at"] = _utc_now()
                 _atomic_write(self._path(kind, record_id), _format_json(_seal_record(record)))

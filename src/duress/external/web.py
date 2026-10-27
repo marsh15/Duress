@@ -333,6 +333,16 @@ def install_external(
     """Install the external workbench using the app's shared auth and gate."""
     app.state.begin_operation = begin_operation
     app.state.gate = gate
+    app.state.external_recovery = {}
+    if not settings.hosted:
+        try:
+            for entry in registered_projects():
+                try:
+                    app.state.external_recovery[entry["project"]] = _store(entry["project"]).reconcile()
+                except (OSError, ValueError, StorageError):
+                    app.state.external_recovery[entry["project"]] = {"error":"record_recovery_unavailable"}
+        except (OSError, ValueError, StorageError):
+            app.state.external_recovery["registry"] = {"error":"project_registry_unavailable"}
     router = APIRouter()
 
     @router.get("/projects", response_class=HTMLResponse)
