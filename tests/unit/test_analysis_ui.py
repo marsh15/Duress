@@ -269,7 +269,7 @@ def test_differential_template_renders_expected_observed_matrix_and_null_agreeme
     assert "Scenario comparison matrix" in html
     assert "S3[copies=3,fault=rendezvous,latency_ms=200]" in html
     assert "razorpay-vulnerable" in html
-    assert "Observed</strong> FAIL" in html
+    assert 'Observed</strong> <span class="state-chip state-fail">FAIL</span>' in html
     assert "Expected</strong> FAIL" in html
     assert "AGREES" in html
     assert "DISAGREES" in html

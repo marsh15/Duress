@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -37,7 +38,10 @@ VERIFY_CODES = {"VERIFIED": 0, "NOT_VERIFIED": 1, "INCONCLUSIVE": 2, "REJECTED":
 
 
 def _workspace() -> Workspace:
-    return Workspace.discover(Path.cwd())
+    workspace = Workspace.discover(Path.cwd())
+    # Resource discovery can resolve an installed wheel or DURESS_ROOT while
+    # runtime records remain in the invoking directory (or DURESS_HOME).
+    return replace(workspace, root=workspace.registry.root)
 
 
 def scenario_params(

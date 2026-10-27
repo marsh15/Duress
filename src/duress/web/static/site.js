@@ -119,7 +119,10 @@
       if (summary.valid !== undefined && summary.fail !== undefined) {
         stats.textContent = `${summary.fail} fail / ${summary.valid} valid · aggregate`;
       } else {
-        stats.textContent = "Saved record";
+        stats.textContent = record.verdict
+          ? `${record.verdict}${typeof record.trials_used === "number" ? ` · ${record.trials_used} trials` : ""}`
+          : record.showcase ? "Historical benchmark" : "Business verdict unresolved";
+        if (record.verdict === "FAIL") stats.classList.add("number-fail");
       }
       const action = document.createElement("span");
       action.className = "record-list-open";

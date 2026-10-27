@@ -5,7 +5,8 @@
 <header class="page-heading"><div><p class="eyebrow">Portable failure reproducers</p><h1>Failure DNA</h1><p class="heading-detail">Inspect the schedule, download the artifact, replay it, or verify a candidate fix.</p></div></header>
 
 {% if items %}
-<div class="dna-library-list">
+<div class="filter-toolbar" data-record-filter="#dna-records"><label class="visually-hidden" for="dna-search">Search Failure DNA</label><input id="dna-search" type="search" placeholder="Search artifact ID, invariant or scenario…"></div>
+<div class="dna-library-list" id="dna-records">
   {% for item in items %}
   {% set signature = item.signature|default({}) %}
   <article class="dna-library-row">

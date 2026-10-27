@@ -1,5 +1,17 @@
 # Duress local-first developer beta — engineering report
 
+Final integrated acceptance is recorded separately in
+[27 October integration evidence](../release/2026-10-27-integrated/README.md). Executable
+candidate `3284471` passed both remote CI jobs (770 Python tests passed, 30 browser opt-in
+skips), 579 focused local Python checks, 30 real browser tests, 111 Linux container tests,
+25 HTTP/static/security checks, fresh installed-wheel PostgreSQL controls, the corrected
+nine-scenario suite (45/45) and artifact-only reduced replay (10/10). These are separate
+gates, not an aggregate suite count. PR #2 merged as `baff987`; the redesign reconciled
+with main without rewriting milestones. Later release changes add MIT licensing,
+documentation, evidence and demo media without changing the accepted executor/UI code.
+The owner authorized MIT licensing and public repository visibility on 27 October.
+Render deployment is owner-operated and remains unverified until a real URL is tested.
+
 Release candidate: **0.2.0b1**, based on verified main `4684bd1743c0b09104a53750230b5e98fae2cb2f`. AI-assisted implementation with Luna xhigh delegated architecture, implementation and independent review tasks. This report records reproducible engineering evidence. Final CI/merge disposition and the release decision are recorded in [PR #2](https://github.com/marsh15/Duress/pull/2); an admitted workflow is never counted as a passing workflow.
 
 1. **Before productization.** M0–M6 investigated bundled synthetic payment integrations with fixed event vocabulary, SQLite business tables, six invariants, versioned schedules, isolation, DNA, replay, verification and reduction. Those contracts, historical evidence and Git history remain intact.

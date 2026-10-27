@@ -1,37 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Duress · Failure evidence workbench{% endblock %}
+{% block title %}Workspace overview · Duress{% endblock %}
 {% block content %}
-<section class="welcome-grid" aria-labelledby="welcome-title">
-  <div class="welcome-copy">
-    <p class="eyebrow">Payments · webhook reliability</p>
-    <h1 id="welcome-title">Keep the failure.<br>Carry the proof.</h1>
-    <p class="welcome-lede">Investigate synthetic webhook integrations, detect incorrect business effects, and keep a portable reproducer to replay and verify a fix.</p>
-    <div class="welcome-facts" aria-label="Available workflows">
-      <div><strong>01</strong><span>start a bounded investigation</span></div>
-      <div><strong>02</strong><span>replay portable DNA</span></div>
-      <div><strong>03</strong><span>verify a candidate fix</span></div>
-    </div>
+<header class="page-heading overview-intro"><div><p class="eyebrow">Business correctness · reproducible evidence</p><h1>Workspace overview</h1><p class="heading-detail">Investigate what your integration actually does under duplicates, retries and concurrent events.</p></div><a class="button button-primary" href="/investigations#new-investigation">New investigation</a></header>
+<div class="overview-grid"><div>
+<section class="overview-start" id="workspace-get-started" aria-labelledby="welcome-title"><p class="eyebrow" id="workspace-welcome-label">Your next investigation starts here</p><h2 id="welcome-title">Find what your integration does under pressure.</h2><p>Register a test application, describe the business effects that matter, and run reproducible reliability experiments. Duress observes persisted state, then checks your business contract.</p><div class="inline-actions"><a class="button button-secondary" href="/guide#setup">Set up a project</a><a class="button button-ghost" href="/investigations#new-investigation">Explore the example →</a></div>
+<ol class="workflow-steps"><li><span>01</span><strong>Configure</strong><p>Connect a target and read-only observer.</p></li><li><span>02</span><strong>Investigate</strong><p>Exercise conditions. Inspect business effects.</p></li><li><span>03</span><strong>Reproduce</strong><p>Keep Failure DNA. Verify a correction.</p></li></ol></section>
+<div class="overview-evidence">
+<section class="records-section" aria-labelledby="history-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">Workspace records</p><h2 id="history-title">Investigation history</h2></div>
+    <span class="section-count">New and historical runs</span>
   </div>
+  <ul id="investigation-history" class="record-list" aria-live="polite"><li class="list-placeholder">Loading investigation records…</li></ul>
+</section>
 
-  <section class="workbench-panel" aria-labelledby="new-investigation-title">
-    <div class="panel-topline">
-      <div>
-        <p class="panel-kicker">Start an experiment</p>
-        <h2 id="new-investigation-title">Investigation creation</h2>
-      </div>
-      <span class="state-chip">Ready</span>
-    </div>
-    <div class="pending-explanation">
-      <p>Choose a registered target and run cached hypotheses or the deterministic scenario set. Every finding comes from isolated execution and persisted business state.</p>
-      <a class="button button-primary" href="/investigations#new-investigation">New investigation</a>
-      <p class="field-help">Cached responses are authored fixtures. Live inference requires a configured provider.</p>
-      <a class="text-link" href="/differential">Compare vulnerable, naive fix and corrected targets →</a>
-    </div>
-    <div class="target-registry" aria-labelledby="targets-title">
-      <div class="registry-heading"><h3 id="targets-title">Available targets</h3><span>API registry</span></div>
-      <ul id="target-registry-list" class="registry-list"><li class="list-placeholder">Loading targets…</li></ul>
-    </div>
-  </section>
+<section class="records-section" aria-labelledby="recent-findings-title"><div class="section-heading"><div><p class="eyebrow">Observed business failures</p><h2 id="recent-findings-title">Recent findings</h2></div></div><ul id="recent-findings" class="record-list">{% for finding in recent_findings|default([]) %}{% set signature = finding.signature|default({}) %}<li class="record-list-row"><a class="record-list-main" href="/investigations/{{ finding.investigation_id }}#findings-title"><strong>{{ signature.check|default('Observed failure') }}{% if signature.kind %} · {{ signature.kind }}{% endif %}</strong><span>{{ finding.target_id }} · {{ finding.scenario_id|default('Scenario not recorded') }}</span></a></li>{% else %}<li class="list-placeholder">No executed failure findings retained in recent records. Hypothesis proposals alone are not findings.</li>{% endfor %}</ul></section>
+<section class="records-section dna-index-section" aria-labelledby="dna-index-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">Portable artifacts</p><h2 id="dna-index-title">Failure DNA</h2></div>
+    <span class="section-count">Inspect, download, or replay</span>
+  </div>
+  <ul id="dna-index" class="record-list" aria-live="polite"><li class="list-placeholder">Loading DNA artifacts…</li></ul>
 </section>
 
 <section class="showcase-section" aria-labelledby="showcase-title">
@@ -78,19 +67,5 @@
   {% endif %}
 </section>
 
-<section class="records-section" aria-labelledby="history-title">
-  <div class="section-heading">
-    <div><p class="eyebrow">Workspace records</p><h2 id="history-title">Investigation history</h2></div>
-    <span class="section-count">New and historical runs</span>
-  </div>
-  <ul id="investigation-history" class="record-list" aria-live="polite"><li class="list-placeholder">Loading investigation records…</li></ul>
-</section>
-
-<section class="records-section dna-index-section" aria-labelledby="dna-index-title">
-  <div class="section-heading">
-    <div><p class="eyebrow">Portable artifacts</p><h2 id="dna-index-title">Failure DNA</h2></div>
-    <span class="section-count">Inspect, download, or replay</span>
-  </div>
-  <ul id="dna-index" class="record-list" aria-live="polite"><li class="list-placeholder">Loading DNA artifacts…</li></ul>
-</section>
+</div></div><aside class="overview-aside"><section class="content-section" aria-labelledby="readiness-title"><h2 id="readiness-title">Workspace readiness</h2><dl id="workspace-readiness" class="readiness-list"><div><dt>Server</dt><dd>Checking…</dd></div></dl><a href="{{ '/guide' if ui_hosted|default(false) else '/projects' }}" id="workspace-project-link">{{ 'Local project setup guide →' if ui_hosted|default(false) else 'Open registered projects →' }}</a></section><section class="workbench-panel"><div class="target-registry"><div class="registry-heading"><h2>Reference targets</h2><span>API registry</span></div><ul id="target-registry-list" class="registry-list"><li class="list-placeholder">Loading targets…</li></ul></div></section><section class="content-section"><h2>Read the evidence</h2><p>Execution completion describes the lifecycle. PASS, FAIL and INCONCLUSIVE describe the business contract.</p><p>Recorded benchmarks and authored hypotheses are labelled separately from current execution.</p><a class="text-link" href="/guide#evidence">How to read a result →</a></section></aside></div>
 {% endblock %}

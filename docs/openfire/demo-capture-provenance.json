@@ -1,0 +1,56 @@
+[
+  {
+    "scene": "01-problem",
+    "url": "<local-app>/investigations/inv-20261027T044209-843af6",
+    "http": 200,
+    "title": "Investigation inv-20261027T044209-843af6 \u00b7 Duress"
+  },
+  {
+    "scene": "02-findings",
+    "url": "<local-app>/investigations/inv-20261027T044209-843af6",
+    "http": 200,
+    "title": "Investigation inv-20261027T044209-843af6 \u00b7 Duress"
+  },
+  {
+    "scene": "03-state",
+    "url": "<local-app>/evidence/tf13fae116060",
+    "http": 200,
+    "title": "Retained snapshot tf13fae116060 \u00b7 Duress"
+  },
+  {
+    "scene": "04-dna",
+    "url": "<local-app>/dna/0edb63c480dbc29b",
+    "http": 200,
+    "title": "Failure DNA 0edb63c480dbc29b \u00b7 Duress"
+  },
+  {
+    "scene": "05-schedule",
+    "url": "<local-app>/dna/0edb63c480dbc29b",
+    "http": 200,
+    "title": "Failure DNA 0edb63c480dbc29b \u00b7 Duress"
+  },
+  {
+    "scene": "06-replay",
+    "url": "<local-app>/operations/34a397ea0f1547ce",
+    "http": 200,
+    "title": "Operation 34a397ea0f1547ce \u00b7 Duress"
+  },
+  {
+    "scene": "07-verification",
+    "url": "<local-app>/operations/469bc1ef48374728",
+    "http": 200,
+    "title": "Operation 469bc1ef48374728 \u00b7 Duress"
+  },
+  {
+    "scene": "08-alan",
+    "url": "Document excerpt rendered from docs/openfire/alan-evidence.json",
+    "http": 200,
+    "title": ""
+  },
+  {
+    "scene": "09-workspace",
+    "url": "<local-app>/",
+    "http": 200,
+    "title": "Workspace overview \u00b7 Duress"
+  }
+]

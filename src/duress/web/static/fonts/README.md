@@ -1,0 +1,1 @@
+Geist Sans and Geist Mono variable WOFF2, from the official vercel/geist-font distribution (npm geist 1.8.2). Copyright and SIL Open Font License: LICENSE.txt. Self-hosted; no runtime CDN requests. Full upstream character coverage retained.

@@ -2,7 +2,7 @@ services:
   - type: web
     name: duress
     runtime: docker
-    plan: starter
+    plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     autoDeploy: false

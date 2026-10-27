@@ -1,0 +1,93 @@
+[
+  {
+    "file": "overview-dark.png",
+    "route": "/",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "theme": "dark",
+    "http": 200,
+    "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
+    "sha256": "d071f98ccbb8ceab5e3f4f0bd24a1596a23585979eb6bc3eabf0b8dbe537271a",
+    "provenance": "Actual running application with retained execution records; no new investigation implied."
+  },
+  {
+    "file": "overview-light.png",
+    "route": "/",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "theme": "light",
+    "http": 200,
+    "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
+    "sha256": "19009fa4855bdbcfc97925225c4cec8c0b6fbe369dd2f207631c567c5704e00a",
+    "provenance": "Actual running application with retained execution records; no new investigation implied."
+  },
+  {
+    "file": "investigation.png",
+    "route": "/investigations/inv-20261027T044209-843af6",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "theme": "dark",
+    "http": 200,
+    "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
+    "sha256": "9fa0e097a27266f4e906960f878ce10191cf86375b6899fe3ec5f7b17d939602",
+    "provenance": "Actual running application with retained execution records; no new investigation implied."
+  },
+  {
+    "file": "failure-dna.png",
+    "route": "/dna/0edb63c480dbc29b",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "theme": "dark",
+    "http": 200,
+    "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
+    "sha256": "3b580adfcd6d225645f9d907777c34f2610515682165b075ce99303b8336f405",
+    "provenance": "Actual running application with retained execution records; no new investigation implied."
+  },
+  {
+    "file": "delivery-sequence.png",
+    "route": "/dna/0edb63c480dbc29b",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "theme": "dark",
+    "http": 200,
+    "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
+    "sha256": "3b580adfcd6d225645f9d907777c34f2610515682165b075ce99303b8336f405",
+    "provenance": "Actual running application with retained execution records; no new investigation implied."
+  },
+  {
+    "file": "business-state.png",
+    "route": "/evidence/tf13fae116060",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "theme": "dark",
+    "http": 200,
+    "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
+    "sha256": "b081cd2c20a0f7980da9682f6065ed42d02bd1e3f262a275ba5858283c0679e4",
+    "provenance": "Actual running application with retained execution records; no new investigation implied."
+  },
+  {
+    "file": "mobile-guide.png",
+    "route": "/guide",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "theme": "light",
+    "http": 200,
+    "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
+    "sha256": "17a624c3379b2144ac4eb63ef71c4c74c0b2423e1914ef4c3945766e84da2d2e",
+    "provenance": "Actual running application with retained execution records; no new investigation implied."
+  }
+]

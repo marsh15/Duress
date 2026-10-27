@@ -1,0 +1,170 @@
+{
+  "full_corrected_suite": {
+    "verdict": "PASS",
+    "outcome": null,
+    "scenarios": [
+      {
+        "id": "normal",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "sequential-duplicate",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "concurrent-duplicate",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "distinct-events",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "ambiguous-ack",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "delayed-processing",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "out-of-order",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "invalid-data",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      },
+      {
+        "id": "invalid-signature",
+        "status": "PASS",
+        "valid": 5,
+        "fail": 0,
+        "inconclusive": 0,
+        "trials": 5,
+        "signature": null,
+        "signature_counts": {},
+        "reasons": [
+          "quota_met"
+        ],
+        "budget_exhausted": false
+      }
+    ]
+  },
+  "reduced_artifact_replay": {
+    "verdict": null,
+    "outcome": "REPRODUCED",
+    "result": {
+      "status": "FAIL",
+      "valid": 10,
+      "fail": 10,
+      "inconclusive": 0,
+      "trials": 10,
+      "signature": {
+        "check": "one-ticket-per-booking@1",
+        "kind": "duplicate_key",
+        "roles": []
+      },
+      "signature_counts": {
+        "one-ticket-per-booking@1:duplicate_key:": 10
+      },
+      "reasons": [
+        "fail_observed",
+        "signature:one-ticket-per-booking@1:duplicate_key:"
+      ],
+      "budget_exhausted": false
+    }
+  },
+  "replay": {
+    "outcome": "REPRODUCED"
+  },
+  "verify-fixed": {
+    "outcome": "VERIFIED"
+  },
+  "verify-flawed": {
+    "outcome": "NOT_VERIFIED"
+  },
+  "reduce": {
+    "outcome": "REDUCED"
+  }
+}

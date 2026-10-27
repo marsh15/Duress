@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}External project evidence · Duress{% endblock %}
 {% block content %}
+{% from "_evidence_ui.html" import schedule_view, attempt_view, state_diff %}
 {% if record %}
 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><a href="/projects">External projects</a><span aria-hidden="true">/</span><a href="/projects/{{ project.project }}">{{ project.project }}</a><span aria-hidden="true">/</span><span>Investigation</span></nav>
 <header class="page-heading investigation-heading">
   <div><p class="eyebrow">Recorded external investigation · {{ record.status }}</p><h1>{{ record.verdict }}</h1><p class="heading-detail"><code>{{ record.investigation_id }}</code> · {{ record.scenarios|length }} scenario records · contract <code>{{ record.contract_id }}@{{ record.contract_version }}</code></p></div>
-  <div><a class="button button-secondary" href="/projects/{{ project.project }}">Project</a> <a class="button button-primary" href="/projects/{{ project.project }}/investigations/{{ record.investigation_id }}/report">Static HTML report</a></div>
+  <div class="inline-actions"><a class="button button-secondary" href="/projects/{{ project.project }}">Project</a> <a class="button button-primary" href="/projects/{{ project.project }}/investigations/{{ record.investigation_id }}/report">Static HTML report</a></div>
 </header>
 <aside class="notice notice-cyan">
   <strong>How to read this outcome</strong>
@@ -27,21 +28,24 @@
 {% for scenario in record.scenarios %}
 {% set scenario_index = loop.index %}
 <section class="records-section" aria-labelledby="scenario-{{ loop.index }}">
-  <div class="section-heading"><div><p class="eyebrow">Scenario {{ loop.index }}</p><h2 id="scenario-{{ loop.index }}">{{ scenario.scenario_id }}</h2></div><span class="state-chip">{{ scenario.result.status }}</span></div>
+  <div class="section-heading"><div><p class="eyebrow">Scenario {{ loop.index }}</p><h2 id="scenario-{{ loop.index }}">{{ scenario.scenario_id }}</h2></div><span class="state-chip state-{{ scenario.result.status|lower }}">{{ scenario.result.status }}</span></div>
   <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Aggregate scenario outcome</caption><thead><tr><th scope="col">Status</th><th scope="col">Valid</th><th scope="col">Fail</th><th scope="col">Inconclusive</th><th scope="col">Trials</th></tr></thead><tbody><tr><td>{{ scenario.result.status }}</td><td>{{ scenario.result.valid }}</td><td>{{ scenario.result.fail }}</td><td>{{ scenario.result.inconclusive }}</td><td>{{ scenario.result.trials }}</td></tr></tbody></table></div>
+  {{ schedule_view(scenario.schedule) }}
   <details class="content-section"><summary>Registered schedule</summary><pre>{{ scenario.schedule|tojson(indent=2) }}</pre></details>
   {% for trial in scenario.trials %}
   <section class="content-section" aria-labelledby="trial-{{ scenario_index }}-{{ loop.index }}">
-    <div class="section-heading compact-heading"><h3 id="trial-{{ scenario_index }}-{{ loop.index }}">Trial <code>{{ trial.trial_id }}</code></h3><span class="state-chip">{{ trial.verdict.status }}</span></div>
+    <div class="section-heading compact-heading"><h3 id="trial-{{ scenario_index }}-{{ loop.index }}">Trial <code>{{ trial.trial_id }}</code></h3><span class="state-chip state-{{ trial.verdict.status|lower }}">{{ trial.verdict.status }}</span></div>
     {% if trial.verdict.reasons %}<p><strong>Verdict reasons:</strong> {{ trial.verdict.reasons|join(', ') }}</p>{% endif %}
     <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Declared invariant results for trial {{ trial.trial_id }}</caption><thead><tr><th scope="col">Invariant</th><th scope="col">Status</th><th scope="col">Reason</th><th scope="col">Identities</th><th scope="col">Explanation</th></tr></thead><tbody>
       {% for item in trial.invariants %}<tr><th scope="row"><code>{{ item.id }}@{{ item.version }}</code></th><td>{{ item.status }}</td><td>{{ item.reason }}</td><td>{% if item.identities %}<pre>{{ item.identities|tojson(indent=2) }}</pre>{% else %}—{% endif %}</td><td>{{ item.explanation }}</td></tr>{% endfor %}
     </tbody></table></div>
+    {{ attempt_view(trial.execution.attempts) }}
     <h4>Delivery attempts</h4>
     {% if trial.execution.attempts %}<div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">External delivery attempts</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP status</th><th scope="col">Duration</th></tr></thead><tbody>
       {% for attempt in trial.execution.attempts %}<tr><th scope="row">{{ attempt.delivery_id }}</th><td>{{ attempt.attempt }}</td><td>{{ attempt.outcome }}</td><td>{{ attempt.status_code|default('—') }}</td><td>{{ attempt.duration_ms|default('—') }} ms</td></tr>{% endfor %}
     </tbody></table></div>{% else %}<p class="empty-note">No delivery attempts were recorded.</p>{% endif %}
     <h4>Observed business state</h4>
+    {{ state_diff(trial.before, trial.after) }}
     {% for label, snapshot in [('Before', trial.before), ('After', trial.after)] %}
     <details class="content-section" open>
       <summary>{{ label }} snapshot · available {{ snapshot.available }} · valid {{ snapshot.valid }} · settled {{ snapshot.settled }}</summary>
@@ -66,11 +70,11 @@
 {% set op = operation.payload %}
 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><a href="/projects">External projects</a><span aria-hidden="true">/</span><a href="/projects/{{ project.project }}">{{ project.project }}</a><span aria-hidden="true">/</span><span>Operation</span></nav>
 <header class="page-heading investigation-heading"><div><p class="eyebrow">Saved external operation · {{ op.status }}</p><h1>{{ op.operation|title }}</h1><p class="heading-detail"><code>{{ op.operation_id }}</code> · {{ op.project }}</p></div><a class="button button-secondary" href="/projects/{{ project.project }}">Back to project</a></header>
-<section class="content-section" aria-labelledby="operation-details-title"><div class="section-heading compact-heading"><h2 id="operation-details-title">Operation details</h2><a href="/api/projects/{{ project.project }}/operations/{{ op.operation_id }}">Poll JSON</a></div>
+<section class="content-section" aria-labelledby="operation-details-title"{% if op.status in ['queued', 'running'] %} data-external-poll="/api/projects/{{ project.project }}/operations/{{ op.operation_id }}"{% endif %}><div class="section-heading compact-heading"><h2 id="operation-details-title">Operation details</h2><a href="/api/projects/{{ project.project }}/operations/{{ op.operation_id }}">Poll JSON</a></div>
   <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Saved operation status</caption><tbody><tr><th scope="row">Status</th><td>{{ op.status }}</td></tr><tr><th scope="row">Operation</th><td>{{ op.operation }}</td></tr><tr><th scope="row">Project</th><td>{{ op.project }}</td></tr>{% if op.scenario_id %}<tr><th scope="row">Scenario</th><td>{{ op.scenario_id }}</td></tr>{% endif %}{% if op.candidate_project %}<tr><th scope="row">Candidate project</th><td>{{ op.candidate_project }}</td></tr>{% endif %}{% if op.error %}<tr><th scope="row">Issue</th><td>{{ op.error }}</td></tr>{% endif %}</tbody></table></div>
   {% if op.investigation_id %}<p><a class="button button-primary" href="/projects/{{ project.project }}/investigations/{{ op.investigation_id }}">Open investigation evidence</a></p>{% endif %}
   {% if op.reduced_dna_id %}<p><a href="/api/projects/{{ project.project }}/dna/{{ op.reduced_dna_id }}/download">Download reduced Failure DNA</a></p>{% endif %}
-  {% if op.result %}<h3>Result</h3><pre>{{ op.result|tojson(indent=2) }}</pre>{% elif op.status in ['queued', 'running'] %}<p>This operation is still running. Reload this page or poll the JSON status link above.</p>{% endif %}
+  {% if op.result %}<h3>Result</h3><pre>{{ op.result|tojson(indent=2) }}</pre>{% elif op.status in ['queued', 'running'] %}<p id="external-poll-message" role="status">This operation is still running. This page checks its saved status and refreshes when execution ends.</p>{% endif %}
 </section>
 {% endif %}
 {% endblock %}
