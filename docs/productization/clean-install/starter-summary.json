@@ -1,0 +1,14 @@
+[
+  {
+    "command": "init",
+    "exit_code": 0
+  },
+  {
+    "command": "doctor",
+    "exit_code": 0
+  },
+  {
+    "command": "check",
+    "exit_code": 0
+  }
+]

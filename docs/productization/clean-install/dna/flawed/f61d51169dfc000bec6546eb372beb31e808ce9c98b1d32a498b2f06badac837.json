@@ -1,0 +1,393 @@
+{
+  "characterization": {
+    "fail": 5,
+    "p0": 1.0,
+    "provenance": "actual local HTTP deliveries and declared database observer",
+    "valid": 5
+  },
+  "dna_id": "f61d51169dfc000bec6546eb372beb31e808ce9c98b1d32a498b2f06badac837",
+  "reproducer": {
+    "adapters": {
+      "delivery": "http-json@1",
+      "dispatcher": "exec@1",
+      "invariants": "declarative@1",
+      "lifecycle": "external@1",
+      "observer": "postgresql@1"
+    },
+    "assumptions": [
+      "owned isolated test application",
+      "fresh managed process and test state",
+      "scoped read-only persisted-state evidence",
+      "bounded empirical experiment"
+    ],
+    "contract": {
+      "entities": {
+        "bookings": {
+          "columns": [
+            "id",
+            "event_id",
+            "customer_id",
+            "amount",
+            "status"
+          ],
+          "key": "id",
+          "table": "bookings"
+        },
+        "events": {
+          "columns": [
+            "id",
+            "capacity"
+          ],
+          "key": "id",
+          "table": "events"
+        },
+        "tickets": {
+          "columns": [
+            "id",
+            "booking_id",
+            "event_id",
+            "customer_id",
+            "amount"
+          ],
+          "key": "id",
+          "table": "tickets"
+        }
+      },
+      "id": "ticketing-v1",
+      "invariants": [
+        {
+          "entity": "tickets",
+          "id": "one-ticket-per-booking",
+          "keys": [
+            "booking_id"
+          ],
+          "kind": "unique_by",
+          "max_count": 1,
+          "version": 1
+        },
+        {
+          "entity": "tickets",
+          "id": "ticket-references-booking",
+          "kind": "reference_exists",
+          "reference": "booking_id",
+          "target_entity": "bookings",
+          "target_key": "id",
+          "version": 1
+        },
+        {
+          "entity": "tickets",
+          "id": "expected-ticket-effect",
+          "kind": "expected_effect",
+          "version": 1
+        },
+        {
+          "allowed": [
+            {
+              "from_state": "pending",
+              "to_state": "paid"
+            },
+            {
+              "from_state": "pending",
+              "to_state": "cancelled"
+            },
+            {
+              "from_state": "paid",
+              "to_state": "cancelled"
+            }
+          ],
+          "entity": "bookings",
+          "field": "status",
+          "id": "booking-transitions",
+          "kind": "state_transition",
+          "version": 1
+        },
+        {
+          "entity": "tickets",
+          "field": "amount",
+          "id": "ticket-amount-matches",
+          "kind": "value_consistency",
+          "mode": "fields_equal",
+          "reference": "booking_id",
+          "related_entity": "bookings",
+          "related_field": "amount",
+          "related_key": "id",
+          "version": 1
+        },
+        {
+          "entity": "tickets",
+          "field": "customer_id",
+          "id": "ticket-customer_id-matches",
+          "kind": "value_consistency",
+          "mode": "fields_equal",
+          "reference": "booking_id",
+          "related_entity": "bookings",
+          "related_field": "customer_id",
+          "related_key": "id",
+          "version": 1
+        },
+        {
+          "entity": "tickets",
+          "field": "event_id",
+          "id": "ticket-event_id-matches",
+          "kind": "value_consistency",
+          "mode": "fields_equal",
+          "reference": "booking_id",
+          "related_entity": "bookings",
+          "related_field": "event_id",
+          "related_key": "id",
+          "version": 1
+        },
+        {
+          "entity": "events",
+          "field": "capacity",
+          "id": "event-capacity",
+          "kind": "value_consistency",
+          "mode": "count_at_most",
+          "reference": "event_id",
+          "related_entity": "tickets",
+          "related_field": null,
+          "related_key": "id",
+          "version": 1
+        },
+        {
+          "entity": "bookings",
+          "id": "booking-ownership",
+          "kind": "scope_ownership",
+          "version": 1
+        },
+        {
+          "id": "acknowledgement-intent",
+          "kind": "acknowledgement_consistency",
+          "version": 1
+        }
+      ],
+      "schema_version": 1,
+      "version": 1
+    },
+    "delivery": {
+      "adapter": "http-json@1",
+      "endpoint": "/webhooks",
+      "event_id_header": "X-Event-Id",
+      "headers": {},
+      "method": "POST",
+      "referenced_header_names": [],
+      "signature": "hmac-sha256",
+      "signature_header": "X-Signature"
+    },
+    "failure_signature": {
+      "check": "one-ticket-per-booking@1",
+      "kind": "duplicate_key",
+      "roles": []
+    },
+    "fixtures": {
+      "events": {
+        "ambiguous": {
+          "payload": {
+            "amount": "49.50",
+            "booking_id": "booking-101",
+            "event_id": "ambiguous-101",
+            "event_type": "booking.paid",
+            "test_controls": {
+              "ack_delay_ms": 500
+            }
+          }
+        },
+        "cancel": {
+          "payload": {
+            "amount": "49.50",
+            "booking_id": "booking-101",
+            "event_id": "cancel-101",
+            "event_type": "booking.cancelled"
+          }
+        },
+        "invalid": {
+          "payload": {
+            "amount": "99.00",
+            "booking_id": "booking-101",
+            "event_id": "invalid-101",
+            "event_type": "booking.paid"
+          }
+        },
+        "paid": {
+          "payload": {
+            "amount": "49.50",
+            "booking_id": "booking-101",
+            "event_id": "paid-101",
+            "event_type": "booking.paid"
+          }
+        },
+        "paid-distinct": {
+          "payload": {
+            "amount": "49.50",
+            "booking_id": "booking-101",
+            "event_id": "paid-distinct-101",
+            "event_type": "booking.paid"
+          }
+        },
+        "slow": {
+          "payload": {
+            "amount": "49.50",
+            "booking_id": "booking-101",
+            "event_id": "slow-101",
+            "event_type": "booking.paid",
+            "test_controls": {
+              "processing_delay_ms": 200
+            }
+          }
+        }
+      },
+      "seed": {
+        "bookings": [
+          {
+            "amount": "49.50",
+            "customer_id": "customer-ana",
+            "event_id": "event-summit-2026",
+            "id": "booking-101",
+            "status": "pending"
+          },
+          {
+            "amount": "62.00",
+            "customer_id": "customer-ben",
+            "event_id": "event-summit-2026",
+            "id": "booking-102",
+            "status": "pending"
+          },
+          {
+            "amount": "75.00",
+            "customer_id": "customer-chen",
+            "event_id": "event-summit-2026",
+            "id": "booking-103",
+            "status": "pending"
+          },
+          {
+            "amount": "88.00",
+            "customer_id": "customer-devi",
+            "event_id": "event-summit-2026",
+            "id": "booking-104",
+            "status": "pending"
+          }
+        ],
+        "events": [
+          {
+            "capacity": 2,
+            "id": "event-summit-2026"
+          }
+        ]
+      }
+    },
+    "implementation_sha256": "cf54aef6611d19bf85dedd37e9e6f6fc3cf0fb996fc2793b2725447fa0ee1a00",
+    "measured_sample": {
+      "fail": 5,
+      "p0": 1.0,
+      "valid": 5
+    },
+    "mode": "managed",
+    "normalization": "entities@1",
+    "observed_schema": {
+      "adapter": "postgresql",
+      "read_only": true,
+      "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+      "version": "2"
+    },
+    "payloads": {
+      "ambiguous": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"ambiguous-101\",\"test_controls\":{\"ack_delay_ms\":500}}",
+      "cancel": "{\"event_type\":\"booking.cancelled\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"cancel-101\"}",
+      "invalid": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"99.00\",\"event_id\":\"invalid-101\"}",
+      "paid": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"paid-101\"}",
+      "paid-distinct": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"paid-distinct-101\"}",
+      "slow": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"slow-101\",\"test_controls\":{\"processing_delay_ms\":200}}"
+    },
+    "scenario": {
+      "ack_delivery_id": null,
+      "acknowledgements": {
+        "d1": {
+          "entity": "tickets",
+          "intent": "create",
+          "match": {
+            "booking_id": "booking-101"
+          }
+        }
+      },
+      "context": {
+        "expected_effects": [
+          {
+            "entity": "tickets",
+            "match": {
+              "booking_id": "booking-101"
+            },
+            "max_delta": 1,
+            "min_delta": 1
+          }
+        ],
+        "required_transitions": [
+          {
+            "entity": "bookings",
+            "from_state": "pending",
+            "identity": "booking-101",
+            "to_state": "paid"
+          }
+        ],
+        "scopes": [
+          {
+            "entity": "bookings",
+            "identities": [
+              "booking-101"
+            ]
+          }
+        ]
+      },
+      "deliveries": [
+        {
+          "attempt_timeout_ms": null,
+          "event_id": "paid-101",
+          "fixture": "paid",
+          "id": "d1",
+          "invalid_signature": false,
+          "max_attempts": null
+        },
+        {
+          "attempt_timeout_ms": null,
+          "event_id": "paid-101",
+          "fixture": "paid",
+          "id": "d2",
+          "invalid_signature": false,
+          "max_attempts": null
+        },
+        {
+          "attempt_timeout_ms": null,
+          "event_id": "paid-101",
+          "fixture": "paid",
+          "id": "d3",
+          "invalid_signature": false,
+          "max_attempts": null
+        }
+      ],
+      "delivery_policy": {
+        "attempt_timeout_ms": 5000,
+        "backoff_ms": [],
+        "max_attempts": 1,
+        "retry_on": []
+      },
+      "expected_status": {
+        "d1": "2xx",
+        "d2": "2xx",
+        "d3": "2xx"
+      },
+      "id": "concurrent-duplicate",
+      "require_overlap": true,
+      "require_retry": false,
+      "settle_ms": 0,
+      "steps": [
+        {
+          "delay_before_ms": 0,
+          "deliveries": [
+            "d1",
+            "d2",
+            "d3"
+          ]
+        }
+      ]
+    }
+  },
+  "schema": "external-dna@1"
+}

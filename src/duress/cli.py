@@ -74,9 +74,22 @@ def _print_result(result: ScenarioResult) -> None:
 
 
 @app.command("targets")
-def targets_command() -> None:
+def targets_command(config: Path | None = typer.Option(None,"--config"),
+                    json_output: bool = typer.Option(False,"--json")) -> None:
     """List target profiles."""
+    if config:
+        from .external.manifest import load_project
+        from .external.commands import emit
+        project=load_project(config)
+        emit({"project":project.manifest.duress.project,"target_id":project.manifest.target.id,
+              "adapter":"external@1","mode":project.manifest.target.mode,
+              "contract":f"{project.contract.id}@{project.contract.version}",
+              "scenarios":[s.id for s in project.manifest.scenarios]},json_output=json_output)
+        return
     workspace = _workspace()
+    if json_output:
+        typer.echo(json.dumps([{"target_id":p.target_id,"profile_id":p.profile_id,"variant":p.variant} for p in workspace.registry.all()],indent=2))
+        return
     for profile in workspace.registry.all():
         typer.echo(
             f"{profile.target_id:<32}{profile.profile_id:<18}{profile.variant:<18}"
@@ -152,8 +165,15 @@ def dna_build_command(
 
 
 @dna_app.command("list")
-def dna_list_command(json_output: bool = typer.Option(False, "--json")) -> None:
+def dna_list_command(json_output: bool = typer.Option(False, "--json"),
+                     config: Path | None = typer.Option(None,"--config")) -> None:
     """List stored DNA artifacts."""
+    if config:
+        from .external.manifest import load_project
+        from .external.storage import ProjectStore
+        items=[r["payload"] for r in ProjectStore(load_project(config).manifest.duress.project).list("dna")]
+        typer.echo(json.dumps(items,indent=2))
+        return
     items = dna_index(_workspace())
     if json_output:
         typer.echo(json.dumps(items, indent=2))
@@ -177,8 +197,12 @@ def replay_command(
     target: str | None = typer.Option(None, "--target", help="target id (default: from DNA)"),
     policy: str = typer.Option("replay", "--policy"),
     json_output: bool = typer.Option(False, "--json"),
+    config: Path | None = typer.Option(None,"--config"),
 ) -> None:
     """Replay a DNA against a fresh target process."""
+    if config:
+        _external_operation("replay",config,dna,json_output=json_output)
+        return
     workspace = _workspace()
     try:
         document = load_dna_document(workspace, dna)
@@ -213,8 +237,15 @@ def verify_fix_command(
     vulnerable: str = typer.Option("razorpay-vulnerable", "--vulnerable"),
     candidate: str = typer.Option("razorpay-fixed", "--candidate"),
     json_output: bool = typer.Option(False, "--json"),
+    config: Path | None = typer.Option(None,"--config"),
+    candidate_config: Path | None = typer.Option(None,"--candidate-config"),
 ) -> None:
     """Empirically verify a candidate against the characterised failure."""
+    if config:
+        if not candidate_config:
+            raise typer.BadParameter("external verification requires --candidate-config")
+        _external_operation("verify",config,dna,candidate_config=candidate_config,json_output=json_output)
+        return
     run = asyncio.run(
         verify_fix(
             _workspace(),
@@ -263,13 +294,32 @@ REDUCE_CODES = {
 
 @app.command("investigate")
 def investigate_command(
-    target: str = typer.Argument(..., help="target id, e.g. razorpay-vulnerable"),
+    target: str | None = typer.Argument(None, help="target id, e.g. razorpay-vulnerable"),
     mode: str = typer.Option("cached", "--mode", help="live | cached | exhaustive"),
     reduce: bool = typer.Option(False, "--reduce", help="reduce each new DNA (M4)"),
     wall_cap_s: float | None = typer.Option(None, "--wall-cap-s", help="override the wall cap"),
     json_output: bool = typer.Option(False, "--json"),
+    config: Path | None = typer.Option(None,"--config"),
+    scenario: str | None = typer.Option(None,"--scenario"),
+    output: Path | None = typer.Option(None,"--output"),
 ) -> None:
     """Investigate a target: hypotheses, confirming runs, Failure DNA."""
+    if config:
+        from .external.services import investigate as investigate_external
+        from .external.commands import emit
+        from .external.reporting import export_run
+        if mode != "exhaustive":
+            raise typer.BadParameter("external contracts currently support --mode exhaustive")
+        try:
+            record=asyncio.run(investigate_external(config,scenario_id=scenario))
+            export_run(record,output=output)
+        except (ValueError,OSError,ImportError) as exc:
+            typer.echo(f"error: {exc}",err=True)
+            raise typer.Exit(3)
+        emit(record,json_output)
+        raise typer.Exit(EXIT_CODES[record["verdict"]])
+    if not target:
+        raise typer.BadParameter("target is required unless --config is supplied")
     from .orchestrator import MODES
     from .services import investigate
 
@@ -330,8 +380,12 @@ def reduce_command(
     target: str | None = typer.Option(None, "--target", help="target id (default: from DNA)"),
     black_box: bool = typer.Option(True, "--black-box", help="characterise without faults (required by C.11)"),
     json_output: bool = typer.Option(False, "--json"),
+    config: Path | None = typer.Option(None,"--config"),
 ) -> None:
     """Reduce a DNA by single-delivery removal (bounded, release-preserving)."""
+    if config:
+        _external_operation("reduce",config,dna,json_output=json_output)
+        return
     from .services import reduce_dna, reduction_summary
 
     workspace = _workspace()
@@ -444,8 +498,17 @@ def serve_command(
 def report_command(
     investigation: str = typer.Argument("showcase", help="Stored record id, or showcase"),
     output: Path = typer.Option(Path("duress-report.html"), "--output", "-o"),
+    config: Path | None = typer.Option(None,"--config"),
 ) -> None:
     """Export an existing investigation record as a self-contained HTML report."""
+    if config:
+        from .external.manifest import load_project
+        from .external.storage import ProjectStore
+        from .external.reporting import html_report
+        record=ProjectStore(load_project(config).manifest.duress.project).load("investigations",investigation)["payload"]
+        output.write_text(html_report(record))
+        typer.echo(str(output.resolve()))
+        return
     from .records import load_investigation_record
     from .store import atomic_write_text
     from .web import render_report
@@ -457,6 +520,29 @@ def report_command(
         raise typer.Exit(3) from None
     atomic_write_text(output, render_report(record))
     typer.echo(f"report {output.resolve()}")
+
+
+
+def _external_operation(action: str, config: Path, dna: str, *, candidate_config: Path | None = None, json_output: bool = False):
+    from .external import artifacts
+    from .external.commands import emit, payload
+    try:
+        document=payload(config,dna)
+        if action=="verify":
+            result=asyncio.run(artifacts.verify(config,candidate_config,document))
+        else:
+            result=asyncio.run(getattr(artifacts,action)(config,document))
+    except (ValueError,OSError,ImportError) as exc:
+        emit({"outcome":"ERROR","reason":str(exc)},json_output)
+        raise typer.Exit(3)
+    emit(result,json_output)
+    codes={"REPRODUCED":1,"DIFFERENT_FAILURE":1,"NOT_REPRODUCED":0,"VERIFIED":0,"NOT_VERIFIED":1,
+           "REDUCED":0,"NOT_REDUCED":0,"INCONCLUSIVE":2,"REJECTED":4}
+    raise typer.Exit(codes[result["outcome"]])
+
+
+from .external.commands import install as _install_external_commands
+_install_external_commands(app,dna_app)
 
 
 def main() -> None:

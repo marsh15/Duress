@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="duress-business-effects" tests="1" failures="1" skipped="0"><testcase classname="ticketing-flawed" name="concurrent-duplicate"><failure message="FAIL">{
+  "result": {
+    "status": "FAIL",
+    "valid": 5,
+    "fail": 5,
+    "inconclusive": 0,
+    "trials": 5,
+    "signature": {
+      "check": "one-ticket-per-booking@1",
+      "kind": "duplicate_key",
+      "roles": []
+    },
+    "signature_counts": {
+      "one-ticket-per-booking@1:duplicate_key:": 5
+    },
+    "reasons": [
+      "fail_observed",
+      "signature:one-ticket-per-booking@1:duplicate_key:"
+    ],
+    "budget_exhausted": false
+  },
+  "dna": [
+    "f61d51169dfc000bec6546eb372beb31e808ce9c98b1d32a498b2f06badac837"
+  ],
+  "violations": [
+    {
+      "id": "one-ticket-per-booking",
+      "version": 1,
+      "status": "violated",
+      "reason": "duplicate_key",
+      "identities": [
+        {
+          "booking_id": "booking-101"
+        }
+      ],
+      "explanation": "Entity 'tickets' has more than 1 rows for booking_id."
+    },
+    {
+      "id": "expected-ticket-effect",
+      "version": 1,
+      "status": "violated",
+      "reason": "unexpected_effect_delta",
+      "identities": [
+        {
+          "id": 1
+        },
+        {
+          "id": 2
+        },
+        {
+          "id": 3
+        }
+      ],
+      "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range."
+    },
+    {
+      "id": "event-capacity",
+      "version": 1,
+      "status": "violated",
+      "reason": "capacity_exceeded",
+      "identities": [
+        {
+          "id": "event-summit-2026"
+        }
+      ],
+      "explanation": "Related 'tickets' row count exceeds the declared capacity in 'events'.capacity."
+    },
+    {
+      "id": "one-ticket-per-booking",
+      "version": 1,
+      "status": "violated",
+      "reason": "duplicate_key",
+      "identities": [
+        {
+          "booking_id": "booking-101"
+        }
+      ],
+      "explanation": "Entity 'tickets' has more than 1 rows for booking_id."
+    },
+    {
+      "id": "expected-ticket-effect",
+      "version": 1,
+      "status": "violated",
+      "reason": "unexpected_effect_delta",
+      "identities": [
+        {
+          "id": 1
+        },
+        {
+          "id": 2
+        },
+        {
+          "id": 3
+        }
+      ],
+      "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range."
+    },
+    {
+      "id": "event-capacity",
+      "version": 1,
+      "status": "violated",
+      "reason": "capacity_exceeded",
+      "identities": [
+        {
+          "id": "event-summit-2026"
+        }
+      ],
+      "explanation": "Related 'tickets' row count exceeds the declared capacity in 'events'.capacity."
+    },
+    {
+      "id": "one-ticket-per-booking",
+      "version": 1,
+      "status": "violated",
+      "reason": "duplicate_key",
+      "identities": [
+        {
+          "booking_id": "booking-101"
+        }
+      ],
+      "explanation": "Entity 'tickets' has more than 1 rows for booking_id."
+    },
+    {
+      "id": "expected-ticket-effect",
+      "version": 1,
+      "status": "violated",
+      "reason": "unexpected_effect_delta",
+      "identities": [
+        {
+          "id": 1
+        },
+        {
+          "id": 2
+        },
+        {
+          "id": 3
+        }
+      ],
+      "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range."
+    },
+    {
+      "id": "event-capacity",
+      "version": 1,
+      "status": "violated",
+      "reason": "capacity_exceeded",
+      "identities": [
+        {
+          "id": "event-summit-2026"
+        }
+      ],
+      "explanation": "Related 'tickets' row count exceeds the declared capacity in 'events'.capacity."
+    },
+    {
+      "id": "one-ticket-per-booking",
+      "version": 1,
+      "status": "violated",
+      "reason": "duplicate_key",
+      "identities": [
+        {
+          "booking_id": "booking-101"
+        }
+      ],
+      "explanation": "Entity 'tickets' has more than 1 rows for booking_id."
+    },
+    {
+      "id": "expected-ticket-effect",
+      "version": 1,
+      "status": "violated",
+      "reason": "unexpected_effect_delta",
+      "identities": [
+        {
+          "id": 1
+        },
+        {
+          "id": 2
+        },
+        {
+          "id": 3
+        }
+      ],
+      "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range."
+    },
+    {
+      "id": "event-capacity",
+      "version": 1,
+      "status": "violated",
+      "reason": "capacity_exceeded",
+      "identities": [
+        {
+          "id": "event-summit-2026"
+        }
+      ],
+      "explanation": "Related 'tickets' row count exceeds the declared capacity in 'events'.capacity."
+    },
+    {
+      "id": "one-ticket-per-booking",
+      "version": 1,
+      "status": "violated",
+      "reason": "duplicate_key",
+      "identities": [
+        {
+          "booking_id": "booking-101"
+        }
+      ],
+      "explanation": "Entity 'tickets' has more than 1 rows for booking_id."
+    },
+    {
+      "id": "expected-ticket-effect",
+      "version": 1,
+      "status": "violated",
+      "reason": "unexpected_effect_delta",
+      "identities": [
+        {
+          "id": 1
+        },
+        {
+          "id": 2
+        },
+        {
+          "id": 3
+        }
+      ],
+      "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range."
+    },
+    {
+      "id": "event-capacity",
+      "version": 1,
+      "status": "violated",
+      "reason": "capacity_exceeded",
+      "identities": [
+        {
+          "id": "event-summit-2026"
+        }
+      ],
+      "explanation": "Related 'tickets' row count exceeds the declared capacity in 'events'.capacity."
+    }
+  ]
+}</failure></testcase></testsuite>

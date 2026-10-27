@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}External projects · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>External projects</span></nav>
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Local integrations · registered manifests</p>
+    <h1>External projects</h1>
+    <p class="heading-detail">Inspect approved local project configurations, run bounded investigations, and keep evidence with each project.</p>
+  </div>
+</header>
+
+<aside class="notice notice-cyan">
+  <strong>Local configuration stays in the terminal</strong>
+  <span>Create and register a project from its directory with <code>duress init</code> and <code>duress register --config duress.toml</code>. This page does not accept manifests, paths, commands, or URLs.</span>
+</aside>
+
+<section class="records-section" aria-labelledby="external-projects-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">Approved project registry</p><h2 id="external-projects-title">Projects</h2></div>
+    <span class="section-count">{{ projects|length }} registered</span>
+  </div>
+  {% if projects %}
+  <div class="history-list">
+    {% for item in projects %}
+    <article class="history-record">
+      <div class="history-record-main">
+        <div class="history-record-head"><span class="state-chip">{{ item.status|replace('_', ' ') }}</span>{% if item.mode %}<span class="recorded-label">{{ item.mode }}</span>{% endif %}</div>
+        <h3>{% if item.available %}<a href="/projects/{{ item.project }}">{{ item.project }}</a>{% else %}{{ item.project }}{% endif %}</h3>
+        {% if item.available %}
+        <p>{{ item.contract.id }}@{{ item.contract.version }} · {{ item.adapters.observer }} observer · {{ item.scenarios|length }} scenarios</p>
+        {% else %}<p>Registered configuration could not be loaded. Review it locally, then reload this page.</p>{% endif %}
+      </div>
+      {% if item.available %}<a class="history-open" href="/projects/{{ item.project }}">Open project</a>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state"><span aria-hidden="true">—</span><h2>No external projects registered</h2><p>From your project directory, run <code>duress init --project my-integration</code>, configure <code>duress.toml</code>, then run <code>duress doctor</code> and <code>duress register</code>.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

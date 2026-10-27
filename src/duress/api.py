@@ -311,4 +311,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         gate=gate,
     )
     install_web(app, workspace)
+    from .external.web import install_external
+    install_external(app, settings, authorize, begin_operation, gate)
     return app

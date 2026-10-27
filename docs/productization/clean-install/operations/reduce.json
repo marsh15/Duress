@@ -1,0 +1,4607 @@
+{
+  "candidates": [
+    {
+      "result": {
+        "budget_exhausted": false,
+        "fail": 3,
+        "inconclusive": 0,
+        "reasons": [
+          "fail_observed",
+          "signature:one-ticket-per-booking@1:duplicate_key:"
+        ],
+        "signature": {
+          "check": "one-ticket-per-booking@1",
+          "kind": "duplicate_key",
+          "roles": []
+        },
+        "signature_counts": {
+          "one-ticket-per-booking@1:duplicate_key:": 3
+        },
+        "status": "FAIL",
+        "trials": 3,
+        "valid": 3
+      },
+      "scenario_id": "concurrent-duplicate",
+      "schedule": {
+        "ack_delivery_id": null,
+        "acknowledgements": {
+          "d1": {
+            "entity": "tickets",
+            "intent": "create",
+            "match": {
+              "booking_id": "booking-101"
+            }
+          }
+        },
+        "context": {
+          "expected_effects": [
+            {
+              "entity": "tickets",
+              "match": {
+                "booking_id": "booking-101"
+              },
+              "max_delta": 1,
+              "min_delta": 1
+            }
+          ],
+          "required_transitions": [
+            {
+              "entity": "bookings",
+              "from_state": "pending",
+              "identity": "booking-101",
+              "to_state": "paid"
+            }
+          ],
+          "scopes": [
+            {
+              "entity": "bookings",
+              "identities": [
+                "booking-101"
+              ]
+            }
+          ]
+        },
+        "deliveries": [
+          {
+            "attempt_timeout_ms": null,
+            "event_id": "paid-101",
+            "fixture": "paid",
+            "id": "d1",
+            "invalid_signature": false,
+            "max_attempts": null
+          },
+          {
+            "attempt_timeout_ms": null,
+            "event_id": "paid-101",
+            "fixture": "paid",
+            "id": "d3",
+            "invalid_signature": false,
+            "max_attempts": null
+          }
+        ],
+        "delivery_policy": {
+          "attempt_timeout_ms": 5000,
+          "backoff_ms": [],
+          "max_attempts": 1,
+          "retry_on": []
+        },
+        "expected_status": {
+          "d1": "2xx",
+          "d3": "2xx"
+        },
+        "id": "concurrent-duplicate",
+        "require_overlap": true,
+        "require_retry": false,
+        "settle_ms": 0,
+        "steps": [
+          {
+            "delay_before_ms": 0,
+            "deliveries": [
+              "d1",
+              "d3"
+            ]
+          }
+        ]
+      },
+      "trials": [
+        {
+          "after": {
+            "available": true,
+            "entities": {
+              "bookings": [
+                {
+                  "amount": 62,
+                  "customer_id": "customer-ben",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-102",
+                  "status": "pending"
+                },
+                {
+                  "amount": 75,
+                  "customer_id": "customer-chen",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-103",
+                  "status": "pending"
+                },
+                {
+                  "amount": 88,
+                  "customer_id": "customer-devi",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-104",
+                  "status": "pending"
+                },
+                {
+                  "amount": "49.5",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-101",
+                  "status": "paid"
+                }
+              ],
+              "events": [
+                {
+                  "capacity": 2,
+                  "id": "event-summit-2026"
+                }
+              ],
+              "tickets": [
+                {
+                  "amount": "49.5",
+                  "booking_id": "booking-101",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": 2
+                },
+                {
+                  "amount": "49.5",
+                  "booking_id": "booking-101",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": 1
+                }
+              ]
+            },
+            "error": null,
+            "provenance": {
+              "adapter": "postgresql",
+              "observed_at": "2026-10-27T03:30:06.543742+00:00",
+              "read_only": true,
+              "row_limit_per_entity": 5000,
+              "schema": "duress_t35bb37007d8e",
+              "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+              "version": "2"
+            },
+            "settled": true,
+            "valid": true
+          },
+          "before": {
+            "available": true,
+            "entities": {
+              "bookings": [
+                {
+                  "amount": "49.5",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-101",
+                  "status": "pending"
+                },
+                {
+                  "amount": 62,
+                  "customer_id": "customer-ben",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-102",
+                  "status": "pending"
+                },
+                {
+                  "amount": 75,
+                  "customer_id": "customer-chen",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-103",
+                  "status": "pending"
+                },
+                {
+                  "amount": 88,
+                  "customer_id": "customer-devi",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-104",
+                  "status": "pending"
+                }
+              ],
+              "events": [
+                {
+                  "capacity": 2,
+                  "id": "event-summit-2026"
+                }
+              ],
+              "tickets": []
+            },
+            "error": null,
+            "provenance": {
+              "adapter": "postgresql",
+              "observed_at": "2026-10-27T03:30:05.431835+00:00",
+              "read_only": true,
+              "row_limit_per_entity": 5000,
+              "schema": "duress_t35bb37007d8e",
+              "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+              "version": "2"
+            },
+            "settled": true,
+            "valid": true
+          },
+          "execution": {
+            "attempts": [
+              {
+                "attempt": 1,
+                "body_scope": null,
+                "body_status": null,
+                "delivery_id": "d1",
+                "ended_s": 0.1341730419999294,
+                "error": null,
+                "outcome": "response",
+                "started_s": 0.006839249999757158,
+                "status_code": 200
+              },
+              {
+                "attempt": 1,
+                "body_scope": null,
+                "body_status": null,
+                "delivery_id": "d3",
+                "ended_s": 0.13443370900040463,
+                "error": null,
+                "outcome": "response",
+                "started_s": 0.00770412500060047,
+                "status_code": 200
+              }
+            ],
+            "baseline_ok": true,
+            "cancelled_attempts": 0,
+            "duration_s": 1.8018609580003613,
+            "execution_deadline_exceeded": false,
+            "exit_code": 0,
+            "harness_errors": [],
+            "instance_ok": true,
+            "phase_timings": {
+              "drain": 0.201382,
+              "execute": 0.205541,
+              "kill_confirm": 0.040721,
+              "prepare": 0.689278,
+              "readiness": 0.629762
+            },
+            "response_semantics_mismatches": [],
+            "scenario_id": "concurrent-duplicate",
+            "schema_error": null,
+            "schema_ok": true,
+            "settlement": "clean",
+            "started_at": "2026-10-27T03:30:04+00:00",
+            "target_id": "ticketing-flawed",
+            "target_ready": true,
+            "trial_id": "t35bb37007d8e",
+            "undispatched": 0,
+            "watchdog_fired": false
+          },
+          "invariants": [
+            {
+              "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+              "id": "one-ticket-per-booking",
+              "identities": [
+                {
+                  "booking_id": "booking-101"
+                }
+              ],
+              "reason": "duplicate_key",
+              "status": "violated",
+              "version": 1
+            },
+            {
+              "explanation": "All 'tickets'.booking_id references resolve.",
+              "id": "ticket-references-booking",
+              "identities": [],
+              "reason": "references_resolve",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+              "id": "expected-ticket-effect",
+              "identities": [
+                {
+                  "id": 1
+                },
+                {
+                  "id": 2
+                }
+              ],
+              "reason": "unexpected_effect_delta",
+              "status": "violated",
+              "version": 1
+            },
+            {
+              "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+              "id": "booking-transitions",
+              "identities": [],
+              "reason": "transitions_allowed",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-amount-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-customer_id-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-event_id-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Related 'tickets' row counts fit within declared capacities.",
+              "id": "event-capacity",
+              "identities": [],
+              "reason": "within_capacity",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All changes to 'bookings' are within the declared scope.",
+              "id": "booking-ownership",
+              "identities": [],
+              "reason": "scope_respected",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+              "id": "acknowledgement-intent",
+              "identities": [],
+              "reason": "acknowledgement_matches_effect",
+              "status": "satisfied",
+              "version": 1
+            }
+          ],
+          "scenario_id": "concurrent-duplicate",
+          "schema_version": 1,
+          "trial_id": "t35bb37007d8e",
+          "verdict": {
+            "evidence_missing": [],
+            "expected_effect_misses": [],
+            "pass_condition_failures": [],
+            "reasons": [
+              "one-ticket-per-booking@1",
+              "expected-ticket-effect@1"
+            ],
+            "signature": {
+              "check": "one-ticket-per-booking@1",
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            "status": "FAIL",
+            "violations": [
+              {
+                "check": "one-ticket-per-booking@1",
+                "entity_ids": [
+                  "booking-101"
+                ],
+                "independent": true,
+                "kind": "duplicate_key",
+                "roles": []
+              },
+              {
+                "check": "expected-ticket-effect@1",
+                "entity_ids": [
+                  "1",
+                  "2"
+                ],
+                "independent": true,
+                "kind": "unexpected_effect_delta",
+                "roles": []
+              }
+            ]
+          }
+        },
+        {
+          "after": {
+            "available": true,
+            "entities": {
+              "bookings": [
+                {
+                  "amount": 62,
+                  "customer_id": "customer-ben",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-102",
+                  "status": "pending"
+                },
+                {
+                  "amount": 75,
+                  "customer_id": "customer-chen",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-103",
+                  "status": "pending"
+                },
+                {
+                  "amount": 88,
+                  "customer_id": "customer-devi",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-104",
+                  "status": "pending"
+                },
+                {
+                  "amount": "49.5",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-101",
+                  "status": "paid"
+                }
+              ],
+              "events": [
+                {
+                  "capacity": 2,
+                  "id": "event-summit-2026"
+                }
+              ],
+              "tickets": [
+                {
+                  "amount": "49.5",
+                  "booking_id": "booking-101",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": 1
+                },
+                {
+                  "amount": "49.5",
+                  "booking_id": "booking-101",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": 2
+                }
+              ]
+            },
+            "error": null,
+            "provenance": {
+              "adapter": "postgresql",
+              "observed_at": "2026-10-27T03:30:08.274955+00:00",
+              "read_only": true,
+              "row_limit_per_entity": 5000,
+              "schema": "duress_t994492b53698",
+              "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+              "version": "2"
+            },
+            "settled": true,
+            "valid": true
+          },
+          "before": {
+            "available": true,
+            "entities": {
+              "bookings": [
+                {
+                  "amount": "49.5",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-101",
+                  "status": "pending"
+                },
+                {
+                  "amount": 62,
+                  "customer_id": "customer-ben",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-102",
+                  "status": "pending"
+                },
+                {
+                  "amount": 75,
+                  "customer_id": "customer-chen",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-103",
+                  "status": "pending"
+                },
+                {
+                  "amount": 88,
+                  "customer_id": "customer-devi",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-104",
+                  "status": "pending"
+                }
+              ],
+              "events": [
+                {
+                  "capacity": 2,
+                  "id": "event-summit-2026"
+                }
+              ],
+              "tickets": []
+            },
+            "error": null,
+            "provenance": {
+              "adapter": "postgresql",
+              "observed_at": "2026-10-27T03:30:07.207789+00:00",
+              "read_only": true,
+              "row_limit_per_entity": 5000,
+              "schema": "duress_t994492b53698",
+              "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+              "version": "2"
+            },
+            "settled": true,
+            "valid": true
+          },
+          "execution": {
+            "attempts": [
+              {
+                "attempt": 1,
+                "body_scope": null,
+                "body_status": null,
+                "delivery_id": "d1",
+                "ended_s": 0.14086495799983823,
+                "error": null,
+                "outcome": "response",
+                "started_s": 0.006897874999594933,
+                "status_code": 200
+              },
+              {
+                "attempt": 1,
+                "body_scope": null,
+                "body_status": null,
+                "delivery_id": "d3",
+                "ended_s": 0.1411115829996561,
+                "error": null,
+                "outcome": "response",
+                "started_s": 0.007685166999181092,
+                "status_code": 200
+              }
+            ],
+            "baseline_ok": true,
+            "cancelled_attempts": 0,
+            "duration_s": 1.6223780420004914,
+            "execution_deadline_exceeded": false,
+            "exit_code": 0,
+            "harness_errors": [],
+            "instance_ok": true,
+            "phase_timings": {
+              "drain": 0.225668,
+              "execute": 0.217123,
+              "kill_confirm": 0.04004,
+              "prepare": 0.553996,
+              "readiness": 0.549305
+            },
+            "response_semantics_mismatches": [],
+            "scenario_id": "concurrent-duplicate",
+            "schema_error": null,
+            "schema_ok": true,
+            "settlement": "clean",
+            "started_at": "2026-10-27T03:30:06+00:00",
+            "target_id": "ticketing-flawed",
+            "target_ready": true,
+            "trial_id": "t994492b53698",
+            "undispatched": 0,
+            "watchdog_fired": false
+          },
+          "invariants": [
+            {
+              "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+              "id": "one-ticket-per-booking",
+              "identities": [
+                {
+                  "booking_id": "booking-101"
+                }
+              ],
+              "reason": "duplicate_key",
+              "status": "violated",
+              "version": 1
+            },
+            {
+              "explanation": "All 'tickets'.booking_id references resolve.",
+              "id": "ticket-references-booking",
+              "identities": [],
+              "reason": "references_resolve",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+              "id": "expected-ticket-effect",
+              "identities": [
+                {
+                  "id": 1
+                },
+                {
+                  "id": 2
+                }
+              ],
+              "reason": "unexpected_effect_delta",
+              "status": "violated",
+              "version": 1
+            },
+            {
+              "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+              "id": "booking-transitions",
+              "identities": [],
+              "reason": "transitions_allowed",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-amount-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-customer_id-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-event_id-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Related 'tickets' row counts fit within declared capacities.",
+              "id": "event-capacity",
+              "identities": [],
+              "reason": "within_capacity",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All changes to 'bookings' are within the declared scope.",
+              "id": "booking-ownership",
+              "identities": [],
+              "reason": "scope_respected",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+              "id": "acknowledgement-intent",
+              "identities": [],
+              "reason": "acknowledgement_matches_effect",
+              "status": "satisfied",
+              "version": 1
+            }
+          ],
+          "scenario_id": "concurrent-duplicate",
+          "schema_version": 1,
+          "trial_id": "t994492b53698",
+          "verdict": {
+            "evidence_missing": [],
+            "expected_effect_misses": [],
+            "pass_condition_failures": [],
+            "reasons": [
+              "one-ticket-per-booking@1",
+              "expected-ticket-effect@1"
+            ],
+            "signature": {
+              "check": "one-ticket-per-booking@1",
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            "status": "FAIL",
+            "violations": [
+              {
+                "check": "one-ticket-per-booking@1",
+                "entity_ids": [
+                  "booking-101"
+                ],
+                "independent": true,
+                "kind": "duplicate_key",
+                "roles": []
+              },
+              {
+                "check": "expected-ticket-effect@1",
+                "entity_ids": [
+                  "1",
+                  "2"
+                ],
+                "independent": true,
+                "kind": "unexpected_effect_delta",
+                "roles": []
+              }
+            ]
+          }
+        },
+        {
+          "after": {
+            "available": true,
+            "entities": {
+              "bookings": [
+                {
+                  "amount": 62,
+                  "customer_id": "customer-ben",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-102",
+                  "status": "pending"
+                },
+                {
+                  "amount": 75,
+                  "customer_id": "customer-chen",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-103",
+                  "status": "pending"
+                },
+                {
+                  "amount": 88,
+                  "customer_id": "customer-devi",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-104",
+                  "status": "pending"
+                },
+                {
+                  "amount": "49.5",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-101",
+                  "status": "paid"
+                }
+              ],
+              "events": [
+                {
+                  "capacity": 2,
+                  "id": "event-summit-2026"
+                }
+              ],
+              "tickets": [
+                {
+                  "amount": "49.5",
+                  "booking_id": "booking-101",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": 2
+                },
+                {
+                  "amount": "49.5",
+                  "booking_id": "booking-101",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": 1
+                }
+              ]
+            },
+            "error": null,
+            "provenance": {
+              "adapter": "postgresql",
+              "observed_at": "2026-10-27T03:30:09.989993+00:00",
+              "read_only": true,
+              "row_limit_per_entity": 5000,
+              "schema": "duress_tffdf0caf4734",
+              "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+              "version": "2"
+            },
+            "settled": true,
+            "valid": true
+          },
+          "before": {
+            "available": true,
+            "entities": {
+              "bookings": [
+                {
+                  "amount": "49.5",
+                  "customer_id": "customer-ana",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-101",
+                  "status": "pending"
+                },
+                {
+                  "amount": 62,
+                  "customer_id": "customer-ben",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-102",
+                  "status": "pending"
+                },
+                {
+                  "amount": 75,
+                  "customer_id": "customer-chen",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-103",
+                  "status": "pending"
+                },
+                {
+                  "amount": 88,
+                  "customer_id": "customer-devi",
+                  "event_id": "event-summit-2026",
+                  "id": "booking-104",
+                  "status": "pending"
+                }
+              ],
+              "events": [
+                {
+                  "capacity": 2,
+                  "id": "event-summit-2026"
+                }
+              ],
+              "tickets": []
+            },
+            "error": null,
+            "provenance": {
+              "adapter": "postgresql",
+              "observed_at": "2026-10-27T03:30:08.935719+00:00",
+              "read_only": true,
+              "row_limit_per_entity": 5000,
+              "schema": "duress_tffdf0caf4734",
+              "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+              "version": "2"
+            },
+            "settled": true,
+            "valid": true
+          },
+          "execution": {
+            "attempts": [
+              {
+                "attempt": 1,
+                "body_scope": null,
+                "body_status": null,
+                "delivery_id": "d1",
+                "ended_s": 0.13737520800077618,
+                "error": null,
+                "outcome": "response",
+                "started_s": 0.006494707999991078,
+                "status_code": 200
+              },
+              {
+                "attempt": 1,
+                "body_scope": null,
+                "body_status": null,
+                "delivery_id": "d3",
+                "ended_s": 0.13761258300019108,
+                "error": null,
+                "outcome": "response",
+                "started_s": 0.007219625000288943,
+                "status_code": 200
+              }
+            ],
+            "baseline_ok": true,
+            "cancelled_attempts": 0,
+            "duration_s": 1.605250707999403,
+            "execution_deadline_exceeded": false,
+            "exit_code": 0,
+            "harness_errors": [],
+            "instance_ok": true,
+            "phase_timings": {
+              "drain": 0.226679,
+              "execute": 0.207782,
+              "kill_confirm": 0.040011,
+              "prepare": 0.550516,
+              "readiness": 0.545429
+            },
+            "response_semantics_mismatches": [],
+            "scenario_id": "concurrent-duplicate",
+            "schema_error": null,
+            "schema_ok": true,
+            "settlement": "clean",
+            "started_at": "2026-10-27T03:30:08+00:00",
+            "target_id": "ticketing-flawed",
+            "target_ready": true,
+            "trial_id": "tffdf0caf4734",
+            "undispatched": 0,
+            "watchdog_fired": false
+          },
+          "invariants": [
+            {
+              "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+              "id": "one-ticket-per-booking",
+              "identities": [
+                {
+                  "booking_id": "booking-101"
+                }
+              ],
+              "reason": "duplicate_key",
+              "status": "violated",
+              "version": 1
+            },
+            {
+              "explanation": "All 'tickets'.booking_id references resolve.",
+              "id": "ticket-references-booking",
+              "identities": [],
+              "reason": "references_resolve",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+              "id": "expected-ticket-effect",
+              "identities": [
+                {
+                  "id": 1
+                },
+                {
+                  "id": 2
+                }
+              ],
+              "reason": "unexpected_effect_delta",
+              "status": "violated",
+              "version": 1
+            },
+            {
+              "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+              "id": "booking-transitions",
+              "identities": [],
+              "reason": "transitions_allowed",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-amount-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-customer_id-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All declared related values are consistent.",
+              "id": "ticket-event_id-matches",
+              "identities": [],
+              "reason": "values_consistent",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Related 'tickets' row counts fit within declared capacities.",
+              "id": "event-capacity",
+              "identities": [],
+              "reason": "within_capacity",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "All changes to 'bookings' are within the declared scope.",
+              "id": "booking-ownership",
+              "identities": [],
+              "reason": "scope_respected",
+              "status": "satisfied",
+              "version": 1
+            },
+            {
+              "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+              "id": "acknowledgement-intent",
+              "identities": [],
+              "reason": "acknowledgement_matches_effect",
+              "status": "satisfied",
+              "version": 1
+            }
+          ],
+          "scenario_id": "concurrent-duplicate",
+          "schema_version": 1,
+          "trial_id": "tffdf0caf4734",
+          "verdict": {
+            "evidence_missing": [],
+            "expected_effect_misses": [],
+            "pass_condition_failures": [],
+            "reasons": [
+              "one-ticket-per-booking@1",
+              "expected-ticket-effect@1"
+            ],
+            "signature": {
+              "check": "one-ticket-per-booking@1",
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            "status": "FAIL",
+            "violations": [
+              {
+                "check": "one-ticket-per-booking@1",
+                "entity_ids": [
+                  "booking-101"
+                ],
+                "independent": true,
+                "kind": "duplicate_key",
+                "roles": []
+              },
+              {
+                "check": "expected-ticket-effect@1",
+                "entity_ids": [
+                  "1",
+                  "2"
+                ],
+                "independent": true,
+                "kind": "unexpected_effect_delta",
+                "roles": []
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "claim": "One bounded delivery removal, independently revalidated; no global minimality claim.",
+  "dna": {
+    "characterization": {
+      "fail": 10,
+      "p0": 1.0,
+      "provenance": "actual local HTTP deliveries and declared database observer",
+      "valid": 10
+    },
+    "dna_id": "f4f1b5104412acab60091a2c13eedd355e7691e730fe7d7db773fb71eedbead5",
+    "reproducer": {
+      "adapters": {
+        "delivery": "http-json@1",
+        "dispatcher": "exec@1",
+        "invariants": "declarative@1",
+        "lifecycle": "external@1",
+        "observer": "postgresql@1"
+      },
+      "assumptions": [
+        "owned isolated test application",
+        "fresh managed process and test state",
+        "scoped read-only persisted-state evidence",
+        "bounded empirical experiment"
+      ],
+      "contract": {
+        "entities": {
+          "bookings": {
+            "columns": [
+              "id",
+              "event_id",
+              "customer_id",
+              "amount",
+              "status"
+            ],
+            "key": "id",
+            "table": "bookings"
+          },
+          "events": {
+            "columns": [
+              "id",
+              "capacity"
+            ],
+            "key": "id",
+            "table": "events"
+          },
+          "tickets": {
+            "columns": [
+              "id",
+              "booking_id",
+              "event_id",
+              "customer_id",
+              "amount"
+            ],
+            "key": "id",
+            "table": "tickets"
+          }
+        },
+        "id": "ticketing-v1",
+        "invariants": [
+          {
+            "entity": "tickets",
+            "id": "one-ticket-per-booking",
+            "keys": [
+              "booking_id"
+            ],
+            "kind": "unique_by",
+            "max_count": 1,
+            "version": 1
+          },
+          {
+            "entity": "tickets",
+            "id": "ticket-references-booking",
+            "kind": "reference_exists",
+            "reference": "booking_id",
+            "target_entity": "bookings",
+            "target_key": "id",
+            "version": 1
+          },
+          {
+            "entity": "tickets",
+            "id": "expected-ticket-effect",
+            "kind": "expected_effect",
+            "version": 1
+          },
+          {
+            "allowed": [
+              {
+                "from_state": "pending",
+                "to_state": "paid"
+              },
+              {
+                "from_state": "pending",
+                "to_state": "cancelled"
+              },
+              {
+                "from_state": "paid",
+                "to_state": "cancelled"
+              }
+            ],
+            "entity": "bookings",
+            "field": "status",
+            "id": "booking-transitions",
+            "kind": "state_transition",
+            "version": 1
+          },
+          {
+            "entity": "tickets",
+            "field": "amount",
+            "id": "ticket-amount-matches",
+            "kind": "value_consistency",
+            "mode": "fields_equal",
+            "reference": "booking_id",
+            "related_entity": "bookings",
+            "related_field": "amount",
+            "related_key": "id",
+            "version": 1
+          },
+          {
+            "entity": "tickets",
+            "field": "customer_id",
+            "id": "ticket-customer_id-matches",
+            "kind": "value_consistency",
+            "mode": "fields_equal",
+            "reference": "booking_id",
+            "related_entity": "bookings",
+            "related_field": "customer_id",
+            "related_key": "id",
+            "version": 1
+          },
+          {
+            "entity": "tickets",
+            "field": "event_id",
+            "id": "ticket-event_id-matches",
+            "kind": "value_consistency",
+            "mode": "fields_equal",
+            "reference": "booking_id",
+            "related_entity": "bookings",
+            "related_field": "event_id",
+            "related_key": "id",
+            "version": 1
+          },
+          {
+            "entity": "events",
+            "field": "capacity",
+            "id": "event-capacity",
+            "kind": "value_consistency",
+            "mode": "count_at_most",
+            "reference": "event_id",
+            "related_entity": "tickets",
+            "related_field": null,
+            "related_key": "id",
+            "version": 1
+          },
+          {
+            "entity": "bookings",
+            "id": "booking-ownership",
+            "kind": "scope_ownership",
+            "version": 1
+          },
+          {
+            "id": "acknowledgement-intent",
+            "kind": "acknowledgement_consistency",
+            "version": 1
+          }
+        ],
+        "schema_version": 1,
+        "version": 1
+      },
+      "delivery": {
+        "adapter": "http-json@1",
+        "endpoint": "/webhooks",
+        "event_id_header": "X-Event-Id",
+        "headers": {},
+        "method": "POST",
+        "referenced_header_names": [],
+        "signature": "hmac-sha256",
+        "signature_header": "X-Signature"
+      },
+      "failure_signature": {
+        "check": "one-ticket-per-booking@1",
+        "kind": "duplicate_key",
+        "roles": []
+      },
+      "fixtures": {
+        "events": {
+          "ambiguous": {
+            "payload": {
+              "amount": "49.50",
+              "booking_id": "booking-101",
+              "event_id": "ambiguous-101",
+              "event_type": "booking.paid",
+              "test_controls": {
+                "ack_delay_ms": 500
+              }
+            }
+          },
+          "cancel": {
+            "payload": {
+              "amount": "49.50",
+              "booking_id": "booking-101",
+              "event_id": "cancel-101",
+              "event_type": "booking.cancelled"
+            }
+          },
+          "invalid": {
+            "payload": {
+              "amount": "99.00",
+              "booking_id": "booking-101",
+              "event_id": "invalid-101",
+              "event_type": "booking.paid"
+            }
+          },
+          "paid": {
+            "payload": {
+              "amount": "49.50",
+              "booking_id": "booking-101",
+              "event_id": "paid-101",
+              "event_type": "booking.paid"
+            }
+          },
+          "paid-distinct": {
+            "payload": {
+              "amount": "49.50",
+              "booking_id": "booking-101",
+              "event_id": "paid-distinct-101",
+              "event_type": "booking.paid"
+            }
+          },
+          "slow": {
+            "payload": {
+              "amount": "49.50",
+              "booking_id": "booking-101",
+              "event_id": "slow-101",
+              "event_type": "booking.paid",
+              "test_controls": {
+                "processing_delay_ms": 200
+              }
+            }
+          }
+        },
+        "seed": {
+          "bookings": [
+            {
+              "amount": "49.50",
+              "customer_id": "customer-ana",
+              "event_id": "event-summit-2026",
+              "id": "booking-101",
+              "status": "pending"
+            },
+            {
+              "amount": "62.00",
+              "customer_id": "customer-ben",
+              "event_id": "event-summit-2026",
+              "id": "booking-102",
+              "status": "pending"
+            },
+            {
+              "amount": "75.00",
+              "customer_id": "customer-chen",
+              "event_id": "event-summit-2026",
+              "id": "booking-103",
+              "status": "pending"
+            },
+            {
+              "amount": "88.00",
+              "customer_id": "customer-devi",
+              "event_id": "event-summit-2026",
+              "id": "booking-104",
+              "status": "pending"
+            }
+          ],
+          "events": [
+            {
+              "capacity": 2,
+              "id": "event-summit-2026"
+            }
+          ]
+        }
+      },
+      "implementation_sha256": "cf54aef6611d19bf85dedd37e9e6f6fc3cf0fb996fc2793b2725447fa0ee1a00",
+      "measured_sample": {
+        "fail": 10,
+        "p0": 1.0,
+        "valid": 10
+      },
+      "mode": "managed",
+      "normalization": "entities@1",
+      "observed_schema": {
+        "adapter": "postgresql",
+        "read_only": true,
+        "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+        "version": "2"
+      },
+      "payloads": {
+        "ambiguous": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"ambiguous-101\",\"test_controls\":{\"ack_delay_ms\":500}}",
+        "cancel": "{\"event_type\":\"booking.cancelled\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"cancel-101\"}",
+        "invalid": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"99.00\",\"event_id\":\"invalid-101\"}",
+        "paid": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"paid-101\"}",
+        "paid-distinct": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"paid-distinct-101\"}",
+        "slow": "{\"event_type\":\"booking.paid\",\"booking_id\":\"booking-101\",\"amount\":\"49.50\",\"event_id\":\"slow-101\",\"test_controls\":{\"processing_delay_ms\":200}}"
+      },
+      "reduced_from": "f61d51169dfc000bec6546eb372beb31e808ce9c98b1d32a498b2f06badac837",
+      "scenario": {
+        "ack_delivery_id": null,
+        "acknowledgements": {
+          "d1": {
+            "entity": "tickets",
+            "intent": "create",
+            "match": {
+              "booking_id": "booking-101"
+            }
+          }
+        },
+        "context": {
+          "expected_effects": [
+            {
+              "entity": "tickets",
+              "match": {
+                "booking_id": "booking-101"
+              },
+              "max_delta": 1,
+              "min_delta": 1
+            }
+          ],
+          "required_transitions": [
+            {
+              "entity": "bookings",
+              "from_state": "pending",
+              "identity": "booking-101",
+              "to_state": "paid"
+            }
+          ],
+          "scopes": [
+            {
+              "entity": "bookings",
+              "identities": [
+                "booking-101"
+              ]
+            }
+          ]
+        },
+        "deliveries": [
+          {
+            "attempt_timeout_ms": null,
+            "event_id": "paid-101",
+            "fixture": "paid",
+            "id": "d1",
+            "invalid_signature": false,
+            "max_attempts": null
+          },
+          {
+            "attempt_timeout_ms": null,
+            "event_id": "paid-101",
+            "fixture": "paid",
+            "id": "d3",
+            "invalid_signature": false,
+            "max_attempts": null
+          }
+        ],
+        "delivery_policy": {
+          "attempt_timeout_ms": 5000,
+          "backoff_ms": [],
+          "max_attempts": 1,
+          "retry_on": []
+        },
+        "expected_status": {
+          "d1": "2xx",
+          "d3": "2xx"
+        },
+        "id": "concurrent-duplicate",
+        "require_overlap": true,
+        "require_retry": false,
+        "settle_ms": 0,
+        "steps": [
+          {
+            "delay_before_ms": 0,
+            "deliveries": [
+              "d1",
+              "d3"
+            ]
+          }
+        ]
+      }
+    },
+    "schema": "external-dna@1"
+  },
+  "original_dna_id": "f61d51169dfc000bec6546eb372beb31e808ce9c98b1d32a498b2f06badac837",
+  "outcome": "REDUCED",
+  "revalidation": {
+    "result": {
+      "budget_exhausted": false,
+      "fail": 10,
+      "inconclusive": 0,
+      "reasons": [
+        "fail_observed",
+        "signature:one-ticket-per-booking@1:duplicate_key:"
+      ],
+      "signature": {
+        "check": "one-ticket-per-booking@1",
+        "kind": "duplicate_key",
+        "roles": []
+      },
+      "signature_counts": {
+        "one-ticket-per-booking@1:duplicate_key:": 10
+      },
+      "status": "FAIL",
+      "trials": 10,
+      "valid": 10
+    },
+    "scenario_id": "concurrent-duplicate",
+    "schedule": {
+      "ack_delivery_id": null,
+      "acknowledgements": {
+        "d1": {
+          "entity": "tickets",
+          "intent": "create",
+          "match": {
+            "booking_id": "booking-101"
+          }
+        }
+      },
+      "context": {
+        "expected_effects": [
+          {
+            "entity": "tickets",
+            "match": {
+              "booking_id": "booking-101"
+            },
+            "max_delta": 1,
+            "min_delta": 1
+          }
+        ],
+        "required_transitions": [
+          {
+            "entity": "bookings",
+            "from_state": "pending",
+            "identity": "booking-101",
+            "to_state": "paid"
+          }
+        ],
+        "scopes": [
+          {
+            "entity": "bookings",
+            "identities": [
+              "booking-101"
+            ]
+          }
+        ]
+      },
+      "deliveries": [
+        {
+          "attempt_timeout_ms": null,
+          "event_id": "paid-101",
+          "fixture": "paid",
+          "id": "d1",
+          "invalid_signature": false,
+          "max_attempts": null
+        },
+        {
+          "attempt_timeout_ms": null,
+          "event_id": "paid-101",
+          "fixture": "paid",
+          "id": "d3",
+          "invalid_signature": false,
+          "max_attempts": null
+        }
+      ],
+      "delivery_policy": {
+        "attempt_timeout_ms": 5000,
+        "backoff_ms": [],
+        "max_attempts": 1,
+        "retry_on": []
+      },
+      "expected_status": {
+        "d1": "2xx",
+        "d3": "2xx"
+      },
+      "id": "concurrent-duplicate",
+      "require_overlap": true,
+      "require_retry": false,
+      "settle_ms": 0,
+      "steps": [
+        {
+          "delay_before_ms": 0,
+          "deliveries": [
+            "d1",
+            "d3"
+          ]
+        }
+      ]
+    },
+    "trials": [
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:11.716639+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_tb503df174996",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:10.650575+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_tb503df174996",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.13439358300001913,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006920249999893713,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.1341570419999698,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007744792000266898,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.6195018329999584,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.238951,
+            "execute": 0.205323,
+            "kill_confirm": 0.040077,
+            "prepare": 0.552954,
+            "readiness": 0.544744
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:10+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "tb503df174996",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "tb503df174996",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:13.444924+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_tc2fb15e8d231",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:12.375017+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_tc2fb15e8d231",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.1341282500006855,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006453209000028437,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.1338781670001481,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007151292000344256,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.6180892909997056,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.25588,
+            "execute": 0.205131,
+            "kill_confirm": 0.040548,
+            "prepare": 0.547753,
+            "readiness": 0.527544
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:11+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "tc2fb15e8d231",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "tc2fb15e8d231",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:15.154564+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_td242b59f9683",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:14.104767+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_td242b59f9683",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.13514395800029888,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006707791000735597,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.13490116600041802,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007391416000245954,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.6008772909999607,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.241193,
+            "execute": 0.205518,
+            "kill_confirm": 0.040071,
+            "prepare": 0.550607,
+            "readiness": 0.527649
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:13+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "td242b59f9683",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "td242b59f9683",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:16.873882+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t989b18a6bdad",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:15.815560+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t989b18a6bdad",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.14379729100073746,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006629958000303304,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.14403137499994045,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007439250000061293,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.608730832999754,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.24874,
+            "execute": 0.209068,
+            "kill_confirm": 0.040173,
+            "prepare": 0.55003,
+            "readiness": 0.525689
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:15+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "t989b18a6bdad",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "t989b18a6bdad",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:18.581667+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t2498148cfc7a",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:17.530777+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t2498148cfc7a",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.13493183399987174,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006654750000052445,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.1351771670006201,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007375166999736393,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.6013326669999515,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.229024,
+            "execute": 0.20565,
+            "kill_confirm": 0.040811,
+            "prepare": 0.54991,
+            "readiness": 0.540498
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:16+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "t2498148cfc7a",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "t2498148cfc7a",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:20.310761+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t29f6f9ca4a7d",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:19.253450+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t29f6f9ca4a7d",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.13413874999969266,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006535249999615189,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.13389495799947326,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007278957999915292,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.6204956659994423,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.242705,
+            "execute": 0.205298,
+            "kill_confirm": 0.040374,
+            "prepare": 0.562866,
+            "readiness": 0.534685
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:18+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "t29f6f9ca4a7d",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "t29f6f9ca4a7d",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:22.072838+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t76ef92ffa629",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:20.970662+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t76ef92ffa629",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.1460529999994833,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007516540999858989,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.14628795799944783,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.008444207999673381,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.6530764589997489,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.165111,
+            "execute": 0.216288,
+            "kill_confirm": 0.040196,
+            "prepare": 0.55048,
+            "readiness": 0.647963
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:20+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "t76ef92ffa629",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "t76ef92ffa629",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:23.788120+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t4fb13aecaf30",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:22.729863+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t4fb13aecaf30",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.1378620420000516,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006580917000064801,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.13811283400082175,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007310542000595888,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.60424491699996,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.223967,
+            "execute": 0.207885,
+            "kill_confirm": 0.039815,
+            "prepare": 0.545574,
+            "readiness": 0.55077
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:22+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "t4fb13aecaf30",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "t4fb13aecaf30",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:25.534176+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t10dae25f4779",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:24.475584+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t10dae25f4779",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.1382683330002692,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006488625000201864,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.1385241660000247,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007202374999906169,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.6367676660001962,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.239655,
+            "execute": 0.208544,
+            "kill_confirm": 0.040093,
+            "prepare": 0.577783,
+            "readiness": 0.535987
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:23+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "t10dae25f4779",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "t10dae25f4779",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      },
+      {
+        "after": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              },
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "paid"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": [
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 1
+              },
+              {
+                "amount": "49.5",
+                "booking_id": "booking-101",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": 2
+              }
+            ]
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:27.249835+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t2f5908f9cde8",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "before": {
+          "available": true,
+          "entities": {
+            "bookings": [
+              {
+                "amount": "49.5",
+                "customer_id": "customer-ana",
+                "event_id": "event-summit-2026",
+                "id": "booking-101",
+                "status": "pending"
+              },
+              {
+                "amount": 62,
+                "customer_id": "customer-ben",
+                "event_id": "event-summit-2026",
+                "id": "booking-102",
+                "status": "pending"
+              },
+              {
+                "amount": 75,
+                "customer_id": "customer-chen",
+                "event_id": "event-summit-2026",
+                "id": "booking-103",
+                "status": "pending"
+              },
+              {
+                "amount": 88,
+                "customer_id": "customer-devi",
+                "event_id": "event-summit-2026",
+                "id": "booking-104",
+                "status": "pending"
+              }
+            ],
+            "events": [
+              {
+                "capacity": 2,
+                "id": "event-summit-2026"
+              }
+            ],
+            "tickets": []
+          },
+          "error": null,
+          "provenance": {
+            "adapter": "postgresql",
+            "observed_at": "2026-10-27T03:30:26.193215+00:00",
+            "read_only": true,
+            "row_limit_per_entity": 5000,
+            "schema": "duress_t2f5908f9cde8",
+            "schema_fingerprint": "8ad1b3f95675a42d76ac368f69610d19cb44c6d5d79d78836645882d2c382a3b",
+            "version": "2"
+          },
+          "settled": true,
+          "valid": true
+        },
+        "execution": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d1",
+              "ended_s": 0.13633349999963684,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.006602458000088518,
+              "status_code": 200
+            },
+            {
+              "attempt": 1,
+              "body_scope": null,
+              "body_status": null,
+              "delivery_id": "d3",
+              "ended_s": 0.13657279200015182,
+              "error": null,
+              "outcome": "response",
+              "started_s": 0.007293582999409409,
+              "status_code": 200
+            }
+          ],
+          "baseline_ok": true,
+          "cancelled_attempts": 0,
+          "duration_s": 1.606894999999895,
+          "execution_deadline_exceeded": false,
+          "exit_code": 0,
+          "harness_errors": [],
+          "instance_ok": true,
+          "phase_timings": {
+            "drain": 0.246337,
+            "execute": 0.207983,
+            "kill_confirm": 0.040263,
+            "prepare": 0.549825,
+            "readiness": 0.527218
+          },
+          "response_semantics_mismatches": [],
+          "scenario_id": "concurrent-duplicate",
+          "schema_error": null,
+          "schema_ok": true,
+          "settlement": "clean",
+          "started_at": "2026-10-27T03:30:25+00:00",
+          "target_id": "ticketing-flawed",
+          "target_ready": true,
+          "trial_id": "t2f5908f9cde8",
+          "undispatched": 0,
+          "watchdog_fired": false
+        },
+        "invariants": [
+          {
+            "explanation": "Entity 'tickets' has more than 1 rows for booking_id.",
+            "id": "one-ticket-per-booking",
+            "identities": [
+              {
+                "booking_id": "booking-101"
+              }
+            ],
+            "reason": "duplicate_key",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "All 'tickets'.booking_id references resolve.",
+            "id": "ticket-references-booking",
+            "identities": [],
+            "reason": "references_resolve",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Observed effect count delta for 'tickets' fell outside the scenario-declared range.",
+            "id": "expected-ticket-effect",
+            "identities": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ],
+            "reason": "unexpected_effect_delta",
+            "status": "violated",
+            "version": 1
+          },
+          {
+            "explanation": "Observed transitions for 'bookings'.status satisfy the contract.",
+            "id": "booking-transitions",
+            "identities": [],
+            "reason": "transitions_allowed",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-amount-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-customer_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All declared related values are consistent.",
+            "id": "ticket-event_id-matches",
+            "identities": [],
+            "reason": "values_consistent",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Related 'tickets' row counts fit within declared capacities.",
+            "id": "event-capacity",
+            "identities": [],
+            "reason": "within_capacity",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "All changes to 'bookings' are within the declared scope.",
+            "id": "booking-ownership",
+            "identities": [],
+            "reason": "scope_respected",
+            "status": "satisfied",
+            "version": 1
+          },
+          {
+            "explanation": "Successful acknowledgement is consistent with the declared 'create' intent.",
+            "id": "acknowledgement-intent",
+            "identities": [],
+            "reason": "acknowledgement_matches_effect",
+            "status": "satisfied",
+            "version": 1
+          }
+        ],
+        "scenario_id": "concurrent-duplicate",
+        "schema_version": 1,
+        "trial_id": "t2f5908f9cde8",
+        "verdict": {
+          "evidence_missing": [],
+          "expected_effect_misses": [],
+          "pass_condition_failures": [],
+          "reasons": [
+            "one-ticket-per-booking@1",
+            "expected-ticket-effect@1"
+          ],
+          "signature": {
+            "check": "one-ticket-per-booking@1",
+            "kind": "duplicate_key",
+            "roles": []
+          },
+          "status": "FAIL",
+          "violations": [
+            {
+              "check": "one-ticket-per-booking@1",
+              "entity_ids": [
+                "booking-101"
+              ],
+              "independent": true,
+              "kind": "duplicate_key",
+              "roles": []
+            },
+            {
+              "check": "expected-ticket-effect@1",
+              "entity_ids": [
+                "1",
+                "2"
+              ],
+              "independent": true,
+              "kind": "unexpected_effect_delta",
+              "roles": []
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

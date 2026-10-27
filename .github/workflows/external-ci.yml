@@ -1,0 +1,266 @@
+name: Duress external integration CI
+
+on:
+  workflow_call:
+    inputs:
+      application-path:
+        description: Path to the trusted caller application, relative to the checkout or cloned bundle root.
+        type: string
+        required: false
+        default: .
+      application-bundle:
+        description: Optional trusted Git bundle path, relative to the caller repository root.
+        type: string
+        required: false
+        default: ""
+      install-application:
+        description: Install the caller application package into the Duress virtual environment.
+        type: boolean
+        required: false
+        default: false
+      app-requirements-path:
+        description: Optional trusted requirements.txt path, relative to application-path.
+        type: string
+        required: false
+        default: ""
+      config-path:
+        description: Duress TOML configuration path, relative to application-path.
+        type: string
+        required: false
+        default: duress.toml
+      scenario:
+        description: Optional scenario ID; empty runs all configured scenarios.
+        type: string
+        required: false
+        default: ""
+      duress-repository:
+        description: Public Duress source repository containing the installable package.
+        type: string
+        required: false
+        default: marsh15/Duress
+      duress-ref:
+        description: Git ref to install from; use the same immutable ref as the reusable workflow call.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  external-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      DURESS_ARTIFACT_DIR: /tmp/duress-ci-artifacts-${{ github.run_id }}-${{ github.run_attempt }}
+      DURESS_HOME: /tmp/duress-ci-home-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Check out caller application
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Check out Duress source
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: ${{ inputs.duress-repository }}
+          ref: ${{ inputs.duress-ref }}
+          path: .duress-ci/source
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Clone trusted caller application bundle
+        if: ${{ inputs.application-bundle != '' }}
+        shell: bash
+        env:
+          APPLICATION_BUNDLE: ${{ inputs.application-bundle }}
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+
+          workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve(strict=True)
+          bundle_input = Path(os.environ["APPLICATION_BUNDLE"])
+          if bundle_input.is_absolute():
+              raise SystemExit("application-bundle must be relative to the caller checkout")
+          bundle = (workspace / bundle_input).resolve(strict=True)
+          if not bundle.is_file() or not bundle.is_relative_to(workspace):
+              raise SystemExit("application-bundle must name a file inside the caller checkout")
+          subprocess.run(["git", "bundle", "verify", str(bundle)], check=True)
+
+          target = Path(os.environ["RUNNER_TEMP"]) / (
+              f"duress-caller-application-{os.environ['GITHUB_RUN_ID']}-"
+              f"{os.environ['GITHUB_RUN_ATTEMPT']}"
+          )
+          if target.exists():
+              raise SystemExit("temporary caller application path already exists")
+          subprocess.run(["git", "clone", "--no-hardlinks", str(bundle), str(target)], check=True)
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"DURESS_APPLICATION_ROOT={target.resolve(strict=True)}\n")
+          PY
+
+      - name: Validate caller paths
+        shell: bash
+        env:
+          APP_PATH: ${{ inputs.application-path }}
+          APP_REQUIREMENTS_PATH: ${{ inputs.app-requirements-path }}
+          CONFIG_PATH: ${{ inputs.config-path }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve(strict=True)
+          app_root_value = os.environ.get("DURESS_APPLICATION_ROOT", "")
+          app_root = Path(app_root_value).resolve(strict=True) if app_root_value else workspace
+          app_input = Path(os.environ["APP_PATH"])
+          if app_input.is_absolute():
+              raise SystemExit("application-path must be relative to the caller application root")
+          app = (app_root / app_input).resolve(strict=True)
+          if not app.is_dir() or not app.is_relative_to(app_root):
+              raise SystemExit("application-path must be a directory inside the caller application root")
+
+          config_input = Path(os.environ["CONFIG_PATH"])
+          if config_input.is_absolute():
+              raise SystemExit("config-path must be relative to application-path")
+          config = (app / config_input).resolve(strict=True)
+          if not config.is_file() or not config.is_relative_to(app):
+              raise SystemExit("config-path must name a file inside application-path")
+
+          requirements_value = os.environ["APP_REQUIREMENTS_PATH"]
+          requirements = ""
+          if requirements_value:
+              requirements_input = Path(requirements_value)
+              if requirements_input.is_absolute():
+                  raise SystemExit("app-requirements-path must be relative to application-path")
+              requirements_path = (app / requirements_input).resolve(strict=True)
+              if not requirements_path.is_file() or not requirements_path.is_relative_to(app):
+                  raise SystemExit("app-requirements-path must name a file inside application-path")
+              requirements = str(requirements_path)
+
+          if any("\n" in value or "\r" in value for value in (str(app), str(config), requirements)):
+              raise SystemExit("workflow paths cannot contain newlines")
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"DURESS_APP_PATH={app}\n")
+              env_file.write(f"DURESS_CONFIG_PATH={config}\n")
+              env_file.write(f"DURESS_REQUIREMENTS_PATH={requirements}\n")
+          PY
+
+      - name: Prepare report directory
+        run: mkdir -p "$DURESS_ARTIFACT_DIR/dna"
+
+      - name: Install Duress with PostgreSQL support
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python -m venv "$RUNNER_TEMP/duress-ci-venv"
+          venv_python="$RUNNER_TEMP/duress-ci-venv/bin/python"
+          "$venv_python" -m pip install --disable-pip-version-check --upgrade pip
+          "$venv_python" -m pip install "$GITHUB_WORKSPACE/.duress-ci/source[postgresql]"
+          echo "$RUNNER_TEMP/duress-ci-venv/bin" >> "$GITHUB_PATH"
+
+      - name: Start isolated PostgreSQL on loopback
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          password="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+          echo "::add-mask::$password"
+          container_name="duress-postgres-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          docker run --detach --name "$container_name" \
+            --env POSTGRES_DB=duress_ci_test \
+            --env POSTGRES_USER=postgres \
+            --env POSTGRES_PASSWORD="$password" \
+            --publish 127.0.0.1::5432 \
+            postgres:16-alpine >/dev/null
+          port="$(docker port "$container_name" 5432/tcp | sed 's/.*://')"
+          for attempt in {1..60}; do
+            if docker exec "$container_name" pg_isready -U postgres -d duress_ci_test >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec "$container_name" pg_isready -U postgres -d duress_ci_test >/dev/null
+          printf 'DURESS_TICKETING_DB=postgresql://postgres:%s@127.0.0.1:%s/duress_ci_test\n' \
+            "$password" "$port" >> "$GITHUB_ENV"
+
+      - name: Install trusted application dependencies
+        if: ${{ inputs.app-requirements-path != '' }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          "$RUNNER_TEMP/duress-ci-venv/bin/python" -m pip install \
+            --disable-pip-version-check -r "$DURESS_REQUIREMENTS_PATH"
+
+      - name: Install trusted caller application package
+        if: ${{ inputs.install-application }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          "$RUNNER_TEMP/duress-ci-venv/bin/python" -m pip install \
+            --disable-pip-version-check "$DURESS_APP_PATH"
+
+      - name: Run Duress business-state gate
+        shell: bash
+        env:
+          INPUT_SCENARIO: ${{ inputs.scenario }}
+        run: |
+          set -Eeuo pipefail
+          cd "$DURESS_APP_PATH"
+          args=(check --config "$DURESS_CONFIG_PATH" \
+            --output "$DURESS_ARTIFACT_DIR/report.json" \
+            --junit "$DURESS_ARTIFACT_DIR/junit.xml" \
+            --artifacts "$DURESS_ARTIFACT_DIR/dna" --json)
+          if [[ -n "$INPUT_SCENARIO" ]]; then
+            args+=(--scenario "$INPUT_SCENARIO")
+          fi
+          set +e
+          duress "${args[@]}"
+          status=$?
+          set -e
+          printf 'Duress check exit code: %s\n' "$status"
+          exit "$status"
+
+      - name: Suppress credentials from report files
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from urllib.parse import unquote, urlsplit
+
+          dsn = os.environ.get("DURESS_TICKETING_DB", "")
+          parsed = urlsplit(dsn)
+          credentials = {value.encode("utf-8") for value in
+                         (dsn, unquote(parsed.password or "")) if value}
+          directory = Path(os.environ["DURESS_ARTIFACT_DIR"])
+          suppressed = 0
+          for path in directory.rglob("*") if directory.exists() else ():
+              if path.is_file() and any(secret in path.read_bytes() for secret in credentials):
+                  path.write_text('{"artifact_status":"suppressed_runtime_credentials"}\n', encoding="utf-8")
+                  suppressed += 1
+          if suppressed:
+              print(f"Suppressed {suppressed} credential-bearing report file(s).")
+              raise SystemExit("runtime database credentials were found in reports")
+          PY
+
+      - name: Upload JSON, JUnit, and Failure DNA
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: duress-external-ci-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.DURESS_ARTIFACT_DIR }}/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop isolated PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force "duress-postgres-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >/dev/null 2>&1 || true
