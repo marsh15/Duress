@@ -267,3 +267,6 @@ select { appearance: auto; background-image: none !important; padding-right: 12p
 .claim-line.claim-neutral { color: var(--text-secondary); background: var(--bg-elevated); border-left-color: var(--border-strong); }
 
 .button { transition: border-color 120ms ease; }
+
+.trial-detail > div span { min-width: 0; overflow-wrap: anywhere; }
+.explanation-band { overflow-wrap: anywhere; }

@@ -76,7 +76,7 @@ def assert_populated_evidence_accessible(page):
     page.add_script_tag(path=str(ROOT / 'tests/browser/vendor/axe.min.js'))
     violations = page.evaluate("async()=> (await axe.run()).violations.filter(x=>['serious','critical'].includes(x.impact)).map(x=>({id:x.id,nodes:x.nodes.map(n=>n.target)}))")
     assert violations == []
-    for width in [390, 768]:
+    for width in [320, 375, 390, 768, 1280]:
         page.set_viewport_size({'width': width, 'height': 844})
         assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
     page.set_viewport_size({'width': 1440, 'height': 1000})
@@ -184,7 +184,10 @@ def test_new_investigation_replay_verify_reduce_and_differential(page, server):
     expect(page.locator('#investigation-history')).to_contain_text('FAIL')
     page.goto('/investigations/' + investigation_id)
     assert record['model']['provenance']['source'] == 'authored_fixture'
-    assert record['trials_used'] == 30
+    # Invalid attempts can be retried within the declared budget, including
+    # during DNA characterization. They must not change the valid trial quota.
+    assert 30 <= record['trials_used'] <= record['trial_cap']
+    assert all(item['result']['valid'] == 5 for item in record['scenarios'])
     assert all(item['status']['outcome'] == 'confirmed' for item in record['hypotheses'])
     hypotheses = httpx.get(server[0] + admission['status_url'] + '/hypotheses').json()
     findings = httpx.get(server[0] + admission['status_url'] + '/findings').json()

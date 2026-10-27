@@ -228,6 +228,7 @@ jobs:
           exit "$status"
 
       - name: Suppress credentials from report files
+        id: sanitize_artifacts
         if: always()
         shell: bash
         run: |
@@ -252,7 +253,7 @@ jobs:
           PY
 
       - name: Upload JSON, JUnit, and Failure DNA
-        if: always()
+        if: ${{ always() && steps.sanitize_artifacts.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: duress-external-ci-${{ github.run_id }}-${{ github.run_attempt }}
