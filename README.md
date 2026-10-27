@@ -6,9 +6,9 @@ Duress is a local-first reliability-testing tool for developer-owned webhook int
 
 An HTTP acknowledgment can hide duplicate tickets, missing business effects, and incorrect state transitions. Duress checks declared business entities after managed processes have drained and their termination has been confirmed.
 
-![Duress workspace overview](docs/design/screenshots/overview-dark.png)
+![Duress workspace overview](docs/design/quality-pass/overview-desktop-dark.png)
 
-[Light theme](docs/design/screenshots/overview-light.png) · [Executed investigation](docs/design/screenshots/investigation-completed.png) · [Failure DNA](docs/design/screenshots/failure-dna.png) · [Delivery sequence](docs/design/screenshots/delivery-sequence.png) · [Mobile setup](docs/design/screenshots/mobile-setup.png) · [Silent walkthrough](docs/design/screenshots/walkthrough.mp4) · [Design and validation](docs/design/redesign.md)
+[Light theme](docs/design/screenshots/overview-light.png) · [Executed investigation](docs/design/screenshots/investigation-completed.png) · [Failure DNA](docs/design/screenshots/failure-dna.png) · [Delivery sequence](docs/design/screenshots/delivery-sequence.png) · [Mobile setup](docs/design/screenshots/mobile-setup.png) · [Silent walkthrough](docs/design/screenshots/walkthrough.mp4) · [Design and validation](docs/design/redesign.md) · [Final visual quality pass](docs/design/quality-pass/README.md)
 
 The workspace includes dark, light and system appearance, keyboard navigation with **Cmd/Ctrl+K**, a local project setup guide at `/guide`, and a shared component reference at `/design-system`. Execution lifecycle and business verdict remain separate. Historical release screenshots and measurements remain in `docs/screenshots` and `docs/release`.
 

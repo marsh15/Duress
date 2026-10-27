@@ -147,3 +147,5 @@ Static raw-size budgets: JavaScript including vendored HTMX ≤128 KiB; CSS ≤1
 Separate-file gzip estimates: JavaScript including HTMX 30,537 bytes; CSS 15,288 bytes. These are compression estimates, not a claim that the current server enables gzip.
 
 One cached local Chromium desktop navigation measured DOMContentLoaded at 80ms and load at 92ms. This is a single warmed local observation, not a benchmark or an INP/Lighthouse score. Cold-load, container responsiveness and real-device measurements remain unmeasured.
+
+The [final visual quality pass](quality-pass/README.md) records subsequent usability fixes, refreshed screenshots and the current regression results.
