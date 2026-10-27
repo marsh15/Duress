@@ -1,0 +1,5 @@
+{
+  "select_allowed": true,
+  "insert_refused": true,
+  "remaining_trial_schemas": 0
+}

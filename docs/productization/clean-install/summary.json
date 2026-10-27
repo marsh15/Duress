@@ -1,0 +1,68 @@
+{
+  "checks": [
+    {
+      "accepted_exit_codes": [
+        1
+      ],
+      "actual_exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "flawed-check",
+      "outcome": "FAIL",
+      "passed": true
+    },
+    {
+      "accepted_exit_codes": [
+        0
+      ],
+      "actual_exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "fixed-check",
+      "outcome": "PASS",
+      "passed": true
+    },
+    {
+      "accepted_exit_codes": [
+        1
+      ],
+      "actual_exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "flawed-replay",
+      "outcome": "REPRODUCED",
+      "passed": true
+    },
+    {
+      "accepted_exit_codes": [
+        0
+      ],
+      "actual_exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "fixed-verification",
+      "outcome": "VERIFIED",
+      "passed": true
+    },
+    {
+      "accepted_exit_codes": [
+        1
+      ],
+      "actual_exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "flawed-negative-control",
+      "outcome": "NOT_VERIFIED",
+      "passed": true
+    },
+    {
+      "accepted_exit_codes": [
+        0,
+        2,
+        4
+      ],
+      "actual_exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "optional-reduction",
+      "outcome": "REDUCED",
+      "passed": true
+    }
+  ],
+  "credential_bearing_artifacts_suppressed": 0,
+  "schema": "duress-ticketing-ci@1"
+}

@@ -1,0 +1,7 @@
+{
+  "/api/health": 200,
+  "/api/targets": 200,
+  "/web/static/site.css": 200,
+  "/": 200,
+  "hosted_external_rejection": 403
+}
