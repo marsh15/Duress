@@ -1,6 +1,6 @@
 [project]
 name = "duress"
-version = "0.1.0"
+version = "0.2.0b1"
 description = "Put your integrations under pressure. Keep the proof."
 requires-python = ">=3.12"
 dependencies = [

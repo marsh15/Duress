@@ -7,7 +7,13 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from duress.external.contract import Contract, Snapshot, evaluate, load_contract
+from duress.external.contract import (
+    MAX_CONTRACT_BYTES,
+    Contract,
+    Snapshot,
+    evaluate,
+    load_contract,
+)
 
 
 def make_contract() -> Contract:
@@ -285,6 +291,61 @@ max_count = 1
     assert load_contract(contract_path).id == "simple-v1"
 
 
+def test_load_contract_rejects_oversize_file_before_opening_it(tmp_path, monkeypatch):
+    contract_path = tmp_path / "oversize.json"
+    contract_path.write_bytes(b" " * (MAX_CONTRACT_BYTES + 1))
+
+    def unexpected_open(*args, **kwargs):
+        pytest.fail("oversize contract was opened for reading")
+
+    monkeypatch.setattr(type(contract_path), "open", unexpected_open)
+
+    with pytest.raises(ValueError, match="size limit"):
+        load_contract(contract_path)
+
+
+@pytest.mark.parametrize("limit", ["entities", "invariants", "columns"])
+def test_contract_enforces_collection_bounds(limit):
+    payload = {
+        "schema_version": 1,
+        "id": "bounded-contract",
+        "version": 1,
+        "entities": {"items": {"table": "item", "key": "id", "columns": ["id"]}},
+        "invariants": [{"id": "effect", "kind": "expected_effect", "entity": "items"}],
+    }
+
+    if limit == "entities":
+        payload["entities"].update(
+            {
+                f"item_{index}": {
+                    "table": f"item_{index}",
+                    "key": "id",
+                    "columns": ["id"],
+                }
+                for index in range(50)
+            }
+        )
+    elif limit == "invariants":
+        payload["invariants"].extend(
+            {
+                "id": f"effect-{index}",
+                "kind": "expected_effect",
+                "entity": "items",
+            }
+            for index in range(100)
+        )
+    else:
+        for entity_name, table_name in (("items", "item"), ("other_items", "other_item")):
+            payload["entities"][entity_name] = {
+                "table": table_name,
+                "key": "id",
+                "columns": ["id", *[f"field_{index}" for index in range(50)]],
+            }
+
+    with pytest.raises(ValidationError):
+        Contract.model_validate(payload)
+
+
 def test_decimal_datetime_and_result_json_are_deterministic():
     snapshot = Snapshot(
         entities={"x": [{"amount": Decimal("1.2000"), "when": datetime(2026, 1, 2, tzinfo=timezone.utc)}]},
@@ -320,3 +381,45 @@ def test_duplicate_acknowledgement_does_not_accept_replacement_state():
     results = result_by_id(evaluate(make_contract(), before, after, context=context))
 
     assert results["ack-matches-effect"].status == "violated"
+
+
+@pytest.mark.parametrize(
+    ("change_existing_row", "expected_status"),
+    [(False, "violated"), (True, "satisfied")],
+)
+def test_update_ack_pairs_matching_rows_by_declared_identity(change_existing_row, expected_status):
+    before = before_snapshot()
+    before.entities["tickets"] = [
+        {"id": "t1", "booking_id": "b1", "amount": "12.5", "tenant": "north"},
+        {"id": "t2", "booking_id": "b1", "amount": "12.5", "tenant": "north"},
+    ]
+    after = after_snapshot()
+    after.entities["tickets"] = [dict(row) for row in before.entities["tickets"]]
+    if change_existing_row:
+        after.entities["tickets"][0]["amount"] = "13.5"
+    context = {
+        "acknowledgement": {
+            "successful": True,
+            "status_code": 200,
+            "intent": "update",
+            "entity": "tickets",
+            "match": {"booking_id": "b1"},
+        }
+    }
+
+    results = result_by_id(evaluate(make_contract(), before, after, context=context))
+
+    assert results["ack-matches-effect"].status == expected_status
+
+
+def test_negative_ack_does_not_require_a_new_effect_but_other_invariants_still_run():
+    contract = make_contract()
+    context = valid_context()
+    context["acknowledgement"].update(successful=False, status_code=409)
+
+    results = result_by_id(
+        evaluate(contract, before_snapshot(), before_snapshot(), context=context)
+    )
+
+    assert results["ack-matches-effect"].status == "satisfied"
+    assert results["ticket-created"].status == "violated"

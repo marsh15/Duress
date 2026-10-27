@@ -84,6 +84,8 @@ def test_sqlite_observer_is_read_only_allowlisted_and_settled(tmp_path, monkeypa
     assert "do-not-read" not in repr(snapshot.model_dump())
     assert snapshot.provenance["adapter"] == "sqlite"
     assert snapshot.provenance["read_only"] is True
+    assert snapshot.provenance["version"] == "2"
+    assert len(snapshot.provenance["schema_fingerprint"]) == 64
     assert str(database) not in repr(snapshot.provenance)
     assert observed_connections[0].write_blocked
 
@@ -94,6 +96,84 @@ def test_sqlite_observer_is_read_only_allowlisted_and_settled(tmp_path, monkeypa
         context={},
     )
     assert result[0].status == "satisfied"
+
+
+def test_sqlite_schema_fingerprint_tracks_selected_fields_types_and_nullability(tmp_path):
+    def make_database(path, amount_declaration="NUMERIC"):
+        with sqlite3.connect(path) as connection:
+            connection.executescript(
+                "CREATE TABLE booking(id TEXT PRIMARY KEY, "
+                f"amount {amount_declaration}, created_at TEXT);"
+                "CREATE TABLE ticket(id TEXT PRIMARY KEY, booking_id TEXT, amount NUMERIC);"
+            )
+
+    baseline_path = tmp_path / "baseline.db"
+    type_drift_path = tmp_path / "type-drift.db"
+    nullability_drift_path = tmp_path / "nullability-drift.db"
+    make_database(baseline_path)
+    make_database(type_drift_path, "TEXT")
+    make_database(nullability_drift_path, "NUMERIC NOT NULL")
+
+    baseline = observe(contract_for_sqlite(), kind="sqlite", database=baseline_path)
+    repeated = observe(contract_for_sqlite(), kind="sqlite", database=baseline_path)
+    type_drift = observe(contract_for_sqlite(), kind="sqlite", database=type_drift_path)
+    nullability_drift = observe(
+        contract_for_sqlite(), kind="sqlite", database=nullability_drift_path
+    )
+
+    fingerprint = baseline.provenance["schema_fingerprint"]
+    assert fingerprint == repeated.provenance["schema_fingerprint"]
+    assert fingerprint != type_drift.provenance["schema_fingerprint"]
+    assert fingerprint != nullability_drift.provenance["schema_fingerprint"]
+
+
+def test_sqlite_schema_fingerprint_tracks_the_contract_selected_field_set(tmp_path):
+    database = tmp_path / "selected.db"
+    with sqlite3.connect(database) as connection:
+        connection.executescript(
+            "CREATE TABLE booking(id TEXT PRIMARY KEY, amount NUMERIC, created_at TEXT);"
+            "CREATE TABLE ticket(id TEXT PRIMARY KEY, booking_id TEXT, amount NUMERIC);"
+        )
+    original = contract_for_sqlite()
+    reordered_payload = original.model_dump(mode="python")
+    reordered_payload["entities"]["bookings"]["columns"] = ["created_at", "amount", "id"]
+    reordered_payload["entities"]["tickets"]["columns"] = ["amount", "id", "booking_id"]
+    reordered = Contract.model_validate(reordered_payload)
+    subset = Contract.model_validate(
+        {
+            "schema_version": 1,
+            "id": "inventory-subset-v1",
+            "version": 1,
+            "entities": {
+                "bookings": {
+                    "table": "booking",
+                    "key": "id",
+                    "columns": ["id", "created_at"],
+                },
+                "tickets": {
+                    "table": "ticket",
+                    "key": "id",
+                    "columns": ["id", "booking_id"],
+                },
+            },
+            "invariants": [
+                {"id": "ticket-seen", "kind": "expected_effect", "entity": "tickets"}
+            ],
+        }
+    )
+
+    original_snapshot = observe(original, kind="sqlite", database=database)
+    reordered_snapshot = observe(reordered, kind="sqlite", database=database)
+    subset_snapshot = observe(subset, kind="sqlite", database=database)
+
+    assert (
+        original_snapshot.provenance["schema_fingerprint"]
+        == reordered_snapshot.provenance["schema_fingerprint"]
+    )
+    assert (
+        original_snapshot.provenance["schema_fingerprint"]
+        != subset_snapshot.provenance["schema_fingerprint"]
+    )
 
 
 def test_sqlite_missing_table_or_column_is_missing_evidence_not_empty_proof(tmp_path):
@@ -157,9 +237,26 @@ class FakeCursor:
         self.queries.append((query, parameters))
         if "information_schema.columns" in query:
             if parameters[1] == "booking":
-                self.next_rows = [("id",), ("amount",), ("created_at",)]
+                self.next_rows = [
+                    ("id", "text", "text", "NO", None, None, None, None),
+                    ("amount", "numeric", "numeric", "YES", None, 10, 2, None),
+                    (
+                        "created_at",
+                        "timestamp with time zone",
+                        "timestamptz",
+                        "YES",
+                        None,
+                        None,
+                        None,
+                        6,
+                    ),
+                ]
             else:
-                self.next_rows = [("id",), ("booking_id",), ("amount",)]
+                self.next_rows = [
+                    ("id", "text", "text", "NO", None, None, None, None),
+                    ("booking_id", "text", "text", "YES", None, None, None, None),
+                    ("amount", "numeric", "numeric", "YES", None, 10, 2, None),
+                ]
         elif 'FROM "ticketing"."booking"' in query:
             self.next_rows = [
                 ("b1", Decimal("12.500"), datetime(2026, 10, 27, 12, tzinfo=timezone.utc))

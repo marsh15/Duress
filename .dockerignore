@@ -5,5 +5,7 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .duress/
+.duress-productization/
+dist/
 .recovery/
 docs/measurements/

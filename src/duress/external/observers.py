@@ -14,9 +14,9 @@ from time import monotonic
 from typing import Any
 from uuid import UUID
 
-from .contract import Contract, Snapshot, _canonical_value
+from .contract import Contract, EntitySpec, Snapshot, _canonical_value
 
-OBSERVER_VERSION = "1"
+OBSERVER_VERSION = "2"
 MAX_ROWS_PER_ENTITY = 5_000
 QUERY_TIMEOUT_MS = 3_000
 CONNECT_TIMEOUT_SECONDS = 3
@@ -117,11 +117,15 @@ def _read_sqlite_entities(
         quoted_table = _quote(spec.table)
         table_info = connection.execute(f"PRAGMA table_info({quoted_table})").fetchall()
         existing = {row["name"] for row in table_info}
-        declared_types = {row["name"]: (row["type"] or "").upper() for row in table_info}
+        column_metadata = {
+            row["name"]: {
+                "type": (row["type"] or "").strip().upper(),
+                "nullable": not bool(row["notnull"]),
+            }
+            for row in table_info
+        }
         absent = [column for column in spec.columns if column not in existing]
-        schema_rows.append(
-            {"entity": name, "table": spec.table, "columns": [column for column in spec.columns if column in existing]}
-        )
+        schema_rows.append(_schema_description(name, spec, column_metadata))
         if not table_info:
             missing.append({"entity": name, "reason": "missing_table"})
             continue
@@ -136,7 +140,7 @@ def _read_sqlite_entities(
             continue
         entities[name] = [
             {
-                column: _normalize_sqlite_value(row[column], declared_types[column])
+                column: _normalize_sqlite_value(row[column], column_metadata[column]["type"])
                 for column in spec.columns
             }
             for row in rows
@@ -219,15 +223,29 @@ def _read_postgres_entities(
 
     for name, spec in contract.entities.items():
         cursor.execute(
-            "SELECT column_name FROM information_schema.columns "
+            "SELECT column_name, data_type, udt_name, is_nullable, "
+            "character_maximum_length, numeric_precision, numeric_scale, datetime_precision "
+            "FROM information_schema.columns "
             "WHERE table_schema = %s AND table_name = %s ORDER BY ordinal_position",
             (schema, spec.table),
         )
-        existing = [row[0] for row in cursor.fetchall()]
+        column_metadata = {
+            row[0]: {
+                "type": (row[1] or "").strip().lower(),
+                "nullable": row[3] == "YES",
+                "type_details": {
+                    "udt_name": row[2],
+                    "character_maximum_length": row[4],
+                    "numeric_precision": row[5],
+                    "numeric_scale": row[6],
+                    "datetime_precision": row[7],
+                },
+            }
+            for row in cursor.fetchall()
+        }
+        existing = set(column_metadata)
         absent = [column for column in spec.columns if column not in existing]
-        schema_rows.append(
-            {"entity": name, "table": spec.table, "columns": [column for column in spec.columns if column in existing]}
-        )
+        schema_rows.append(_schema_description(name, spec, column_metadata))
         if not existing:
             missing.append({"entity": name, "reason": "missing_table"})
             continue
@@ -285,12 +303,33 @@ def _normalize_sqlite_value(value: Any, declared_type: str) -> Any:
     return _normalize_db_value(value)
 
 
+def _schema_description(
+    name: str, spec: EntitySpec, column_metadata: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    """Describe contract-selected fields with their observed SQL metadata."""
+
+    return {
+        "entity": name,
+        "table": spec.table,
+        "key": spec.key,
+        "columns": [
+            {
+                "name": column,
+                "present": column in column_metadata,
+                **column_metadata.get(column, {"type": None, "nullable": None}),
+            }
+            for column in sorted(spec.columns)
+        ],
+    }
+
+
 def _provenance(kind: str, schema: str, schema_rows: list[dict[str, Any]]) -> dict[str, Any]:
     canonical = json.dumps(
-        [
-            {"entity": row["entity"], "table": row["table"], "columns": row["columns"]}
-            for row in sorted(schema_rows, key=lambda item: item["entity"])
-        ],
+        {
+            "adapter": kind,
+            "schema": schema,
+            "entities": sorted(schema_rows, key=lambda item: item["entity"]),
+        },
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")

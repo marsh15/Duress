@@ -12,6 +12,8 @@ SQL table, one identity key, and an allowlist of columns containing that key.
 Entity names are lower-case snake case. Table and column names accept only
 simple identifier characters. Tables must be distinct. Unknown fields,
 versions, kinds, entity names, and column references are rejected when parsed.
+Contract files are limited to 256 KiB. A contract may declare at most 50
+entities, 100 invariants, and 100 selected columns across all entities.
 
 Example:
 
@@ -104,9 +106,13 @@ Each invariant has a unique stable id, version=1, and discriminating kind.
   parent's numeric field. This models capacities and quotas.
 - scope_ownership: compare before and after rows; only context-listed identities
   may be added, removed, or changed.
-- acknowledgement_consistency: require a successful response to match the
-  declared event intent and observed effect. A duplicate acknowledgement is
-  valid when the prior effect exists and no extra matching row was added.
+- acknowledgement_consistency: when a response is successful, require it to
+  match the declared event intent and observed effect. Update checks pair rows
+  by the entity's declared identity. A duplicate acknowledgement is valid only
+  when the prior matching rows keep the same identities and contents, with no
+  extra matching row added. A non-success response satisfies this conditional
+  check without claiming that no write occurred; expected effects and response
+  requirements are evaluated separately.
 
 ## Constrained scenario context
 
@@ -171,7 +177,13 @@ timeouts, and a parameterized schema lookup. Install the optional psycopg
 dependency for PostgreSQL support.
 
 Both adapters select only contract-listed columns and cap each table at 5,000
-rows. Missing tables/columns and over-limit tables are omitted from
+rows. The `schema_fingerprint` provenance value is a SHA-256 digest over the
+adapter and database schema names, each contract-selected field, and its
+observed SQL type and nullability. PostgreSQL type modifiers are included.
+Entity and field ordering is canonical, so identical observations and selected
+field sets produce the same fingerprint. The digest key remains
+`schema_fingerprint`; the observer version is 2 for this type-aware format.
+Missing tables/columns and over-limit tables are omitted from
 Snapshot.entities and identified in provenance, causing dependent checks to be
 not_evaluable. Reading a database does not prove an application has settled;
 the caller must set settled based on its settlement evidence. PostgreSQL DSNs
@@ -180,7 +192,8 @@ canonical decimal strings; date/time values become ISO 8601 strings; JSON values
 normalize recursively. Unsupported values invalidate a snapshot instead of
 being silently dropped.
 
-The format and observer adapter are external@1. A change to interpretation
-requires an explicit version change; old contracts are never silently
+The contract format and external lifecycle adapter are external@1. The observer
+reports its own version in provenance. A change to contract interpretation
+requires an explicit format version change; old contracts are never silently
 reinterpreted.
 

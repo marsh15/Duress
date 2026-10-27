@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}{{ project.project }} · External project · Duress{% endblock %}
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><a href="/projects">External projects</a><span aria-hidden="true">/</span><span>{{ project.project }}</span></nav>
+<header class="page-heading investigation-heading">
+  <div>
+    <p class="eyebrow">Registered external project · {{ project.mode }} mode</p>
+    <h1>{{ project.project }}</h1>
+    <p class="heading-detail">Target <code>{{ project.target_id }}</code> · contract <code>{{ project.contract.id }}@{{ project.contract.version }}</code></p>
+  </div>
+  <a class="button button-secondary" href="/projects">All external projects</a>
+</header>
+
+<section class="content-section" aria-labelledby="project-adapters-title">
+  <div class="section-heading compact-heading"><h2 id="project-adapters-title">Contract and adapters</h2><span class="section-count">{{ project.status }}</span></div>
+  <div class="table-wrap" tabindex="0">
+    <table class="data-table">
+      <caption class="visually-hidden">Registered project contract and adapter versions</caption>
+      <tbody>
+        <tr><th scope="row">Contract</th><td><code>{{ project.contract.id }}@{{ project.contract.version }}</code></td></tr>
+        {% for name, version in project.adapters.items() %}<tr><th scope="row">{{ name|title }}</th><td><code>{{ version }}</code></td></tr>{% endfor %}
+        <tr><th scope="row">Target mode</th><td>{{ project.mode }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<aside class="notice notice-cyan">
+  <strong>Onboarding and configuration</strong>
+  <span>Manifest edits, target commands, environment references, and project registration stay local. Use <code>duress doctor --config duress.toml</code> to check configuration, then <code>duress register --config duress.toml</code> to approve it for this workbench. The web UI never edits or registers configuration.</span>
+</aside>
+
+<section class="workbench-panel" aria-labelledby="external-actions-title">
+  <div class="panel-topline"><div><p class="panel-kicker">Read-only diagnosis and bounded execution</p><h2 id="external-actions-title">Project actions</h2></div><span class="live-mark"><span aria-hidden="true"></span>Local · persisted status</span></div>
+  <div class="pending-explanation">
+    <label for="external-access-token">Access token <span>(only needed when the server requires one)</span></label>
+    <input id="external-access-token" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Token kept in this page only">
+    <p class="field-help">This value stays in page memory and is sent only to this local Duress server.</p>
+    <form class="external-action-form" data-endpoint="/api/projects/{{ project.project }}/doctor" data-body="false">
+      <button class="button button-secondary" type="submit">Run read-only doctor</button>
+    </form>
+    <p>Doctor validates the registered configuration and checks read-only observer connectivity. It starts no target process and sends no business event.</p>
+    <form class="external-action-form" data-endpoint="/api/projects/{{ project.project }}/investigations" data-body="true">
+      <label for="external-scenario">Scenario</label>
+      <select id="external-scenario" name="scenario_id">
+        <option value="">All registered scenarios</option>
+        {% for scenario in project.scenarios %}<option value="{{ scenario.id }}">{{ scenario.id }} · {{ scenario.deliveries }} deliveries · {{ scenario.steps }} steps</option>{% endfor %}
+      </select>
+      <button class="button button-primary" type="submit">Start investigation</button>
+    </form>
+    <p class="field-help">An investigation uses the manifest’s registered scenario and policy. It cannot accept a caller-supplied path, command, target URL, or manifest.</p>
+    <p id="external-action-status" class="form-message" role="status" aria-live="polite"></p>
+    <pre id="external-action-result" hidden aria-live="polite"></pre>
+  </div>
+  <p class="panel-footnote">HTTP 202 means the operation was accepted. Poll its saved status page for completion. Each run has a five-minute server lifecycle bound.</p>
+</section>
+
+<section class="records-section" aria-labelledby="scenario-title">
+  <div class="section-heading"><div><p class="eyebrow">Manifest-registered choices</p><h2 id="scenario-title">Scenarios</h2></div><span class="section-count">{{ project.scenarios|length }}</span></div>
+  {% if project.scenarios %}
+  <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Registered scenarios</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Deliveries</th><th scope="col">Steps</th><th scope="col">Conditions</th></tr></thead><tbody>
+    {% for scenario in project.scenarios %}<tr><th scope="row"><code>{{ scenario.id }}</code></th><td>{{ scenario.deliveries }}</td><td>{{ scenario.steps }}</td><td>{% if scenario.require_overlap %}overlap required{% endif %}{% if scenario.require_retry %}{% if scenario.require_overlap %} · {% endif %}retry required{% endif %}{% if not scenario.require_overlap and not scenario.require_retry %}Declared invariants and responses{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<p class="empty-note">No scenarios are declared in this configuration.</p>{% endif %}
+</section>
+
+<section class="records-section" aria-labelledby="external-runs-title">
+  <div class="section-heading"><div><p class="eyebrow">Persisted evidence</p><h2 id="external-runs-title">Recent investigations</h2></div><span class="section-count">{{ runs|length }} records</span></div>
+  {% if runs %}<div class="history-list">
+    {% for envelope in runs %}{% set run = envelope.payload %}
+    <article class="history-record"><div class="history-record-main"><div class="history-record-head"><span class="state-chip">{{ run.verdict|default(run.status|default('recorded')) }}</span><span class="recorded-label">{{ envelope.created_at }}</span></div><h3><a href="/projects/{{ project.project }}/investigations/{{ envelope.record_id }}">{{ envelope.record_id }}</a></h3><p>{{ run.target_id }} · {{ run.scenarios|length }} scenario records · {{ run.dna|length }} Failure DNA artifacts</p></div><a class="history-open" href="/projects/{{ project.project }}/investigations/{{ envelope.record_id }}">Inspect evidence</a></article>
+    {% endfor %}
+  </div>{% else %}<div class="empty-state"><span aria-hidden="true">—</span><h2>No investigations yet</h2><p>Choose a registered scenario above to create the first evidence record.</p></div>{% endif %}
+</section>
+
+<section class="records-section" aria-labelledby="external-dna-title">
+  <div class="section-heading"><div><p class="eyebrow">Portable evidence</p><h2 id="external-dna-title">Failure DNA</h2></div><span class="section-count">{{ dna_items|length }} artifacts</span></div>
+  {% if dna_items %}<div class="history-list">
+    {% for envelope in dna_items %}{% set dna = envelope.payload %}
+    <article class="history-record"><div class="history-record-main"><div class="history-record-head"><span class="state-chip">{{ dna.schema|default('external-dna@1') }}</span></div><h3><code>{{ envelope.record_id }}</code></h3><p>{{ dna.reproducer.scenario.id|default('Scenario recorded') }} · failure rate {{ dna.characterization.p0|default('not recorded') }}</p></div>
+      <div class="history-open"><a href="/api/projects/{{ project.project }}/dna/{{ envelope.record_id }}/download">Download JSON</a></div>
+      <div class="pending-explanation">
+        <form class="external-action-form" data-endpoint="/api/projects/{{ project.project }}/dna/{{ envelope.record_id }}/replay" data-body="false"><button class="button button-secondary" type="submit">Replay</button></form>
+        <form class="external-action-form" data-endpoint="/api/projects/{{ project.project }}/dna/{{ envelope.record_id }}/reduce" data-body="false"><button class="button button-secondary" type="submit">Reduce</button></form>
+        <form class="external-action-form" data-endpoint="/api/projects/{{ project.project }}/dna/{{ envelope.record_id }}/verify" data-body="true">
+          <label class="visually-hidden" for="candidate-{{ loop.index }}">Candidate project</label>
+          <select id="candidate-{{ loop.index }}" name="candidate_project_id" required>{% for candidate in projects if candidate.available %}<option value="{{ candidate.project }}">{{ candidate.project }}</option>{% endfor %}</select>
+          <button class="button button-primary" type="submit">Verify candidate</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>{% else %}<div class="empty-state"><span aria-hidden="true">—</span><h2>No Failure DNA saved</h2><p>DNA is retained when an investigation observes a signed failure and builds a compatible reproducer.</p></div>{% endif %}
+</section>
+
+<section class="records-section" aria-labelledby="external-operation-title">
+  <div class="section-heading"><div><p class="eyebrow">Saved operation status</p><h2 id="external-operation-title">Recent operations</h2></div><span class="section-count">{{ operations|length }} records</span></div>
+  {% if operations %}<ul class="record-list">
+    {% for envelope in operations %}{% set op = envelope.payload %}<li class="record-list-row"><a class="record-list-main" href="/projects/{{ project.project }}/operations/{{ envelope.record_id }}"><strong>{{ op.operation|default('External operation') }} · {{ op.status|default(envelope.status|default('recorded')) }}</strong><span>{{ op.error|default(op.result.outcome|default(op.result.verdict|default('Open operation details'))) }}</span><code>{{ envelope.record_id }}</code></a><a href="/api/projects/{{ project.project }}/operations/{{ envelope.record_id }}">Poll JSON</a></li>{% endfor %}
+  </ul>{% else %}<p class="empty-note">No operation records yet.</p>{% endif %}
+</section>
+
+<script>
+(() => {
+  const projectId = {{ project.project|tojson }};
+  const status = document.getElementById("external-action-status");
+  const output = document.getElementById("external-action-result");
+  const token = document.getElementById("external-access-token");
+  const headers = () => token.value ? {"X-Duress-Token": token.value} : {};
+  const showStatus = (message, isError = false) => {
+    status.textContent = message;
+    status.classList.toggle("message-error", isError);
+  };
+  const renderOperation = (envelope) => {
+    const payload = envelope.payload || {};
+    output.hidden = false;
+    output.textContent = JSON.stringify(payload, null, 2);
+    if (payload.investigation_id) {
+      const link = document.createElement("a");
+      link.href = `/projects/${encodeURIComponent(projectId)}/investigations/${encodeURIComponent(payload.investigation_id)}`;
+      link.textContent = "Open investigation evidence";
+      status.replaceChildren(link);
+    } else if (payload.reduced_dna_id) {
+      const link = document.createElement("a");
+      link.href = `/api/projects/${encodeURIComponent(projectId)}/dna/${encodeURIComponent(payload.reduced_dna_id)}/download`;
+      link.textContent = "Download reduced Failure DNA";
+      status.replaceChildren(link);
+    } else if (payload.status) {
+      showStatus(`${payload.operation || "Operation"}: ${payload.status}`);
+    }
+  };
+  const poll = async (accepted) => {
+    const operationLink = document.createElement("a");
+    operationLink.href = accepted.operation_url;
+    operationLink.textContent = `Open saved operation ${accepted.operation_id}`;
+    status.replaceChildren(operationLink);
+    for (let attempt = 0; attempt < 305; attempt += 1) {
+      await new Promise(resolve => window.setTimeout(resolve, 1000));
+      const response = await fetch(accepted.poll_url, {headers: headers(), cache: "no-store"});
+      if (!response.ok) {
+        showStatus(`Could not read operation status (${response.status}). Use the saved operation link.`, true);
+        return;
+      }
+      const envelope = await response.json();
+      renderOperation(envelope);
+      if (["completed", "failed", "interrupted", "timed_out"].includes(envelope.status)) return;
+    }
+    showStatus("The operation is still running. Use the saved operation link to check again.");
+  };
+  document.querySelectorAll(".external-action-form").forEach(form => {
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = form.querySelector("button[type=submit]");
+      button.disabled = true;
+      showStatus("Submitting local operation…");
+      output.hidden = true;
+      try {
+        const requestHeaders = headers();
+        const hasBody = form.dataset.body === "true";
+        const body = {};
+        if (hasBody) {
+          new FormData(form).forEach((value, key) => { body[key] = value; });
+          if (Object.hasOwn(body, "scenario_id") && body.scenario_id === "") body.scenario_id = null;
+        }
+        if (hasBody) requestHeaders["Content-Type"] = "application/json";
+        const response = await fetch(form.dataset.endpoint, {
+          method: "POST", headers: requestHeaders, body: hasBody ? JSON.stringify(body) : undefined,
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || `Request failed (${response.status})`);
+        await poll(result);
+      } catch (error) {
+        showStatus(error.message || "Request failed", true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

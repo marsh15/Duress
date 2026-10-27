@@ -21,6 +21,10 @@ Identifier = Annotated[str, Field(pattern=r"^[A-Za-z_][A-Za-z0-9_]*$")]
 EntityName = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*$")]
 StableId = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]{0,99}$")]
 Scalar = str | int | float | bool | None
+MAX_CONTRACT_BYTES = 256 * 1024
+MAX_CONTRACT_ENTITIES = 50
+MAX_CONTRACT_INVARIANTS = 100
+MAX_CONTRACT_COLUMNS = 100
 
 
 class StrictModel(BaseModel):
@@ -32,7 +36,7 @@ class EntitySpec(StrictModel):
 
     table: Identifier
     key: Identifier
-    columns: list[Identifier] = Field(min_length=1)
+    columns: list[Identifier] = Field(min_length=1, max_length=MAX_CONTRACT_COLUMNS)
 
     @model_validator(mode="after")
     def validate_columns(self) -> EntitySpec:
@@ -144,11 +148,18 @@ class Contract(StrictModel):
     schema_version: Literal[1] = 1
     id: StableId
     version: Literal[1] = 1
-    entities: dict[EntityName, EntitySpec] = Field(min_length=1)
-    invariants: list[Invariant] = Field(min_length=1)
+    entities: dict[EntityName, EntitySpec] = Field(
+        min_length=1, max_length=MAX_CONTRACT_ENTITIES
+    )
+    invariants: list[Invariant] = Field(min_length=1, max_length=MAX_CONTRACT_INVARIANTS)
 
     @model_validator(mode="after")
     def validate_references(self) -> Contract:
+        if sum(len(spec.columns) for spec in self.entities.values()) > MAX_CONTRACT_COLUMNS:
+            raise ValueError(
+                f"contract may select at most {MAX_CONTRACT_COLUMNS} columns across all entities"
+            )
+
         tables = [spec.table for spec in self.entities.values()]
         if len(set(tables)) != len(tables):
             raise ValueError("each entity must map to a distinct table")
@@ -318,9 +329,16 @@ def load_contract(path: str | Path) -> Contract:
 
     contract_path = Path(path)
     try:
-        raw = contract_path.read_bytes()
+        if contract_path.stat().st_size > MAX_CONTRACT_BYTES:
+            raise ValueError(
+                f"contract file exceeds the {MAX_CONTRACT_BYTES}-byte size limit"
+            )
+        with contract_path.open("rb") as contract_file:
+            raw = contract_file.read(MAX_CONTRACT_BYTES + 1)
     except OSError as exc:
         raise ValueError(f"cannot read contract file {contract_path}: {exc.strerror or 'I/O error'}") from exc
+    if len(raw) > MAX_CONTRACT_BYTES:
+        raise ValueError(f"contract file exceeds the {MAX_CONTRACT_BYTES}-byte size limit")
 
     try:
         if contract_path.suffix.lower() == ".toml":
@@ -691,8 +709,9 @@ def _evaluate_one(
                 "Scenario context contains no acknowledgement evidence."
             )
         if not ack.successful:
-            return "not_evaluable", "negative_acknowledgement", [], (
-                "The response did not acknowledge successful handling, so no success claim can be checked."
+            return "satisfied", "no_success_acknowledgement", [], (
+                "No successful acknowledgement was observed. This conditional check makes no "
+                "new-write claim; expected effects and response requirements are evaluated separately."
             )
         if ack.entity is None or not ack.match:
             return "not_evaluable", "acknowledgement_intent_missing", [], (
@@ -702,9 +721,22 @@ def _evaluate_one(
         after_rows = [row for row in after.entities[ack.entity] if _matches(row, ack.match)]
         before_count = len(before_rows)
         after_count = len(after_rows)
+        entity_key = contract.entities[ack.entity].key
+        before_by_key = _rows_by_key(before.entities[ack.entity], entity_key)
+        after_by_key = _rows_by_key(after.entities[ack.entity], entity_key)
+        updated_existing_row = False
+        for identity in before_by_key.keys() & after_by_key.keys():
+            old = before_by_key[identity]
+            new = after_by_key[identity]
+            if (
+                (_matches(old, ack.match) or _matches(new, ack.match))
+                and not _rows_equal(old, new)
+            ):
+                updated_existing_row = True
+                break
         valid = {
             "create": after_count > before_count,
-            "update": any(not _rows_equal(old, new) for old in before_rows for new in after_rows),
+            "update": updated_existing_row,
             "delete": after_count < before_count,
             "duplicate": before_count > 0 and _same_row_multiset(before_rows, after_rows),
             "no_effect": _same_row_multiset(before_rows, after_rows),

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlsplit
 
-from pydantic import Field, model_validator
+from pydantic import Field, ValidationError, model_validator
 
 from ..models import AttemptPolicy, Step, StrictModel
 
@@ -20,7 +20,7 @@ ENVIRONMENT = r"^[A-Z][A-Z0-9_]{0,79}$"
 
 class Project(StrictModel):
     schema_version: Literal[1] = 1
-    project: str = Field(pattern=IDENTIFIER)
+    project: str = Field(pattern=r"^[a-z][a-z0-9_-]{0,62}$")
 
 
 class Target(StrictModel):
@@ -122,12 +122,20 @@ class ExternalDelivery(StrictModel):
     invalid_signature: bool = False
 
 
+class AckIntent(StrictModel):
+    intent: Literal["create", "update", "delete", "duplicate", "no_effect"]
+    entity: str
+    match: dict[str, str | int | float | bool | None] = Field(min_length=1)
+
+
 class Scenario(StrictModel):
     id: str = Field(pattern=IDENTIFIER)
     deliveries: list[ExternalDelivery] = Field(min_length=1, max_length=10)
     steps: list[Step] = Field(min_length=1, max_length=10)
     delivery_policy: AttemptPolicy = Field(default_factory=AttemptPolicy)
     context: dict[str, Any] = Field(default_factory=dict)
+    acknowledgements: dict[str, AckIntent] = Field(default_factory=dict)
+    ack_delivery_id: str | None = None
     expected_status: dict[str, Literal["2xx", "4xx"]] = Field(default_factory=dict)
     require_overlap: bool = False
     require_retry: bool = False
@@ -149,6 +157,11 @@ class Scenario(StrictModel):
             raise ValueError("deliveries must have unique ids and occur in exactly one step")
         if set(self.expected_status) - set(ids):
             raise ValueError("expected_status references an unknown delivery")
+        if set(self.acknowledgements) - set(ids) or (self.ack_delivery_id and self.ack_delivery_id not in ids):
+            raise ValueError("acknowledgement references an unknown delivery")
+        if self.context.get("acknowledgement") is not None:
+            if self.acknowledgements or (len(ids) > 1 and not self.ack_delivery_id):
+                raise ValueError("scenario acknowledgement requires an explicit delivery binding")
         budget = sum(s.delay_before_ms for s in self.steps) + self.settle_ms
         for step in self.steps:
             if len(step.deliveries) > 10:
@@ -197,6 +210,7 @@ class LoadedProject:
     fixtures: dict[str, Any]
     contract: Any
     payloads: dict[str, bytes]
+    expected_schema: str | None = None
 
     def scenario(self, name: str) -> Scenario:
         for scenario in self.manifest.scenarios:
@@ -216,7 +230,12 @@ def load_project(path: Path) -> LoadedProject:
     path = path.expanduser().resolve(strict=True)
     if path.stat().st_size > 256_000:
         raise ValueError("manifest exceeds 256KB")
-    manifest = Manifest.model_validate(tomllib.loads(path.read_text()))
+    try:
+        manifest = Manifest.model_validate(tomllib.loads(path.read_text()))
+    except ValidationError as exc:
+        details = "; ".join(".".join(map(str,e["loc"])) + ": " + e["msg"]
+                            for e in exc.errors(include_input=False))
+        raise ValueError("invalid manifest: " + details) from None
     cwd = (path.parent / manifest.target.cwd).resolve(strict=True)
     if not cwd.is_dir():
         raise ValueError("target cwd must be an existing approved directory")
@@ -224,6 +243,9 @@ def load_project(path: Path) -> LoadedProject:
     if fixtures_path.stat().st_size > 1_000_000:
         raise ValueError("fixtures exceed 1MB")
     fixtures = json.loads(fixtures_path.read_text())
+    from .storage import _redact
+    if _redact(fixtures) != fixtures:
+        raise ValueError("fixture credential fields are forbidden; use environment references for secrets")
     event_fixtures = fixtures
     if manifest.fixtures.events_file:
         events_path = (path.parent / manifest.fixtures.events_file).resolve(strict=True)
@@ -238,8 +260,11 @@ def load_project(path: Path) -> LoadedProject:
             raise ValueError("event fixtures require exactly payload or raw_json")
         raw = event.get("raw_json")
         body = raw.encode() if isinstance(raw, str) else json.dumps(event["payload"], separators=(",", ":")).encode()
-        if not isinstance(json.loads(body), dict):
+        decoded = json.loads(body)
+        if not isinstance(decoded, dict):
             raise ValueError("event payloads must be JSON objects")
+        if _redact(decoded) != decoded:
+            raise ValueError("event fixture credential fields are forbidden; use environment references for secrets")
         payloads[name] = body
     for scenario in manifest.scenarios:
         if any(d.fixture not in payloads for d in scenario.deliveries):
@@ -252,5 +277,11 @@ def load_project(path: Path) -> LoadedProject:
                    if r.status == "invalid"]
         if invalid:
             raise ValueError(f"{scenario.id}: invalid context: {invalid[0].explanation}")
+        for intent in scenario.acknowledgements.values():
+            ack_context={**scenario.context,"acknowledgement":{
+                **intent.model_dump(mode="json"),"successful":False,"status_code":None}}
+            invalid=[r for r in evaluate(contract,missing,missing,context=ack_context) if r.status=="invalid"]
+            if invalid:
+                raise ValueError(f"{scenario.id}: invalid acknowledgement: {invalid[0].explanation}")
     return LoadedProject(path, manifest, cwd, fixtures_path,
                          {"seed":fixtures,"events":event_fixtures["events"]}, contract, payloads)
