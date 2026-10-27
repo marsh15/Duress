@@ -24,7 +24,7 @@ Before a GitHub checkpoint, inspect `git diff --check`, execute focused page/API
 
 ## Render
 
-The repository contains `render.yaml` for a Docker Starter service with `/api/health` as its health check. Render generates the demo token. Provider credentials are unnecessary for cached or exhaustive investigation, replay and verification. Live investigation uses `DURESS_LLM_BASE_URL`, `DURESS_LLM_MODEL` and optional `DURESS_LLM_API_KEY`; genuine hosted inference remains unverified. Bind `DURESS_ROOT=/app` and use `/tmp/duress` as ephemeral runtime storage. Logs go to the existing uvicorn stdout/stderr stream; generated evidence stays in the runtime home, outside Git.
+The repository contains `render.yaml` for a Docker Free service with `/api/health` as its health check. Render generates the demo token. Free compute does not cap all workspace/bandwidth/build charges; follow the [$0 deployment handoff](openfire/RENDER_HANDOFF.md), inspect account billing, and do not upgrade without explicit approval. Provider credentials are unnecessary for cached or exhaustive investigation, replay and verification. Live investigation uses `DURESS_LLM_BASE_URL`, `DURESS_LLM_MODEL` and optional `DURESS_LLM_API_KEY`; genuine hosted inference remains unverified. Bind `DURESS_ROOT=/app` and use `/tmp/duress` as ephemeral runtime storage. Logs go to the existing uvicorn stdout/stderr stream; generated evidence stays in the runtime home, outside Git.
 
 No Render deployment is claimed without an actual deployment and HTTP/browser checks. The local Docker checks do not establish hosted capacity, performance or availability.
 
