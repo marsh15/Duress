@@ -8,6 +8,7 @@
     <h1>External projects</h1>
     <p class="heading-detail">Inspect approved local project configurations, run bounded investigations, and keep evidence with each project.</p>
   </div>
+  <a class="button button-primary" href="/guide#setup">Set up a project</a>
 </header>
 
 <aside class="notice notice-cyan">
@@ -26,12 +27,12 @@
     <article class="history-record">
       <div class="history-record-main">
         <div class="history-record-head"><span class="state-chip">{{ item.status|replace('_', ' ') }}</span>{% if item.mode %}<span class="recorded-label">{{ item.mode }}</span>{% endif %}</div>
-        <h3>{% if item.available %}<a href="/projects/{{ item.project }}">{{ item.project }}</a>{% else %}{{ item.project }}{% endif %}</h3>
+        <h3>{% if item.available %}<a data-project-link href="/projects/{{ item.project }}">{{ item.project }}</a>{% else %}{{ item.project }}{% endif %}</h3>
         {% if item.available %}
         <p>{{ item.contract.id }}@{{ item.contract.version }} · {{ item.adapters.observer }} observer · {{ item.scenarios|length }} scenarios</p>
         {% else %}<p>Registered configuration could not be loaded. Review it locally, then reload this page.</p>{% endif %}
       </div>
-      {% if item.available %}<a class="history-open" href="/projects/{{ item.project }}">Open project</a>{% endif %}
+      {% if item.available %}<a class="history-open" data-project-link href="/projects/{{ item.project }}">Open project</a>{% endif %}
     </article>
     {% endfor %}
   </div>

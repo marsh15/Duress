@@ -1,0 +1,33 @@
+{% macro schedule_view(schedule, interactive=true) -%}
+{% if schedule and schedule.steps|default([]) %}
+<div class="schedule-visual"><h3>Configured delivery sequence</h3><p>Ordered steps, not a measured time axis. Deliveries within a group are configured together; overlap is established separately by trial evidence.</p>
+{% for step in schedule.steps %}<div class="schedule-group"><div class="schedule-group-label">Step {{ loop.index }}<small>{% if step.deliveries|length > 1 %}Concurrent group{% else %}Single delivery{% endif %}{% if step.delay_before_ms %} · {{ step.delay_before_ms }} ms configured delay{% endif %}</small></div><div class="schedule-lanes">
+{% for delivery_id in step.deliveries %}{% set delivery = schedule.deliveries|default([])|selectattr('id', 'equalto', delivery_id)|first %}
+<{% if interactive %}button{% else %}div{% endif %} class="schedule-lane"{% if interactive %} type="button"{% endif %} data-inspect='{{ (delivery if delivery else {"id": delivery_id, "evidence": "Delivery details not retained"})|tojson }}' data-inspect-title="Configured delivery · {{ delivery_id }}"><code>{{ delivery_id }}</code><span>{{ delivery.get('event', {}).get('type', delivery.get('event_type', 'Registered event')) if delivery else 'Details not retained' }}</span>{% if interactive %}<span>Inspect →</span>{% endif %}</{% if interactive %}button{% else %}div{% endif %}>
+{% endfor %}</div></div>{% endfor %}</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro attempt_view(attempts, interactive=true) -%}
+{% if attempts and interactive %}<div class="measured-attempts" data-attempt-timeline><h3>Observed delivery timing</h3><p class="field-help">Bars use retained request start and end times on a shared relative axis. Missing or invalid timings remain in the attempt table below.</p><div class="table-wrap" tabindex="0" role="region" aria-label="Measured delivery timing"><div class="attempt-lanes">
+{% for attempt in attempts %}{% if attempt.started_s is number and attempt.ended_s is number and attempt.ended_s >= attempt.started_s %}<div class="attempt-lane" data-attempt-start="{{ attempt.started_s }}" data-attempt-end="{{ attempt.ended_s }}"><span><code>{{ attempt.delivery_id|default('Delivery') }}</code> · #{{ attempt.attempt|default('?') }}</span><{% if interactive %}button type="button"{% else %}div{% endif %} class="attempt-track" data-inspect='{{ attempt|tojson }}' data-inspect-title="Observed delivery attempt" aria-label="Inspect {{ attempt.delivery_id|default('delivery') }} attempt {{ attempt.attempt|default('?') }}"><span class="attempt-bar"></span></{% if interactive %}button{% else %}div{% endif %}><span>{{ ((attempt.ended_s - attempt.started_s) * 1000)|round(2) }} ms · {{ attempt.outcome|default('not recorded') }}</span></div>{% endif %}{% endfor %}
+</div></div><p class="timing-scale field-help"></p></div>{% endif %}
+{%- endmacro %}
+
+{% macro state_diff(before, after) -%}
+<div class="state-diff-summary">
+{% for entity, rows in (after.entities|default({})).items() %}{% set original = before.entities.get(entity, []) if before.entities is defined else [] %}
+<article class="state-diff-entity"><h4>{{ entity }}</h4><p>{% if entity in before.entities|default({}) %}{{ original|length }}{% else %}Unavailable{% endif %} before → {{ rows|length }} after</p>{% if entity in before.entities|default({}) and before.available and before.valid and before.settled and after.available and after.valid and after.settled %}
+{% set changes = namespace(added=0, removed=0) %}
+{% for row in rows %}{% if rows[:loop.index]|select('equalto', row)|list|length > original|select('equalto', row)|list|length %}{% set changes.added = changes.added + 1 %}{% endif %}{% endfor %}
+{% for row in original %}{% if original[:loop.index]|select('equalto', row)|list|length > rows|select('equalto', row)|list|length %}{% set changes.removed = changes.removed + 1 %}{% endif %}{% endfor %}
+<small>{{ changes.added }} added row contents · {{ changes.removed }} removed row contents. Changed values count as a removal and addition; these counts are not verdicts.</small>
+{% if changes.added or changes.removed %}<details><summary>Inspect changed row contents</summary><div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Changed retained rows in {{ entity }}</caption><thead><tr><th scope="col">Change</th><th scope="col">Row content</th></tr></thead><tbody>
+{% for row in rows %}{% if rows[:loop.index]|select('equalto', row)|list|length > original|select('equalto', row)|list|length %}<tr class="row-added"><th scope="row">Added</th><td><pre>{{ row|tojson(indent=2) }}</pre></td></tr>{% endif %}{% endfor %}
+{% for row in original %}{% if original[:loop.index]|select('equalto', row)|list|length > rows|select('equalto', row)|list|length %}<tr class="row-removed"><th scope="row">Removed</th><td><pre>{{ row|tojson(indent=2) }}</pre></td></tr>{% endif %}{% endfor %}
+</tbody></table></div></details>{% endif %}
+{% else %}<small>Comparison unavailable: both snapshots must be available, valid and settled. Counts describe retained rows only.</small>{% endif %}</article>
+{% endfor %}
+{% for entity, rows in (before.entities|default({})).items() if entity not in after.entities|default({}) %}<article class="state-diff-entity"><h4>{{ entity }}</h4><p>{{ rows|length }} before → unavailable after</p><small>Missing collection; no absence or removal inferred.</small></article>{% endfor %}
+</div>
+{%- endmacro %}

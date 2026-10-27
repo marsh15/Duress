@@ -21,9 +21,10 @@ def junit(record: dict) -> str:
 
 
 def html_report(record: dict) -> str:
-    title = html.escape(str(record.get("project", "External investigation")))
-    content = html.escape(json.dumps(record,indent=2))
-    return f'<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Duress — {title}</title><style>body{{font:16px system-ui;max-width:1100px;margin:3rem auto;padding:1rem;color:#202020}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f4f0;padding:1rem}}h1{{font-size:2rem}}</style><h1>{title}</h1><p>Recorded business-state investigation. Results apply to the declared contract and bounded scenarios.</p><pre>{content}</pre></html>'
+    from ..web import _render, _report_css
+
+    return _render("external_report.html", record=record, css=_report_css(),
+                   raw_record=html.escape(json.dumps(record, indent=2)))
 
 
 def export_run(record: dict, *, output: Path | None = None, junit_path: Path | None = None,

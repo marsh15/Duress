@@ -1,3 +1,4 @@
+{% from "_evidence_ui.html" import schedule_view, attempt_view %}
 <section class="status-band status-band--{{ view.status|lower|replace('_', '-') }}" aria-labelledby="progress-title">
   <div class="status-copy" role="status" aria-live="polite">
     <span class="status-glyph" aria-hidden="true">{% if view.status|lower == 'completed' %}✓{% elif view.status|lower in ['error', 'failed'] %}!{% else %}<span class="spinner"></span>{% endif %}</span>
@@ -14,12 +15,52 @@
   </div>
 </section>
 
+{% if view.events or view.phase %}
+<section class="phase-section" aria-labelledby="phase-title"><h2 id="phase-title" class="visually-hidden">Recorded execution phases</h2><ol class="phase-rail">
+{% set phases = view.events|selectattr('phase', 'defined')|map(attribute='phase')|unique|list %}
+{% for phase in phases %}<li{% if phase == view.phase %} aria-current="step"{% endif %}><span aria-hidden="true">{{ loop.index }}</span>{{ phase|replace('_', ' ')|title }}</li>{% endfor %}
+{% if view.phase and view.phase not in phases %}<li aria-current="step"><span aria-hidden="true">→</span>{{ view.phase|replace('_', ' ')|title }}</li>{% endif %}
+</ol><p class="field-help">Phases shown are persisted observations. No percentage or unrecorded future phase is inferred.</p></section>
+{% endif %}
+
 {% if view.fallback_reason %}
 <aside class="notice notice-cyan"><strong>Mode fallback · {{ view.fallback_reason|replace('_', ' ') }}</strong><span>{{ view.fallback_detail|default('') or 'The effective mode is shown above.' }}</span></aside>
 {% endif %}
 {% if view.explanation %}
 <section class="explanation-band" aria-label="Investigation explanation"><p>{{ view.explanation }}</p></section>
 {% endif %}
+
+<section class="content-section" aria-labelledby="findings-title">
+  <div class="section-heading compact-heading">
+    <div><p class="eyebrow">Observed failures</p><h2 id="findings-title">Findings</h2></div>
+    <span class="section-count">{{ view.findings|length }} recorded findings</span>
+  </div>
+  {% if view.findings %}
+  <div class="hypothesis-list">
+    {% for finding in view.findings %}
+    {% set signature = finding.signature|default({}) %}
+    <article class="hypothesis-row">
+      <div class="hypothesis-index"><span>{{ "%02d"|format(loop.index) }}</span></div>
+      <div class="hypothesis-main">
+        <div class="hypothesis-title-row">
+          <div><p class="hypothesis-id">Observed in {{ finding.scenario_id|default('scenario not recorded') }}</p><h3>{{ signature.check|default('Failure signature not recorded') }}{% if signature.kind %} · {{ signature.kind }}{% endif %}</h3></div>
+          {% if finding.dna_id %}<a class="finding-badge" href="/dna/{{ finding.dna_id }}">Failure DNA · {{ finding.dna_id }}</a>{% endif %}
+        </div>
+        {% if signature.roles %}<p class="prediction"><span>Affected roles</span>{% for role in signature.roles %}<code>{{ role }}</code>{% endfor %}</p>{% endif %}
+        <dl class="status-list">
+          {% if finding.fail is defined %}<div><dt>Failing trials</dt><dd>{{ finding.fail }}</dd></div>{% endif %}
+          {% if finding.valid is defined %}<div><dt>Valid trials</dt><dd>{{ finding.valid }}</dd></div>{% endif %}
+          {% if finding.hypothesis_ids %}<div><dt>Linked hypotheses</dt><dd>{{ finding.hypothesis_ids|join(', ') }}</dd></div>{% endif %}
+          {% if finding.dna_error %}<div><dt>DNA characterization</dt><dd>{{ finding.dna_error|replace('_', ' ') }}</dd></div>{% endif %}
+        </dl>
+        {% if finding.explanation %}<p>{{ finding.explanation }}</p>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% elif view.status|lower in ['queued', 'running'] %}<p class="empty-note">No observed failure finding has been recorded yet. Hypothesis proposals alone do not establish a finding.</p>
+  {% else %}<p class="empty-note">No executed failure findings were recorded for this investigation.</p>{% endif %}
+</section>
 
 {% set model = view.model|default({}) %}
 {% set provenance = model.provenance|default({}) %}
@@ -81,37 +122,7 @@
 </section>
 {% endif %}
 
-<section class="content-section" aria-labelledby="findings-title">
-  <div class="section-heading compact-heading">
-    <div><p class="eyebrow">Observed failures</p><h2 id="findings-title">Findings</h2></div>
-    <span class="section-count">{{ view.findings|length }} recorded findings</span>
-  </div>
-  {% if view.findings %}
-  <div class="hypothesis-list">
-    {% for finding in view.findings %}
-    {% set signature = finding.signature|default({}) %}
-    <article class="hypothesis-row">
-      <div class="hypothesis-index"><span>{{ "%02d"|format(loop.index) }}</span></div>
-      <div class="hypothesis-main">
-        <div class="hypothesis-title-row">
-          <div><p class="hypothesis-id">Observed in {{ finding.scenario_id|default('scenario not recorded') }}</p><h3>{{ signature.check|default('Failure signature not recorded') }}{% if signature.kind %} · {{ signature.kind }}{% endif %}</h3></div>
-          {% if finding.dna_id %}<a class="finding-badge" href="/dna/{{ finding.dna_id }}">Failure DNA · {{ finding.dna_id }}</a>{% endif %}
-        </div>
-        {% if signature.roles %}<p class="prediction"><span>Affected roles</span>{% for role in signature.roles %}<code>{{ role }}</code>{% endfor %}</p>{% endif %}
-        <dl class="status-list">
-          {% if finding.fail is defined %}<div><dt>Failing trials</dt><dd>{{ finding.fail }}</dd></div>{% endif %}
-          {% if finding.valid is defined %}<div><dt>Valid trials</dt><dd>{{ finding.valid }}</dd></div>{% endif %}
-          {% if finding.hypothesis_ids %}<div><dt>Linked hypotheses</dt><dd>{{ finding.hypothesis_ids|join(', ') }}</dd></div>{% endif %}
-          {% if finding.dna_error %}<div><dt>DNA characterization</dt><dd>{{ finding.dna_error|replace('_', ' ') }}</dd></div>{% endif %}
-        </dl>
-        {% if finding.explanation %}<p>{{ finding.explanation }}</p>{% endif %}
-      </div>
-    </article>
-    {% endfor %}
-  </div>
-  {% elif view.status|lower in ['queued', 'running'] %}<p class="empty-note">No observed failure finding has been recorded yet. Hypothesis proposals alone do not establish a finding.</p>
-  {% else %}<p class="empty-note">No executed failure findings were recorded for this investigation.</p>{% endif %}
-</section>
+
 
 {% if view.comparison %}
 <section class="historical-comparison" aria-labelledby="historical-comparison-title">
@@ -209,6 +220,7 @@
         <summary>{{ scenario.scenario_id|default(scenario.template_id) }} · actual schedule</summary>
         {% if schedule and schedule.deliveries is defined %}
         <p class="trial-reason">Control level: {{ scenario.control_level|default('not recorded')|replace('_', ' ') }} · {{ schedule.deliveries|length }} normalized deliveries</p>
+        {{ schedule_view(schedule, interactive|default(true)) }}
         <h3>Delivery groups and steps</h3>
         {% if schedule.steps %}
         <ol class="scenario-step-list">
@@ -297,7 +309,7 @@
           {% for citation in citations %}
           <blockquote class="citation">
             <div><code>{{ citation.path|default('source path not provided') }}</code><span>lines {{ citation.start_line|default('?') }}–{{ citation.end_line|default('?') }}</span></div>
-            {% if citation.quote %}<p>{{ citation.quote }}</p>{% endif %}
+            {% if citation.quote %}<p class="field-help">Retained source quote · validation status is reported above</p><pre class="source-quote"><code>{{ citation.quote }}</code></pre>{% if interactive|default(true) %}<button class="copy-button" type="button" data-copy="{{ citation.path|default('source') }}:{{ citation.start_line|default('?') }}-{{ citation.end_line|default('?') }}">Copy source reference</button>{% endif %}{% endif %}
           </blockquote>
           {% endfor %}
         </div>
@@ -338,6 +350,7 @@
 {% endif %}
 
 {% if view.observed_attempts %}
+{{ attempt_view(view.observed_attempts, interactive|default(true)) }}
 <section class="content-section observed-attempts" aria-labelledby="attempts-title">
   <div class="section-heading compact-heading"><div><p class="eyebrow">Representative execution</p><h2 id="attempts-title">Observed delivery attempts</h2></div><span class="section-count">{{ view.observed_attempts|length }} recorded attempts</span></div>
   <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts from the retained representative DNA</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>

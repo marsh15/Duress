@@ -348,7 +348,7 @@ def install_external(
     @router.get("/projects", response_class=HTMLResponse)
     def projects_page(request: Request):
         _require_local_request(request)
-        return HTMLResponse(_render("projects.html", projects=_registered_summaries()))
+        return HTMLResponse(_render("projects.html", request=request, projects=_registered_summaries()))
 
     @router.get("/projects/{project_id}", response_class=HTMLResponse)
     def project_page(project_id: str, request: Request):
@@ -357,7 +357,7 @@ def install_external(
         summary = _public_project(entry, loaded)
         return HTMLResponse(_render(
             "project.html",
-            project=summary,
+            request=request, project=summary,
             projects=_registered_summaries(),
             runs=_records(project_id, "investigations")[:8],
             dna_items=_records(project_id, "dna")[:8],

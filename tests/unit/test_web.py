@@ -216,14 +216,14 @@ def test_home_and_recorded_showcase_links(tmp_path: Path) -> None:
     client = _client(tmp_path)
     response = client.get("/")
     assert response.status_code == 200
-    assert "Investigation creation" in response.text
+    assert "Workspace overview" in response.text
     assert 'href="/investigations#new-investigation"' in response.text
     assert "New investigation" in response.text
     assert "Investigation unavailable" not in response.text
     assert "Recorded benchmark" in response.text
     assert "/investigations/run-01" in response.text
     assert "/dna/dna-001" in response.text
-    assert "Available targets" in response.text
+    assert "Reference targets" in response.text
 
 
 def test_local_scripts_and_vendored_htmx_are_served(tmp_path: Path) -> None:

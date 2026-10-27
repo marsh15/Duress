@@ -1,43 +1,60 @@
+{% from '_ui.html' import icon, nav_item %}
+{% set path = request.url.path if request is defined else '/projects' %}
+{% set section = 'Overview' if path == '/' else 'Projects' if path.startswith('/projects') else 'Targets' if path.startswith('/targets') else 'Investigations' if path.startswith('/investigations') else 'Failure DNA' if path.startswith('/dna') else 'Comparisons' if path.startswith('/differential') else 'Guide' if path == '/guide' else 'Design system' if path == '/design-system' else 'Evidence' %}
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#122d3a">
+  <meta name="theme-color" content="#0C1115">
   <title>{% block title %}Duress{% endblock %}</title>
+  <link rel="icon" href="/web/static/favicon.svg" type="image/svg+xml">
+  <script src="/web/static/appearance.js"></script>
+  <link rel="preload" href="/web/static/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/web/static/tokens.css">
   <link rel="stylesheet" href="/web/static/site.css">
+  <link rel="stylesheet" href="/web/static/workspace.css">
   <script defer src="/web/static/vendor/htmx.min.js"></script>
   <script defer src="/web/static/site.js"></script>
   <script defer src="/web/static/investigations.js"></script>
   <script defer src="/web/static/analysis.js"></script>
+  <script defer src="/web/static/workspace.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="/" aria-label="Duress home">
-        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
-        <span>duress</span>
-      </a>
-      <p class="topbar-note">Failure analysis for webhook systems</p>
-      <nav class="topbar-nav" aria-label="Primary navigation">
-        <a href="/">Workbench</a>
-        <a href="/targets">Targets</a>
-        <a href="/projects">Projects</a>
-        <a href="/investigations">Investigations</a>
-        <a href="/dna">Failure DNA</a>
-        <a href="/differential">Compare fixes</a>
-      </nav>
+  <aside class="app-sidebar" id="app-sidebar" aria-label="Workspace navigation">
+    <div class="sidebar-brand"><a class="brand" href="/" aria-label="Duress home">{{ icon('mark') }}<span>duress</span><small>beta</small></a><button class="icon-button sidebar-close" type="button" aria-label="Close navigation">{{ icon('close') }}</button></div>
+    <a class="workspace-switch" href="{{ '/guide' if ui_hosted|default(false) else '/projects' }}"><span class="workspace-avatar">D</span><span><strong>Duress workspace</strong><small>Projects and configurations</small></span>{{ icon('chevron') }}</a>
+    <div id="project-switcher" hidden><label class="visually-hidden" for="active-project">Switch project</label><select id="active-project"><option value="/projects">All projects</option></select></div>
+    <button class="search-trigger" type="button" data-command-open>{{ icon('search') }}<span>Find anything…</span><kbd>⌘ K</kbd></button>
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+      <p class="nav-label">Workspace</p>
+      {{ nav_item('/', 'Overview', 'overview', path == '/') }}
+      {% if not ui_hosted|default(false) %}{{ nav_item('/projects', 'Projects', 'projects', path.startswith('/projects')) }}{% endif %}
+      {{ nav_item('/investigations', 'Investigations', 'investigate', path.startswith('/investigations')) }}
+      {{ nav_item('/targets', 'Targets', 'target', path.startswith('/targets')) }}
+      <p class="nav-label">Evidence</p>
+      {{ nav_item('/dna', 'Failure DNA', 'dna', path.startswith('/dna')) }}
+      {{ nav_item('/differential', 'Comparisons', 'compare', path.startswith('/differential')) }}
+    </nav>
+    <div class="sidebar-bottom">
+      <a class="sidebar-help" href="/guide">{{ icon('book') }}<span>Guide and configuration</span></a>
+      <div class="appearance-control"><label for="theme-preference">Appearance</label><select id="theme-preference"><option value="dark">Dark</option><option value="light">Light</option><option value="system">System</option></select></div>
+      <p class="sidebar-footnote">Put your integrations under pressure.<br>Keep the proof.</p>
     </div>
-  </header>
-  <main id="main" class="page-shell">
-    {% block content %}{% endblock %}
-  </main>
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <span>Duress</span>
-      <span>Reproducible conditions. Portable evidence.</span>
-    </div>
-  </footer>
+  </aside>
+  <div class="nav-scrim" hidden></div>
+  <div class="app-body">
+    <header class="context-bar"><div><button class="icon-button nav-toggle" type="button" aria-controls="app-sidebar" aria-expanded="false" aria-label="Open navigation">{{ icon('menu') }}</button><span class="context-workspace">Workspace</span><span class="context-separator">/</span><span>{{ section }}</span></div><button class="context-search" type="button" data-command-open>{{ icon('search') }}<span>Search and navigate</span><kbd>⌘ K</kbd></button></header>
+    <main id="main" class="page-shell" tabindex="-1">{% block content %}{% endblock %}</main>
+    <footer class="site-footer"><span>Duress · Evidence instrument</span><span>Reproducible conditions. Portable evidence.</span></footer>
+  </div>
+  <dialog id="command-palette" class="command-dialog" aria-labelledby="command-title">
+    <div class="command-heading"><h2 id="command-title">Navigate workspace</h2><button class="icon-button" type="button" data-command-close aria-label="Close command palette">{{ icon('close') }}</button></div>
+    <label class="visually-hidden" for="command-search">Search pages and actions</label><input id="command-search" type="search" placeholder="Search pages and actions…" autocomplete="off">
+    <div id="command-results" class="command-results"></div><p class="command-hint">↑ ↓ to move · Enter to open · Esc to close</p>
+  </dialog>
+  <dialog id="evidence-inspector" class="command-dialog evidence-inspector" aria-labelledby="inspector-title"><div class="command-heading"><h2 id="inspector-title">Evidence details</h2><button class="icon-button" type="button" data-inspector-close aria-label="Close evidence details">{{ icon('close') }}</button></div><pre id="inspector-content"></pre></dialog>
+  <div id="workspace-toast" class="workspace-toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>

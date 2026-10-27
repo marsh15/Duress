@@ -12,6 +12,7 @@
     <h1>Investigations</h1>
     <p class="heading-detail">Choose a target and investigation mode. Each run is persisted as it progresses and can be reopened from history.</p>
   </div>
+  <a class="button button-primary" href="#new-investigation">New investigation</a>
 </header>
 
 <section id="new-investigation" class="workbench-panel" aria-labelledby="create-investigation-title">
@@ -64,10 +65,11 @@
     <span class="section-count">{{ records|length }} records</span>
   </div>
   {% if records %}
-  <div class="history-list">
+  <div class="filter-toolbar" data-record-filter="#investigation-records"><label class="visually-hidden" for="record-search">Search investigations</label><input id="record-search" type="search" placeholder="Search target, mode or investigation ID…"><label class="visually-hidden" for="record-status">Lifecycle</label><select id="record-status" data-filter-status><option value="">All lifecycles</option><option value="queued">Queued</option><option value="running">Running</option><option value="completed">Completed</option><option value="failed">Failed</option><option value="error">Error</option><option value="interrupted">Interrupted</option></select><label class="visually-hidden" for="record-sort">Sort records</label><select id="record-sort" data-filter-sort><option value="recorded">Recorded order</option><option value="target">Target name</option></select></div>
+  <div class="history-list" id="investigation-records">
     {% for record in records %}
     {% set record_id = record.investigation_id|default('unknown') %}
-    <article class="history-record{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %} history-record-showcase{% endif %}">
+    <article data-status="{{ record.status|default('recorded')|lower }}" class="history-record{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %} history-record-showcase{% endif %}">
       <div class="history-record-main">
         <div class="history-record-head"><span class="state-chip state-{{ record.status|default('recorded')|lower }}">{{ record.status|default('recorded') }}</span>{% if record.phase %}<span class="recorded-label">{{ record.phase|replace('_', ' ')|title }}</span>{% endif %}{% if record.showcase or record.record_type|default('') == 'recorded_m2_evidence' %}<span class="recorded-label"><span aria-hidden="true">●</span> Recorded M2 benchmark</span>{% endif %}</div>
         <h3><a href="/investigations/{{ record_id }}">{{ record.target_id|default('Target not recorded') }}</a></h3>

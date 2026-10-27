@@ -11,7 +11,7 @@
   <main id="main" class="page-shell report-page">
     <nav class="breadcrumb" aria-label="Breadcrumb"><span>Duress report</span><span aria-hidden="true">/</span><span>{{ view.id }}</span></nav>
     <header class="page-heading"><div><p class="eyebrow">Static investigation report</p><h1>{{ view.target_id }}</h1><p class="heading-detail">{{ view.id }} · {{ view.mode_effective }} · {{ view.status }}</p></div></header>
-    {% include "_investigation_body.html" %}
+    {% set interactive = false %}{% include "_investigation_body.html" %}
   </main>
   <footer class="site-footer"><div class="footer-inner"><span>Duress</span><span>Static report · generated from recorded evidence</span></div></footer>
 </body>

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Failure DNA {{ view.id }} · Duress{% endblock %}
 {% block content %}
+{% from "_evidence_ui.html" import schedule_view, attempt_view %}
 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><span>Failure DNA</span></nav>
 <header class="page-heading dna-heading">
   <div>
@@ -13,8 +14,10 @@
 {% if view.derived_from %}
 <aside class="notice notice-cyan"><strong>Derived artifact</strong><span>This DNA has its own reproducer identity. Derived from <a href="/dna/{{ view.derived_from }}">{{ view.derived_from }}</a>. Inspect its reduction record for acceptance and revalidation evidence.</span></aside>
 {% endif %}
+<button class="copy-button" type="button" data-copy="{{ view.id }}" data-copy-message="Artifact ID copied">Copy artifact ID</button>
 <script id="dna-document" type="application/json">{{ view.document|tojson }}</script>
 
+<nav class="section-jump" data-section-index aria-label="Evidence sections"></nav>
 <section class="dna-signature-band" aria-labelledby="signature-title">
   <div class="signature-mark" aria-hidden="true">!</div>
   <div><p class="eyebrow">Recorded failure signature</p><h2 id="signature-title">{{ view.signature.check|default('Unknown check') }} <span>·</span> {{ view.signature.kind|default('Unknown kind') }}</h2><p>{% if view.signature.roles %}Affected roles: {{ view.signature.roles|join(', ') }}{% else %}No roles recorded{% endif %}</p></div>
@@ -64,6 +67,7 @@
   {% endif %}
 </section>
 
+{{ schedule_view(view.schedule) }}
 <div class="dna-detail-grid">
   <section class="content-section violation-section" aria-labelledby="violations-title">
     <div class="section-heading compact-heading"><div><p class="eyebrow">Representative observation</p><h2 id="violations-title">Invariant violations</h2></div><span class="section-count">{{ view.violation_rows|length }} rows</span></div>
@@ -110,6 +114,7 @@
 {% if view.observations.attempts %}
 <section class="content-section observed-attempts" aria-labelledby="dna-attempts-title">
   <div class="section-heading compact-heading"><div><p class="eyebrow">Retained observation</p><h2 id="dna-attempts-title">Observed delivery attempts</h2></div><span class="section-count">{{ view.observations.attempts|length }} actual attempts</span></div>
+  {{ attempt_view(view.observations.attempts) }}
   <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Actual delivery attempts preserved in this Failure DNA artifact</caption><thead><tr><th scope="col">Delivery</th><th scope="col">Attempt</th><th scope="col">Outcome</th><th scope="col">HTTP</th><th scope="col">Response</th><th scope="col">Started</th><th scope="col">Ended</th></tr></thead><tbody>
     {% for attempt in view.observations.attempts %}<tr><th scope="row"><code>{{ attempt.delivery_id|default('') }}</code></th><td>{{ attempt.attempt|default('—') }}</td><td>{{ attempt.outcome|default('—') }}</td><td>{{ attempt.status_code|default('—') }}</td><td>{{ attempt.body_status|default('—') }}</td><td>{{ attempt.started_s|default('—') }}</td><td>{{ attempt.ended_s|default('—') }}</td></tr>{% endfor %}
   </tbody></table></div>

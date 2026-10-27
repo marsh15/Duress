@@ -1,0 +1,43 @@
+@font-face { font-family: Geist; src: url('fonts/Geist.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Geist Mono'; src: url('fonts/GeistMono.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+:root {
+  color-scheme: dark;
+  --bg-canvas: #0C1115; --bg-sidebar: #10171B; --bg-surface: #151C20;
+  --bg-elevated: #1C252A; --bg-hover: #243036;
+  --border-subtle: #28353B; --border-strong: #405057;
+  --text-primary: #EDF4F3; --text-secondary: #ADBDBD; --text-muted: #879C9E;
+  --accent: #6FDFC9; --accent-hover: #98EBD9; --accent-subtle: #153B35; --on-accent: #0C211C;
+  --success: #75D7A7; --success-subtle: #18352A;
+  --danger: #FF8089; --danger-subtle: #3B2229;
+  --warning: #F3C878; --warning-subtle: #372F1F;
+  --info: #86BFFF; --info-subtle: #1B2D40;
+  --font-sans: Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', 'SFMono-Regular', Consolas, monospace;
+  --type-title: 30px; --type-section: 19px; --type-body: 14px; --type-meta: 12px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --radius-control: 7px; --radius-panel: 10px; --radius-dialog: 14px;
+  --shadow: none; --shadow-overlay: 0 20px 70px #0008;
+  --sidebar-width: 248px;
+  /* Compatibility aliases keep the existing evidence components on one token system. */
+  --ink: var(--text-primary); --ink-soft: var(--text-secondary); --muted: var(--text-muted);
+  --line: var(--border-subtle); --line-dark: var(--border-strong); --paper: var(--bg-canvas);
+  --surface: var(--bg-surface); --surface-blue: var(--accent-subtle);
+  --navy: var(--bg-elevated); --navy-deep: var(--bg-sidebar);
+  --cyan: var(--accent); --cyan-dark: var(--accent); --orange: var(--danger);
+  --orange-soft: var(--danger-subtle); --green: var(--success); --green-soft: var(--success-subtle);
+  font-family: var(--font-sans); font-synthesis: none; text-rendering: optimizeLegibility;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg-canvas: #F5F7F6; --bg-sidebar: #EFF3F1; --bg-surface: #FFFFFF;
+  --bg-elevated: #FBFCFB; --bg-hover: #E5ECE8;
+  --border-subtle: #DBE5E1; --border-strong: #A9B9B2;
+  --text-primary: #162328; --text-secondary: #506269; --text-muted: #586A70;
+  --accent: #086B5D; --accent-hover: #075548; --accent-subtle: #E0F3ED; --on-accent: #FFFFFF;
+  --success: #176B4C; --success-subtle: #E3F2E9;
+  --danger: #AA3345; --danger-subtle: #FBECEF;
+  --warning: #8A5700; --warning-subtle: #FFF3D9;
+  --info: #235EAC; --info-subtle: #E8F1FF;
+  --shadow-overlay: 0 20px 70px #16232826;
+}

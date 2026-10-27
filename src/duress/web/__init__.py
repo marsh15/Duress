@@ -39,6 +39,9 @@ def _jinja_environment():
 
 
 def _render(name: str, **context: Any) -> str:
+    request = context.get("request")
+    state = getattr(getattr(request, "app", None), "state", None)
+    context.setdefault("ui_hosted", getattr(getattr(state, "settings", None), "hosted", False))
     return _jinja_environment().get_template(name).render(**context)
 
 
@@ -574,6 +577,15 @@ def install_web(app: FastAPI, workspace: Callable[[], Any]) -> FastAPI:
             _render("index.html", request=request, showcase=_showcase_context(workspace()))
         )
 
+    @router.get("/design-system", response_class=HTMLResponse, include_in_schema=False)
+    async def design_system_page(request: Request) -> Response:
+        return HTMLResponse(_render("design_system.html", request=request))
+
+    @router.get("/guide", response_class=HTMLResponse, include_in_schema=False)
+    async def guide_page(request: Request) -> Response:
+        return HTMLResponse(_render("guide.html", request=request,
+                                    hosted=getattr(getattr(request.app.state, "settings", None), "hosted", False)))
+
     @router.get("/targets", response_class=HTMLResponse, include_in_schema=False)
     async def targets_page(request: Request) -> Response:
         return HTMLResponse(
@@ -738,6 +750,17 @@ def install_web(app: FastAPI, workspace: Callable[[], Any]) -> FastAPI:
     return app
 
 
+def _report_css() -> str:
+    css = "\n".join((_STATIC / name).read_text(encoding="utf-8")
+                    for name in ("tokens.css", "site.css", "workspace.css"))
+    # Reports remain portable without a running server or external font requests.
+    import base64
+    for font in ("Geist", "GeistMono"):
+        encoded = base64.b64encode((_STATIC / "fonts" / f"{font}.woff2").read_bytes()).decode("ascii")
+        css = css.replace(f"fonts/{font}.woff2", f"data:font/woff2;base64,{encoded}")
+    return css
+
+
 def render_report(document: Mapping[str, Any] | Any) -> str:
     """Render an investigation document as a self-contained static HTML report.
 
@@ -749,7 +772,7 @@ def render_report(document: Mapping[str, Any] | Any) -> str:
         document = document.model_dump(mode="json")
     if not isinstance(document, Mapping):
         raise TypeError("investigation report expects a mapping or model_dump object")
-    css = (_STATIC / "site.css").read_text(encoding="utf-8")
+    css = _report_css()
     return _render(
         "report.html",
         view=_investigation_view(document),

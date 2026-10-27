@@ -282,3 +282,68 @@ def test_empty_errors_and_escaping(page, server):
     response = page.goto('/investigations/not-real')
     assert response.status == 404
     expect(page.get_by_role('link', name='Return to workbench')).to_be_visible()
+
+
+@pytest.mark.parametrize('theme', ['dark', 'light'])
+def test_redesign_themes_navigation_filters_and_mobile_drawer(page, theme):
+    from playwright.sync_api import expect
+    page.goto('/investigations')
+    page.locator('#theme-preference').select_option(theme)
+    page.reload()
+    expect(page.locator('html')).to_have_attribute('data-theme', theme)
+    page.keyboard.press('Control+k')
+    expect(page.get_by_role('dialog', name='Navigate workspace')).to_be_visible()
+    expect(page.locator('#command-search')).to_be_focused()
+    page.locator('#command-search').fill('Failure DNA')
+    page.keyboard.press('Enter')
+    page.wait_for_url('**/dna')
+    expect(page.locator('html')).to_have_attribute('data-theme', theme)
+    page.locator('#dna-search').fill('no-such-artifact')
+    expect(page.get_by_text('No records match these filters.', exact=True)).to_be_visible()
+    page.locator('#dna-search').fill('')
+    expect(page.locator('#dna-records article').first).to_be_visible()
+    page.goto('/investigations')
+    page.locator('#record-search').fill('showcase-m2')
+    expect(page.locator('#investigation-records article:visible')).to_have_count(1)
+    page.locator('#record-status').select_option('running')
+    expect(page.get_by_text('No records match these filters.', exact=True)).to_be_visible()
+    page.set_viewport_size({'width': 320, 'height': 720})
+    expect(page.get_by_role('button', name='Open navigation', exact=True)).to_be_visible()
+    assert page.locator('#app-sidebar').evaluate('(node) => node.inert')
+    page.get_by_role('button', name='Open navigation', exact=True).click()
+    expect(page.locator('.brand')).to_be_focused()
+    page.keyboard.press('Escape')
+    expect(page.get_by_role('button', name='Open navigation', exact=True)).to_be_focused()
+    assert page.locator('#app-sidebar').evaluate('(node) => node.inert')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+
+
+@pytest.mark.parametrize('theme', ['dark', 'light'])
+@pytest.mark.parametrize('route', ['/guide', '/design-system', '/projects', '/targets',
+                                  '/investigations/showcase-m2', '/dna/' + DNA_ID, '/differential'])
+def test_redesign_both_themes_axe_and_responsive(page, route, theme):
+    page.goto(route)
+    page.locator('#theme-preference').select_option(theme)
+    page.wait_for_load_state('networkidle')
+    page.add_script_tag(path=str(ROOT / 'tests/browser/vendor/axe.min.js'))
+    violations = page.evaluate("async()=> (await axe.run()).violations.filter(x=>['serious','critical'].includes(x.impact)).map(x=>({id:x.id,nodes:x.nodes.map(n=>n.target)}))")
+    assert violations == []
+    for width in [320, 430, 768, 1024, 1600]:
+        page.set_viewport_size({'width': width, 'height': 900})
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (route, theme, width)
+
+
+def test_schedule_inspector_and_measured_timing_use_retained_evidence(page):
+    from playwright.sync_api import expect
+    page.goto('/dna/' + DNA_ID)
+    lane = page.locator('.schedule-lane').first
+    expected = lane.get_attribute('data-inspect')
+    lane.click()
+    expect(page.get_by_role('dialog', name='Configured delivery', exact=False)).to_be_visible()
+    assert json.loads(page.locator('#inspector-content').text_content()) == json.loads(expected)
+    page.keyboard.press('Escape')
+    expect(lane).to_be_focused()
+    assert page.locator('.attempt-bar').count() > 0
+    assert page.locator('.timing-scale').inner_text().startswith('Relative axis: 0')
+    page.emulate_media(reduced_motion='reduce')
+    assert page.evaluate("getComputedStyle(document.querySelector('.button')).transitionDuration") in ['1e-05s', '0.00001s']
