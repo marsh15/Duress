@@ -1,0 +1,45 @@
+{
+  "scope": "Fresh anonymous Chromium; warmed service; not representative cold start, memory or physical-device benchmark",
+  "states": [
+    {
+      "title": "Workspace overview \u00b7 Duress",
+      "heading": "Workspace overview",
+      "theme": "dark",
+      "width": 1440,
+      "overflow": false,
+      "fontStatus": "loaded",
+      "geist": true,
+      "elapsed_navigation_and_capture_s": 4.273
+    },
+    {
+      "title": "Workspace overview \u00b7 Duress",
+      "heading": "Workspace overview",
+      "theme": "light",
+      "width": 1440,
+      "overflow": false,
+      "fontStatus": "loaded",
+      "geist": true,
+      "elapsed_navigation_and_capture_s": 1.29
+    },
+    {
+      "title": "Workspace overview \u00b7 Duress",
+      "heading": "Workspace overview",
+      "theme": "dark",
+      "width": 390,
+      "overflow": false,
+      "fontStatus": "loaded",
+      "geist": true,
+      "elapsed_navigation_and_capture_s": 1.167
+    },
+    {
+      "title": "Workspace overview \u00b7 Duress",
+      "heading": "Workspace overview",
+      "theme": "light",
+      "width": 390,
+      "overflow": false,
+      "fontStatus": "loaded",
+      "geist": true,
+      "elapsed_navigation_and_capture_s": 1.691
+    }
+  ]
+}

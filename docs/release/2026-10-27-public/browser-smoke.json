@@ -1,0 +1,55 @@
+{
+  "assets": [
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/appearance.js"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/fonts/Geist.woff2"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/tokens.css"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/site.css"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/workspace.css"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/vendor/htmx.min.js"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/analysis.js"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/workspace.js"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/site.js"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/investigations.js"
+    },
+    {
+      "status": 200,
+      "url": "https://duress.onrender.com/web/static/fonts/GeistMono.woff2"
+    }
+  ],
+  "checkedAt": "2026-10-27T13:46:49.530Z",
+  "fontStatus": "loaded",
+  "geist": true,
+  "heading": "Workspace overview",
+  "overflow": false,
+  "theme": "light",
+  "title": "Workspace overview · Duress"
+}

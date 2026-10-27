@@ -1,0 +1,89 @@
+{
+  "method": "Complete real-time Chromium playback with scene and mid-transition frames; audio stream present, original quiet music",
+  "observations": [
+    {
+      "time": 0,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 0
+    },
+    {
+      "time": 2.515902,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 80
+    },
+    {
+      "time": 3.594561,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 113
+    },
+    {
+      "time": 5.510819,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 170
+    },
+    {
+      "time": 8.58038,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 262
+    },
+    {
+      "time": 10.506656,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 320
+    },
+    {
+      "time": 12.575844,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 382
+    },
+    {
+      "time": 15.509937,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 470
+    },
+    {
+      "time": 17.57796,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 532
+    },
+    {
+      "time": 19.509815,
+      "duration": 22,
+      "ended": false,
+      "error": null,
+      "frames": 590
+    },
+    {
+      "time": 22,
+      "duration": 22,
+      "ended": true,
+      "error": null,
+      "frames": 660
+    },
+    {
+      "time": 22,
+      "duration": 22,
+      "ended": true,
+      "error": null,
+      "frames": 660
+    }
+  ]
+}

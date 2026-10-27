@@ -4,7 +4,17 @@
 
 Duress is a local-first reliability-testing tool for developer-owned webhook integrations. It runs bounded delivery experiments, independently observes persisted business state through SQLite or PostgreSQL, evaluates configurable business invariants, and preserves failures as portable **Failure DNA**. The original controlled payment benchmark remains available as a guided demonstration.
 
+**[Try the public synthetic demo](https://duress.onrender.com)** · [Verified public deployment and exact test scope](docs/release/2026-10-27-public/README.md)
+
 An HTTP acknowledgment can hide duplicate tickets, missing business effects, and incorrect state transitions. Duress checks declared business entities after managed processes have drained and their termination has been confirmed.
+
+## Duress in 22 seconds
+
+https://github.com/user-attachments/assets/8eb5c659-1bb2-4bcd-810b-168102aee653
+
+[Browser player](https://marsh15.github.io/Duress/openfire/demo.html#brag) · [MP4](docs/openfire/duress-brag-22s.mp4)
+
+Real saved UI evidence, captions and original quiet music. A short introduction for developers testing owned webhook integrations.
 
 ![Current Duress workspace with a retained 30-trial investigation and observed business failure](docs/openfire/screenshots/overview-dark.png)
 
@@ -12,19 +22,19 @@ An HTTP acknowledgment can hide duplicate tickets, missing business effects, and
 
 The workspace includes dark, light and system appearance, keyboard navigation with **Cmd/Ctrl+K**, a local project setup guide at `/guide`, and a shared component reference at `/design-system`. Execution lifecycle and business verdict remain separate. Historical release screenshots and measurements remain in `docs/screenshots` and `docs/release`.
 
-## Watch the 90-second demo
-
-[![Play the Duress demo — real concurrency failure, business-state evidence, Failure DNA and correction verification](docs/openfire/demo-poster.jpg)](https://marsh15.github.io/Duress/openfire/demo.html)
-
-**[▶ Play in your browser](https://marsh15.github.io/Duress/openfire/demo.html)** · [MP4 file](docs/openfire/duress-openfire-90s.mp4) · [Script and evidence](docs/openfire/demo-script.md)
-
-Captioned, silent, 90 seconds. The video shows authentic saved execution evidence and a labelled historical Alan contribution excerpt. It does not claim a newly running investigation or a fresh Alan skill invocation. The video player is separate from a deployed Duress application.
-
 ## Architecture
 
 ![Excalidraw architecture: shared CLI and web services, isolated trusted execution, independent business-state oracle, portable Failure DNA and bounded replay and correction verification](docs/architecture/duress-architecture.png)
 
 [Editable Excalidraw source](docs/architecture/duress-architecture.excalidraw) · [Vector image](docs/architecture/duress-architecture.svg) · [Architecture details](docs/ARCHITECTURE.md)
+
+## Full 90-second demonstration
+
+https://github.com/user-attachments/assets/8afda2de-64f6-4ed1-9231-547dfeabce54
+
+[Browser player](https://marsh15.github.io/Duress/openfire/demo.html#demo) · [MP4](docs/openfire/duress-openfire-90s.mp4) · [Script and evidence](docs/openfire/demo-script.md)
+
+Captioned and silent. Authentic saved execution evidence shows the business-state violation, Failure DNA, replay and bounded correction verification. The Alan segment is a labelled historical contribution excerpt, not a fresh skill invocation. The video player is separate from the live Duress application.
 
 ## Alan contribution
 
@@ -143,7 +153,7 @@ docker build -t duress:web .
 docker run --rm -p 8000:8000 -e PORT=8000 duress:web
 ```
 
-The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [render.yaml](render.yaml) defines the intended Render Docker service and health check. **Public application deployment is not yet verified.** The owner is deploying Render; follow the [deployment handoff](docs/openfire/RENDER_HANDOFF.md). See the [operations guide](docs/OPERATIONS.md) for deployment, storage, limits, and smoke checks.
+The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [render.yaml](render.yaml) defines the intended Render Docker service and health check. **[Public Free deployment verified](https://duress.onrender.com).** One real bounded investigation completed and produced Failure DNA; [public acceptance](docs/release/2026-10-27-public/README.md) records exact scope, the one invalid trial, and remaining protected-operation/account limits. Follow the [$0 deployment handoff](docs/openfire/RENDER_HANDOFF.md). See the [operations guide](docs/OPERATIONS.md) for deployment, storage, limits, and smoke checks.
 
 | Variable | Purpose |
 |---|---|

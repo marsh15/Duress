@@ -1,0 +1,96 @@
+{
+  "public_url": "https://duress.onrender.com",
+  "scope": "Read-only public pages + rejected unauthenticated writes. Authenticated hosted-external guard was separately proven in the original image; no token was read or transmitted here.",
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/investigations",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/investigations/inv-20261027T134459-5dffbe",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/investigations/showcase-m2",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/targets",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/guide",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/dna/0edb63c480dbc29b",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/evidence/t39e45ad431a2",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 403,
+      "reason": "local_only",
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/projects",
+      "status": 403,
+      "reason": "local_only",
+      "passed": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/release-probe/investigations",
+      "status": 401,
+      "reason": "token_required",
+      "passed": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/dna/0edb63c480dbc29b/replay",
+      "status": 401,
+      "reason": "token_required",
+      "passed": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/dna/0edb63c480dbc29b/verify-fix",
+      "status": 401,
+      "reason": "token_required",
+      "passed": true
+    }
+  ],
+  "source_deployment_sha": "344db907adfb61519cab7023ce6db3772dcc3824"
+}

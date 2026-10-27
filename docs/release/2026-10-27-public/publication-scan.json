@@ -1,0 +1,15 @@
+{
+  "tool": "gitleaks",
+  "scope": "Final README/media/public-acceptance delta, about 3.24MB",
+  "findings": 1,
+  "confirmed_credentials": 0,
+  "reviewed_false_positive": {
+    "rule": "generic-api-key",
+    "file": "investigation.json",
+    "json_field": "model.calls[0].key",
+    "classification": "64-hex SHA256 model+prompt fixture cache key, not an authentication key",
+    "source": "src/duress/llm.py:90-91; cached audit field at lines 245-248"
+  },
+  "absolute_runtime_path_occurrences_in_public_investigation": 0,
+  "published_attachment_references": "Canonical GitHub IDs only; expiring signed download URLs are not committed"
+}

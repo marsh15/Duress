@@ -1,0 +1,14 @@
+{
+  "source_sha": "344db907adfb61519cab7023ce6db3772dcc3824",
+  "original_dockerfile": "PASS",
+  "health": {
+    "status": "ok",
+    "version": "0.2.0b1",
+    "hosted": true,
+    "token_required": true,
+    "busy": false
+  },
+  "new_workspace": "PASS",
+  "current_css_sha256": "a5bb71f192a286b4c208c265af2c18da64ccb89649e0a0c0f178963dd2dfb455",
+  "guide": 200
+}

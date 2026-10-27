@@ -2,7 +2,7 @@
 
 The original Dockerfile built successfully for accepted code `3284471`; Linux tests,
 static/font routes, authorization and a real replay passed. The repository includes
-`render.yaml`. No public deployment URL has been verified by the release agent.
+`render.yaml`. The existing public Free service is verified at https://duress.onrender.com; see the deployment checkpoint below.
 
 1. Sign in to Render and inspect existing Blueprints/services/deploys first. Preserve a working deployment. Do not create a duplicate. Connect `marsh15/Duress` only if no existing Duress service can be used.
 2. If there is no existing service, create a Blueprint from `render.yaml`; otherwise preserve/use the existing service and review its configuration. Select the verified release branch/tag.
@@ -51,6 +51,10 @@ After Live, record actual URL, service name, plan and deployed SHA. Verify healt
 
 Free instances spin down after inactivity, and runtime files are lost on spin-down/restart/redeploy. Export new evidence promptly. Bundled historical showcase evidence remains reproducible; runtime persistence is not durable cloud storage. No paid disk is needed for this demo.
 
-Current agent status: Render Dashboard redirects to sign-in. Existing services, deploys, credit terms, billing exposure and current charges cannot be inspected without account access. No deployment or financial guarantee is claimed. Owner operates Render and should supply the real HTTPS URL for independent smoke testing.
+Current agent status: Render Dashboard redirects to sign-in. Existing services, deploys, credit terms, billing exposure and current charges cannot be inspected without account access. The public deployment was independently tested through its HTTPS URL; no account billing or future financial guarantee is claimed. Owner operates Render.
 
 Sources checked 27 October: [Render Free limitations](https://render.com/docs/free), [Blueprint reference](https://render.com/docs/blueprint-spec).
+
+## Verified deployment checkpoint
+
+The existing service `srv-dbga5mvb9u1s73cn8h60` now serves https://duress.onrender.com with the redesigned UI and the exact merged-main workspace asset hash. Deployment record: `344db907adfb61519cab7023ce6db3772dcc3824`; owner manually deployed the current commit. Owner confirms Free and Billing reviewed; the release agent did not create or upgrade resources. One actual public cached investigation completed in 330.72s with the intended business FAIL and generated DNA. [Full public acceptance](../release/2026-10-27-public/README.md). Account credit eligibility/expiry, current charges and memory metrics remain independently inaccessible. Authenticated public replay/correction remain pending owner operation at this checkpoint.

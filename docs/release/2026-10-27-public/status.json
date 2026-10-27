@@ -1,0 +1,12 @@
+{
+  "url": "https://duress.onrender.com",
+  "investigation_id": "inv-20261027T134459-5dffbe",
+  "lifecycle": "completed",
+  "verdict": "FAIL",
+  "seconds": 330.72,
+  "dna_ids": [
+    "0edb63c480dbc29b"
+  ],
+  "automatic_retries": 0,
+  "deployment_asset_matches_main": true
+}

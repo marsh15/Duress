@@ -19,8 +19,8 @@ local-first developer beta; a hosted demo must execute bundled trusted targets o
 
 ## Links and final account actions
 
-- Repository: https://github.com/marsh15/Duress — verify anonymous access after owner approval.
-- Working public application: **not yet verified**; do not submit localhost as a public URL.
+- Repository: https://github.com/marsh15/Duress — PUBLIC; anonymous source, README, MIT license, images and editable architecture verified.
+- Working public application: https://duress.onrender.com — redesigned Free deployment and one real bounded investigation verified; [actual public acceptance](../release/2026-10-27-public/README.md). Protected public replay/correction and account cost details remain separately qualified.
 - Final video: [90-second captioned silent demonstration](duress-openfire-90s.mp4), with
   [script, provenance and playback review](demo-script.md).
 - Alan contribution: [verified evidence and exact boundaries](alan.md).
@@ -34,6 +34,7 @@ local-first developer beta; a hosted demo must execute bundled trusted targets o
 > Real concurrent deliveries → committed-state evidence → portable Failure DNA → replay
 > and bounded correction verification. Built in part with Alan Code + DeepSeek.
 > Source: https://github.com/marsh15/Duress
+> Try: https://duress.onrender.com
 
 Attach the reviewed 1–2 minute video. Add the verified app URL only when available. Keep
 this attribution consistent with the Alan report; do not claim exclusive Alan/open-model

@@ -1,0 +1,10 @@
+{
+  "status_code": 202,
+  "body": {
+    "investigation_id": "inv-20261027T134459-5dffbe",
+    "status": "queued",
+    "mode_requested": "cached",
+    "target_id": "razorpay-vulnerable",
+    "status_url": "/api/investigations/inv-20261027T134459-5dffbe"
+  }
+}

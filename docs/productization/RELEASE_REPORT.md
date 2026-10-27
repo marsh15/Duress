@@ -10,7 +10,7 @@ gates, not an aggregate suite count. PR #2 merged as `baff987`; the redesign rec
 with main without rewriting milestones. Later release changes add MIT licensing,
 documentation, evidence and demo media without changing the accepted executor/UI code.
 The owner authorized MIT licensing and public repository visibility on 27 October.
-Render deployment is owner-operated and remains unverified until a real URL is tested.
+The existing owner-operated Free deployment at https://duress.onrender.com passed health/UI/assets and one actual bounded investigation; [public acceptance](../release/2026-10-27-public/README.md) records exact results and account/protected-operation limits. Main CI 40511107747 passed on merged 344db907.
 
 Release candidate: **0.2.0b1**, based on verified main `4684bd1743c0b09104a53750230b5e98fae2cb2f`. AI-assisted implementation with Luna xhigh delegated architecture, implementation and independent review tasks. This report records reproducible engineering evidence. Final CI/merge disposition and the release decision are recorded in [PR #2](https://github.com/marsh15/Duress/pull/2); an admitted workflow is never counted as a passing workflow.
 

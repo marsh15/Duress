@@ -68,14 +68,15 @@
     "file": "business-state.png",
     "route": "/evidence/tf13fae116060",
     "viewport": {
-      "width": 1440,
-      "height": 1000
+      "width": 1920,
+      "height": 1080
     },
     "theme": "dark",
     "http": 200,
     "source_revision": "32844711721166a7a41690759517eeb3e0e412bb",
-    "sha256": "b081cd2c20a0f7980da9682f6065ed42d02bd1e3f262a275ba5858283c0679e4",
-    "provenance": "Actual running application with retained execution records; no new investigation implied."
+    "sha256": "acbbddfcb1e63de7efae8433a58b8b50f802baef533e082bbc7225974741d766",
+    "provenance": "Actual running application with retained execution records; no new investigation implied.",
+    "scroll_context": "Retained Fulfilments section, all three order_A rows visible; same authentic capture used by final demo"
   },
   {
     "file": "mobile-guide.png",

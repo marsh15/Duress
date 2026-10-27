@@ -70,8 +70,7 @@ complete current-code full gate is the remote result above. Earlier installed-wh
 experiments with preparation timeouts remain separately recorded; final fresh acceptance
 above did not relabel or discard inconclusive trials.
 
-Public synthetic hosting is separate from local external-project execution. The owner
-will deploy Render; no deployment URL is claimed here. Genuine historical Alan execution
+Public synthetic hosting is separate from local external-project execution. The owner deployed the existing Free service; [public acceptance](../2026-10-27-public/README.md) records the verified URL, actual investigation, billing boundaries and remaining public-operation checks. Genuine historical Alan execution
 is [documented](../../openfire/alan.md); fresh skill invocation and Duress internal hosted
 inference remain unverified. No PyPI publication or organizer acceptance is claimed.
 
