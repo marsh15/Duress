@@ -72,9 +72,20 @@ class ProfileRegistry:
 
     @classmethod
     def discover(cls, root: Path | None = None) -> "ProfileRegistry":
-        root = Path(root or repo_root())
+        root = Path(root or repo_root()).resolve()
+        profile_paths = sorted(root.glob("targets/*/profile.toml"))
+        # Workspace callers may pass the process cwd explicitly. If that
+        # directory is not a Duress checkout, use the bundled reference tree
+        # found by repo_root instead of returning an empty registry.
+        if not profile_paths:
+            fallback = repo_root(root)
+            if fallback != root:
+                bundled_paths = sorted(fallback.glob("targets/*/profile.toml"))
+                if bundled_paths:
+                    root = fallback
+                    profile_paths = bundled_paths
         targets: dict[str, TargetProfile] = {}
-        for profile_path in sorted(root.glob("targets/*/profile.toml")):
+        for profile_path in profile_paths:
             data = tomllib.loads(profile_path.read_text())
             profile = data["profile"]
             process = data.get("process", {})
@@ -127,6 +138,12 @@ def repo_root(start: Path | None = None) -> Path:
     for candidate in (current, *current.parents):
         if (candidate / "targets").is_dir() and (candidate / "pyproject.toml").exists():
             return candidate
+    # A wheel keeps the reference profiles, fixtures and recorded showcase
+    # under the package.  Prefer an actual checkout above so contributors still
+    # execute the live source tree and can edit those resources in place.
+    bundled = Path(__file__).resolve().parent / "resources"
+    if any(bundled.glob("targets/*/profile.toml")):
+        return bundled
     return current
 
 
