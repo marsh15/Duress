@@ -9,3 +9,7 @@ __pycache__/
 dist/
 .recovery/
 docs/measurements/
+
+# Local browser sessions and generated launch-video workspace
+.playwright-cli/
+brag-output*/

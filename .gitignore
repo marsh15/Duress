@@ -11,3 +11,7 @@ duress-report.html
 
 # Local recovery archives and test evidence
 .recovery/
+
+# Local browser sessions and generated launch-video workspace
+/.playwright-cli/
+/brag-output*/
