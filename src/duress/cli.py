@@ -84,7 +84,7 @@ def targets_command(config: Path | None = typer.Option(None,"--config"),
         emit({"project":project.manifest.duress.project,"target_id":project.manifest.target.id,
               "adapter":"external@1","mode":project.manifest.target.mode,
               "contract":f"{project.contract.id}@{project.contract.version}",
-              "scenarios":[s.id for s in project.manifest.scenarios]})
+              "scenarios":[s.id for s in project.manifest.scenarios]},json_output=json_output)
         return
     workspace = _workspace()
     if json_output:

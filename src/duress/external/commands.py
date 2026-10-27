@@ -14,6 +14,9 @@ def emit(value, json_output=True):
         typer.echo(json.dumps(value,indent=2))
     elif isinstance(value,dict):
         typer.echo(f"{value.get('project','Duress')}  {value.get('outcome',value.get('verdict',value.get('configuration','')))}")
+        for key in ("target_id","contract","mode","adapter","observer","readiness"):
+            if key in value:
+                typer.echo(f"{key:<12} {value[key]}")
         if value.get("reason"):
             typer.echo(value["reason"])
         for item in value.get("scenarios",[]):
@@ -23,6 +26,8 @@ def emit(value, json_output=True):
                     for result in trial["invariants"]:
                         if result["status"] != "satisfied":
                             typer.echo(f"    {result['id']}: {result['reason']} {result['identities']}")
+            else:
+                typer.echo(f"  scenario: {item}")
         if value.get("dna"):
             typer.echo("Failure DNA: " + ", ".join(value["dna"]))
     else:
