@@ -423,3 +423,9 @@ def test_negative_ack_does_not_require_a_new_effect_but_other_invariants_still_r
 
     assert results["ack-matches-effect"].status == "satisfied"
     assert results["ticket-created"].status == "violated"
+
+@pytest.mark.parametrize('column',['api_key','token','client_secret','authorization'])
+def test_credential_like_observation_fields_are_rejected(column):
+    from duress.external.contract import EntitySpec
+    with pytest.raises(ValueError,match='credential-like'):
+        EntitySpec(table='business',key='id',columns=['id',column])

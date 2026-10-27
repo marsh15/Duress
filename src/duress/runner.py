@@ -62,7 +62,8 @@ async def run_schedule(
     url = f"{base_url.rstrip('/')}/webhooks/razorpay"
     result = ExecutionResult()
 
-    async with httpx.AsyncClient(transport=transport, follow_redirects=False) as client:
+    async with httpx.AsyncClient(transport=transport, follow_redirects=False,
+                                 trust_env=request_builder is None) as client:
 
         async def send(
             delivery: DeliverySpec,

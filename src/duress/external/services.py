@@ -25,6 +25,8 @@ def assert_local():
 
 
 def redact(project: LoadedProject, value: Any, runtime_secret: str | None = None) -> Any:
+    from .storage import _redact
+    value = _redact(value)
     refs = [*project.manifest.target.env_refs.values(),
             *project.manifest.delivery.header_refs.values(),
             project.manifest.delivery.secret_ref, project.manifest.observation.database_ref,

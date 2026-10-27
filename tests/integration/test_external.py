@@ -156,3 +156,26 @@ async def test_expected_status_uses_terminal_response_after_retries(external_pro
     result=await trial(project,Scenario.model_validate(data),tmp_path/'runtime')
     assert [a['status_code'] for a in result['execution']['attempts']]==[409,200]
     assert 'unexpected_response:one' in result['verdict']['reasons']
+
+@pytest.mark.asyncio
+async def test_managed_delivery_ignores_ambient_http_proxy(external_project,tmp_path,monkeypatch):
+    for name in ('HTTP_PROXY','HTTPS_PROXY','ALL_PROXY','http_proxy','https_proxy','all_proxy'):
+        monkeypatch.setenv(name,'http://127.0.0.1:1')
+    monkeypatch.setenv('NO_PROXY','');monkeypatch.setenv('no_proxy','')
+    project=load_project(external_project)
+    result=await trial(project,project.scenario('normal'),tmp_path/'runtime')
+    assert result['verdict']['status']=='PASS',result['verdict']
+
+@pytest.mark.asyncio
+async def test_init_pidfile_write_failure_still_reaps_process_group(external_project,tmp_path,monkeypatch):
+    from duress.external import lifecycle
+    from duress.store import group_exists
+    app=external_project.parent/'app.py'
+    app.write_text('import os,time\nif os.fork()==0: time.sleep(30)\nelse: time.sleep(30)\n')
+    project=load_project(external_project)
+    supervisor=lifecycle.ExternalSupervisor(project,project.scenario('normal'),tmp_path/'runtime')
+    def fail(*args,**kwargs):raise OSError('simulated metadata write failure')
+    monkeypatch.setattr(lifecycle,'write_pidfile',fail)
+    observation=await supervisor.run()
+    assert observation.harness_errors
+    assert not group_exists(supervisor.init_pgid)

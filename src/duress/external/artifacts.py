@@ -26,11 +26,10 @@ class ExternalDNA(StrictModel):
 
 def semantics(project: LoadedProject) -> dict[str, Any]:
     delivery = project.manifest.delivery.model_dump(mode="json", exclude={"secret_ref", "header_refs"})
-    from . import contract, observers, lifecycle, services, manifest, launch
-    from .. import runner, limits
-    sources = {m.__name__:hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest()
-               for m in (contract,observers,lifecycle,services,runner,manifest,launch,limits)}
-    sources["duress.external.artifacts"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    package = Path(__file__).resolve().parents[1]
+    paths = [p for p in package.rglob("*.py") if "resources" not in p.relative_to(package).parts]
+    paths += list((package / "semantics").glob("*.json"))
+    sources = {str(p.relative_to(package)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}
     implementation = canonical_sha256(sources)
     return {"adapters":{**ADAPTERS, "observer":project.manifest.observation.adapter},
             "implementation_sha256":implementation,

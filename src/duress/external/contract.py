@@ -40,6 +40,9 @@ class EntitySpec(StrictModel):
 
     @model_validator(mode="after")
     def validate_columns(self) -> EntitySpec:
+        from .storage import _key_is_sensitive
+        if any(_key_is_sensitive(column) for column in self.columns):
+            raise ValueError("credential-like observation fields are forbidden; select non-secret business attributes")
         if len(set(self.columns)) != len(self.columns):
             raise ValueError("entity columns must be unique")
         if self.key not in self.columns:

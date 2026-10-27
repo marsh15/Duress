@@ -96,9 +96,9 @@ class ExternalSupervisor(TrialSupervisor):
         proc = await asyncio.create_subprocess_exec(*command, cwd=self.project.cwd, env=self.env,
             start_new_session=True, stdout=self.log_handle, stderr=asyncio.subprocess.STDOUT)
         self.init_pgid = proc.pid
-        write_pidfile(self.home, self.trial_id + "-init", Pidfile(proc.pid, proc.pid, self.trial_id,
-                      _now(), process_start_time(proc.pid)))
         try:
+            write_pidfile(self.home, self.trial_id + "-init", Pidfile(proc.pid, proc.pid, self.trial_id,
+                          _now(), process_start_time(proc.pid)))
             while proc.returncode is None:
                 self._check_group_limits(self.init_pgid)
                 await asyncio.sleep(.025)
