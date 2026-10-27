@@ -76,3 +76,18 @@ def test_repository_has_model_fixtures_and_recorded_showcase_resources():
     assert list((ROOT / "fixtures" / "llm").glob("*.json"))
     assert (ROOT / "showcase" / "investigation.json").is_file()
     assert list((ROOT / "showcase" / "dna").glob("*.json"))
+
+
+def test_cli_exports_bundled_showcase_outside_checkout(tmp_path, monkeypatch):
+    from typer.testing import CliRunner
+    from duress.cli import app
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("DURESS_ROOT", str(ROOT))
+    monkeypatch.delenv("DURESS_HOME", raising=False)
+    output = tmp_path / "report.html"
+    result = CliRunner().invoke(app, ["report", "showcase", "--output", str(output)])
+
+    assert result.exit_code == 0, result.output
+    assert "showcase-m2" in output.read_text()
+    assert "SIL OPEN FONT LICENSE" in output.read_text()
