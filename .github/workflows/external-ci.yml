@@ -43,8 +43,8 @@ jobs:
     permissions:
       contents: read
     env:
-      DURESS_ARTIFACT_DIR: ${{ runner.temp }}/duress-ci-artifacts
-      DURESS_HOME: ${{ runner.temp }}/duress-ci-home
+      DURESS_ARTIFACT_DIR: /tmp/duress-ci-artifacts-${{ github.run_id }}-${{ github.run_attempt }}
+      DURESS_HOME: /tmp/duress-ci-home-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Check out caller application
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -205,7 +205,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: duress-external-ci-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/duress-ci-artifacts/
+          path: ${{ env.DURESS_ARTIFACT_DIR }}/
           if-no-files-found: warn
           retention-days: 14
 
