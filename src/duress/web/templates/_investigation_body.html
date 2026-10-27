@@ -44,7 +44,7 @@
       <div class="hypothesis-main">
         <div class="hypothesis-title-row">
           <div><p class="hypothesis-id">Observed in {{ finding.scenario_id|default('scenario not recorded') }}</p><h3>{{ signature.check|default('Failure signature not recorded') }}{% if signature.kind %} · {{ signature.kind }}{% endif %}</h3></div>
-          {% if finding.dna_id %}<a class="finding-badge" href="/dna/{{ finding.dna_id }}">Failure DNA · {{ finding.dna_id }}</a>{% endif %}
+          {% if finding.dna_id %}{% if interactive|default(true) %}<a class="finding-badge" href="/dna/{{ finding.dna_id }}">Failure DNA · {{ finding.dna_id }}</a>{% else %}<span class="finding-badge">Failure DNA · {{ finding.dna_id }}</span>{% endif %}{% endif %}
         </div>
         {% if signature.roles %}<p class="prediction"><span>Affected roles</span>{% for role in signature.roles %}<code>{{ role }}</code>{% endfor %}</p>{% endif %}
         <dl class="status-list">
@@ -338,7 +338,7 @@
         {% if trial.signature %}<p class="trial-signature">{{ trial.signature.check|default('') }} · {{ trial.signature.kind|default('') }}{% if trial.signature.roles %} · {{ trial.signature.roles|join(', ') }}{% endif %}</p>{% endif %}
         {% if trial.reasons %}<p class="trial-reason">{{ trial.reasons|join(' · ') }}</p>{% endif %}
         {% if trial.settlement or trial.released_by or trial.duration_s is not none %}<p class="trial-reason">{% if trial.settlement %}Settlement {{ trial.settlement }}{% endif %}{% if trial.released_by %}{% if trial.settlement %} · {% endif %}released by {{ trial.released_by }}{% endif %}{% if trial.duration_s is not none %}{% if trial.settlement or trial.released_by %} · {% endif %}{{ trial.duration_s }}s{% endif %}</p>{% endif %}
-        {% if trial.trial_id and trial.trial_id in evidence_ids|default([]) %}<p class="trial-reason"><a href="/evidence/{{ trial.trial_id }}">Inspect retained state</a></p>{% endif %}
+        {% if interactive|default(true) and trial.trial_id and trial.trial_id in evidence_ids|default([]) %}<p class="trial-reason"><a href="/evidence/{{ trial.trial_id }}">Inspect retained state</a></p>{% endif %}
       </div>
       <span class="trial-verdict">{{ trial.status|default('recorded') }}</span>
     </li>
@@ -373,7 +373,8 @@
 {% if view.dna_ids %}
 <section class="dna-link-band" aria-labelledby="dna-links-title">
   <div><p class="eyebrow">Failure artifacts</p><h2 id="dna-links-title">Portable Failure DNA</h2></div>
-  <div class="dna-links">{% for dna_id in view.dna_ids %}<a href="/dna/{{ dna_id }}"><code>{{ dna_id }}</code><span>Inspect DNA</span></a>{% endfor %}</div>
+  <div class="dna-links">{% for dna_id in view.dna_ids %}{% if interactive|default(true) %}<a href="/dna/{{ dna_id }}"><code>{{ dna_id }}</code><span>Inspect DNA</span></a>{% else %}<code>{{ dna_id }}</code>{% endif %}{% endfor %}</div>
+  {% if not interactive|default(true) %}<p class="field-help">Artifact IDs are retained references. Open these artifacts in the originating Duress workspace.</p>{% endif %}
 </section>
 {% endif %}
 

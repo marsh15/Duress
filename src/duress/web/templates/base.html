@@ -45,14 +45,14 @@
   </aside>
   <div class="nav-scrim" hidden></div>
   <div class="app-body">
-    <header class="context-bar"><div><button class="icon-button nav-toggle" type="button" aria-controls="app-sidebar" aria-expanded="false" aria-label="Open navigation">{{ icon('menu') }}</button><span class="context-workspace">Workspace</span><span class="context-separator">/</span><span>{{ section }}</span></div><button class="context-search" type="button" data-command-open>{{ icon('search') }}<span>Search and navigate</span><kbd>⌘ K</kbd></button></header>
+    <header class="context-bar"><div><button class="icon-button nav-toggle" type="button" aria-controls="app-sidebar" aria-expanded="false" aria-label="Open navigation">{{ icon('menu') }}</button><span class="context-workspace">Workspace</span><span class="context-separator">/</span><span>{{ section }}</span></div><button class="context-search" type="button" data-command-open aria-label="Search and navigate">{{ icon('search') }}<span>Search and navigate</span><kbd>⌘ K</kbd></button></header>
     <main id="main" class="page-shell" tabindex="-1">{% block content %}{% endblock %}</main>
     <footer class="site-footer"><span>Duress · Evidence instrument</span><span>Reproducible conditions. Portable evidence.</span></footer>
   </div>
   <dialog id="command-palette" class="command-dialog" aria-labelledby="command-title">
     <div class="command-heading"><h2 id="command-title">Navigate workspace</h2><button class="icon-button" type="button" data-command-close aria-label="Close command palette">{{ icon('close') }}</button></div>
-    <label class="visually-hidden" for="command-search">Search pages and actions</label><input id="command-search" type="search" placeholder="Search pages and actions…" autocomplete="off">
-    <div id="command-results" class="command-results"></div><p class="command-hint">↑ ↓ to move · Enter to open · Esc to close</p>
+    <label class="visually-hidden" for="command-search">Search pages and actions</label><input id="command-search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="command-results" type="search" placeholder="Search pages and actions…" autocomplete="off">
+    <div id="command-results" class="command-results" role="listbox" aria-label="Matching pages and actions"></div><p class="command-hint">↑ ↓ to move · Enter to open · Esc to close</p>
   </dialog>
   <dialog id="evidence-inspector" class="command-dialog evidence-inspector" aria-labelledby="inspector-title"><div class="command-heading"><h2 id="inspector-title">Evidence details</h2><button class="icon-button" type="button" data-inspector-close aria-label="Close evidence details">{{ icon('close') }}</button></div><pre id="inspector-content"></pre></dialog>
   <div id="workspace-toast" class="workspace-toast" role="status" aria-live="polite" hidden></div>

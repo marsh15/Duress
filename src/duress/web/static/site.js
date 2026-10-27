@@ -92,29 +92,6 @@
     if (!list) return;
     const records = Array.isArray(payload) ? payload : payload.items || payload.investigations || [];
     list.replaceChildren();
-    const findingsList = byId("recent-findings");
-    if (findingsList) {
-      findingsList.replaceChildren();
-      for (const record of records.slice(0, 8)) {
-        const findings = Array.isArray(record.findings) ? record.findings : [];
-        for (const finding of findings.slice(0, 3)) {
-          const item = document.createElement("li"); item.className = "record-list-row";
-          const link = document.createElement("a"); link.className = "record-list-main";
-          link.href = `/investigations/${encodeURIComponent(record.investigation_id)}#findings-title`;
-          const title = document.createElement("strong");
-          const signature = finding.signature || {};
-          title.textContent = `${signature.check || "Observed failure"}${signature.kind ? ` · ${signature.kind}` : ""}`;
-          const detail = document.createElement("span");
-          detail.textContent = `${record.target_id || "Target not recorded"} · ${finding.scenario_id || "Scenario not recorded"}`;
-          link.append(title, detail); item.append(link); findingsList.append(item);
-        }
-      }
-      if (!findingsList.childElementCount) {
-        const empty = document.createElement("li"); empty.className = "list-placeholder";
-        empty.textContent = "No executed failure findings retained in recent records. Hypothesis proposals alone are not findings.";
-        findingsList.append(empty);
-      }
-    }
     if (!records.length) {
       const item = document.createElement("li");
       item.className = "list-placeholder";
@@ -142,7 +119,10 @@
       if (summary.valid !== undefined && summary.fail !== undefined) {
         stats.textContent = `${summary.fail} fail / ${summary.valid} valid · aggregate`;
       } else {
-        stats.textContent = "Saved record";
+        stats.textContent = record.verdict
+          ? `${record.verdict}${typeof record.trials_used === "number" ? ` · ${record.trials_used} trials` : ""}`
+          : record.showcase ? "Historical benchmark" : "Business verdict unresolved";
+        if (record.verdict === "FAIL") stats.classList.add("number-fail");
       }
       const action = document.createElement("span");
       action.className = "record-list-open";
@@ -222,7 +202,7 @@
 
     if (byId("investigation-history")) {
       try { renderHistory((await api("/api/investigations")).payload); }
-      catch (_) { listUnavailable("investigation-history", "Investigation history"); listUnavailable("recent-findings", "Findings"); }
+      catch (_) { listUnavailable("investigation-history", "Investigation history"); }
     }
     if (byId("dna-index")) {
       try { renderDnaIndex((await api("/api/dna")).payload); }

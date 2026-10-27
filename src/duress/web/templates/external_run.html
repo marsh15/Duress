@@ -6,7 +6,7 @@
 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Workbench</a><span aria-hidden="true">/</span><a href="/projects">External projects</a><span aria-hidden="true">/</span><a href="/projects/{{ project.project }}">{{ project.project }}</a><span aria-hidden="true">/</span><span>Investigation</span></nav>
 <header class="page-heading investigation-heading">
   <div><p class="eyebrow">Recorded external investigation · {{ record.status }}</p><h1>{{ record.verdict }}</h1><p class="heading-detail"><code>{{ record.investigation_id }}</code> · {{ record.scenarios|length }} scenario records · contract <code>{{ record.contract_id }}@{{ record.contract_version }}</code></p></div>
-  <div><a class="button button-secondary" href="/projects/{{ project.project }}">Project</a> <a class="button button-primary" href="/projects/{{ project.project }}/investigations/{{ record.investigation_id }}/report">Static HTML report</a></div>
+  <div class="inline-actions"><a class="button button-secondary" href="/projects/{{ project.project }}">Project</a> <a class="button button-primary" href="/projects/{{ project.project }}/investigations/{{ record.investigation_id }}/report">Static HTML report</a></div>
 </header>
 <aside class="notice notice-cyan">
   <strong>How to read this outcome</strong>
@@ -28,13 +28,13 @@
 {% for scenario in record.scenarios %}
 {% set scenario_index = loop.index %}
 <section class="records-section" aria-labelledby="scenario-{{ loop.index }}">
-  <div class="section-heading"><div><p class="eyebrow">Scenario {{ loop.index }}</p><h2 id="scenario-{{ loop.index }}">{{ scenario.scenario_id }}</h2></div><span class="state-chip">{{ scenario.result.status }}</span></div>
+  <div class="section-heading"><div><p class="eyebrow">Scenario {{ loop.index }}</p><h2 id="scenario-{{ loop.index }}">{{ scenario.scenario_id }}</h2></div><span class="state-chip state-{{ scenario.result.status|lower }}">{{ scenario.result.status }}</span></div>
   <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Aggregate scenario outcome</caption><thead><tr><th scope="col">Status</th><th scope="col">Valid</th><th scope="col">Fail</th><th scope="col">Inconclusive</th><th scope="col">Trials</th></tr></thead><tbody><tr><td>{{ scenario.result.status }}</td><td>{{ scenario.result.valid }}</td><td>{{ scenario.result.fail }}</td><td>{{ scenario.result.inconclusive }}</td><td>{{ scenario.result.trials }}</td></tr></tbody></table></div>
   {{ schedule_view(scenario.schedule) }}
   <details class="content-section"><summary>Registered schedule</summary><pre>{{ scenario.schedule|tojson(indent=2) }}</pre></details>
   {% for trial in scenario.trials %}
   <section class="content-section" aria-labelledby="trial-{{ scenario_index }}-{{ loop.index }}">
-    <div class="section-heading compact-heading"><h3 id="trial-{{ scenario_index }}-{{ loop.index }}">Trial <code>{{ trial.trial_id }}</code></h3><span class="state-chip">{{ trial.verdict.status }}</span></div>
+    <div class="section-heading compact-heading"><h3 id="trial-{{ scenario_index }}-{{ loop.index }}">Trial <code>{{ trial.trial_id }}</code></h3><span class="state-chip state-{{ trial.verdict.status|lower }}">{{ trial.verdict.status }}</span></div>
     {% if trial.verdict.reasons %}<p><strong>Verdict reasons:</strong> {{ trial.verdict.reasons|join(', ') }}</p>{% endif %}
     <div class="table-wrap" tabindex="0"><table class="data-table"><caption class="visually-hidden">Declared invariant results for trial {{ trial.trial_id }}</caption><thead><tr><th scope="col">Invariant</th><th scope="col">Status</th><th scope="col">Reason</th><th scope="col">Identities</th><th scope="col">Explanation</th></tr></thead><tbody>
       {% for item in trial.invariants %}<tr><th scope="row"><code>{{ item.id }}@{{ item.version }}</code></th><td>{{ item.status }}</td><td>{{ item.reason }}</td><td>{% if item.identities %}<pre>{{ item.identities|tojson(indent=2) }}</pre>{% else %}—{% endif %}</td><td>{{ item.explanation }}</td></tr>{% endfor %}

@@ -25,12 +25,16 @@ def test_state_diff_refuses_incomplete_observation_and_missing_entity():
 def test_portable_report_embeds_themes_and_fonts_without_interactive_buttons():
     html = render_report({'investigation_id': 'report-1', 'status': 'completed',
                           'target_id': 'test', 'hypotheses': [], 'scenarios': [],
-                          'trials': [], 'events': [], 'dna_ids': []})
+                          'trials': [], 'events': [], 'dna_ids': ['artifact-1'],
+                          'findings': [{'dna_id': 'artifact-1', 'signature': {'check': 'INV-1'}}]})
     assert '--bg-canvas: #0C1115' in html
     assert 'data:font/woff2;base64,' in html
     assert 'SIL OPEN FONT LICENSE Version 1.1' in html
     assert '<button' not in html
     assert '<script' not in html
+    assert 'artifact-1' in html
+    assert 'href="/dna/' not in html
+    assert 'originating Duress workspace' in html
 
 
 def test_hosted_shell_has_no_external_project_navigation():

@@ -41,13 +41,22 @@
     ['New investigation', '/investigations#new-investigation'], ['Guide and configuration', '/guide'], ['Design system', '/design-system'],
     ['Use dark theme', 'theme:dark'], ['Use light theme', 'theme:light'], ['Use system theme', 'theme:system'],
   ];
-  window.addEventListener('duress:projects', event => { for (const project of event.detail) if (project.available) commands.push([`Project: ${project.project}`, `/projects/${encodeURIComponent(project.project)}`]); });
-  document.querySelectorAll('[data-project-link]').forEach(link => commands.push([`Project: ${link.textContent.trim()}`, link.getAttribute('href')]));
+  const addCommand = (label, target) => { if (!commands.some(([, value]) => value === target)) commands.push([label, target]); };
+  window.addEventListener('duress:projects', event => { for (const project of event.detail) if (project.available) addCommand(`Project: ${project.project}`, `/projects/${encodeURIComponent(project.project)}`); });
+  document.querySelectorAll('[data-project-link]').forEach(link => addCommand(`Project: ${link.textContent.trim()}`, link.getAttribute('href')));
   const artifact = document.querySelector('#dna-document');
   if (artifact) { try { const id = JSON.parse(artifact.textContent).dna_id; if (id) commands.push(['Copy artifact ID', `copy:${id}`]); } catch (_) {} }
   let selected = 0;
   let opener;
-  const highlight = () => [...results.children].forEach((node, index) => node.toggleAttribute('data-selected', index === selected));
+  const highlight = () => {
+    const items = [...results.querySelectorAll('[role=option]')];
+    items.forEach((node, index) => {
+      node.toggleAttribute('data-selected', index === selected);
+      node.setAttribute('aria-selected', String(index === selected));
+    });
+    if (items[selected]) search.setAttribute('aria-activedescendant', items[selected].id);
+    else search.removeAttribute('aria-activedescendant');
+  };
   const renderCommands = () => {
     selected = 0;
     results.replaceChildren();
@@ -55,6 +64,9 @@
       const special = target.startsWith('theme:') || target.startsWith('copy:');
       const item = document.createElement(special ? 'button' : 'a');
       item.className = 'command-result';
+      item.id = `command-result-${results.childElementCount}`;
+      item.setAttribute('role', 'option');
+      item.tabIndex = -1;
       item.textContent = label;
       if (!special) item.href = target;
       else item.type = 'button';
@@ -68,8 +80,9 @@
     if (!results.childElementCount) { const empty = document.createElement('p'); empty.className = 'empty-note'; empty.textContent = 'No matching pages or actions.'; results.append(empty); }
     highlight();
   };
-  const openCommands = () => { opener = document.activeElement; search.value = ''; renderCommands(); dialog.showModal(); search.focus(); };
-  const closeCommands = () => { dialog.close(); opener?.focus(); };
+  const openCommands = () => { opener = document.activeElement; search.value = ''; renderCommands(); dialog.showModal(); search.setAttribute('aria-expanded', 'true'); search.focus(); };
+  const closeCommands = () => { dialog.close(); search.setAttribute('aria-expanded', 'false'); opener?.focus(); };
+  dialog.addEventListener('cancel', event => { event.preventDefault(); closeCommands(); });
   document.querySelectorAll('[data-command-open]').forEach(button => button.addEventListener('click', openCommands));
   document.querySelector('[data-command-close]').addEventListener('click', closeCommands);
   search.addEventListener('input', renderCommands);
@@ -83,7 +96,7 @@
   dialog.addEventListener('click', event => { if (event.target === dialog) { const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeCommands(); } });
   document.addEventListener('keydown', event => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); dialog.open ? closeCommands() : openCommands(); }
-    if (event.key === 'Escape' && document.body.classList.contains('nav-open')) setNavigation(false);
+    if (event.key === 'Escape' && !document.querySelector('dialog[open]') && document.body.classList.contains('nav-open')) setNavigation(false);
   });
 
   let toastTimer;
@@ -122,16 +135,32 @@
     toolbar.addEventListener('input', apply); toolbar.addEventListener('change', apply);
   });
 
-  // Generate an in-page index from actual retained sections, preserving native anchors.
-  document.querySelectorAll('[data-section-index]').forEach(index => {
-    const scope = index.parentElement;
+  // Rebuild the index when persisted progress introduces new evidence sections.
+  const initializeIndexes = () => document.querySelectorAll('[data-section-index]').forEach(index => {
+    const scope = index.closest('main');
+    const activeHash = location.hash;
+    index.replaceChildren();
     scope.querySelectorAll('section[aria-labelledby]').forEach(section => {
       const title = document.getElementById(section.getAttribute('aria-labelledby'));
-      if (!title || section.closest('section[aria-labelledby]') !== section || section.parentElement.closest('section[aria-labelledby]')) return;
+      if (!title || section.parentElement.closest('section[aria-labelledby]')) return;
       if (!title.id || title.id === 'progress-title') return;
-      const a = document.createElement('a'); a.href = `#${title.id}`; a.textContent = title.textContent.trim(); index.append(a);
+      const a = document.createElement('a'); a.href = `#${title.id}`; a.textContent = title.textContent.trim();
+      if (a.hash === activeHash) a.setAttribute('aria-current', 'location');
+      index.append(a);
     });
-    index.hidden = !index.childElementCount;
+    const disclosure = index.closest('details');
+    disclosure.hidden = !index.childElementCount;
+  });
+  const compactIndex = matchMedia('(max-width: 680px)');
+  const sizeIndexes = () => document.querySelectorAll('[data-section-disclosure]').forEach(details => { details.open = !compactIndex.matches; });
+  compactIndex.addEventListener('change', sizeIndexes);
+  initializeIndexes(); sizeIndexes();
+  document.addEventListener('htmx:afterSwap', initializeIndexes);
+  window.addEventListener('hashchange', () => {
+    document.querySelectorAll('[data-section-index] a').forEach(a => {
+      if (a.hash === location.hash) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
   });
 })();
 
@@ -206,7 +235,14 @@
     select.addEventListener('change', () => { location.href = select.value; });
     if (projects.length) {
       const title = document.querySelector('#welcome-title');
-      if (title) title.textContent = 'Continue your reliability investigation.';
+      if (title) {
+        title.textContent = 'Continue your reliability investigation.';
+        const intro = document.querySelector('#workspace-get-started');
+        intro.classList.add('returning-workspace');
+        intro.querySelector(':scope > p:not(.eyebrow)').textContent = 'Inspect a saved investigation, or open a registered project to run its scenarios and check business effects.';
+        const action = intro.querySelector('.inline-actions a');
+        action.textContent = 'Open projects'; action.href = '/projects';
+      }
       const label = document.querySelector('#workspace-welcome-label');
       if (label) label.textContent = `${projects.length} registered project${projects.length === 1 ? '' : 's'} in this workspace`;
     }

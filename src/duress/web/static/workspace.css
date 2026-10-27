@@ -239,3 +239,31 @@ button:disabled { color: var(--text-muted); background: var(--bg-elevated); bord
 select { appearance: auto; background-image: none !important; padding-right: 12px !important; }
 .spinner { border-color: var(--border-strong); border-top-color: var(--info); }
 .dna-links a:hover { background: var(--bg-hover); }
+/* Confirmed visual-review corrections: keep outcomes and evidence controls easy to reach. */
+.section-jump-disclosure { margin: 0 0 24px; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-surface); }
+.section-jump-disclosure > summary { min-height: 44px; padding: 12px 16px; cursor: pointer; font-size: 13px; color: var(--text-secondary); }
+.section-jump-disclosure .section-jump { margin: 0; border: 0; border-radius: 8px; }
+.section-jump a[aria-current] { color: var(--accent); background: var(--accent-subtle); }
+.returning-workspace .workflow-steps { display: none; }
+.project-action-controls > label, .project-action-controls form > label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 13px; }
+.project-action-controls > input, .project-action-controls form > select { width: 100%; }
+.project-action-controls form { margin-top: 20px; }
+.project-action-controls form + p { margin-top: 12px; }
+.attempt-track { min-height: 36px; border: 1px solid var(--border-subtle); padding: 0; }
+.attempt-track:hover { border-color: var(--accent); }
+.attempt-bar { top: 50%; transform: translateY(-50%); }
+.differential-matrix { min-width: 680px; }
+.differential-matrix tr > :first-child { position: sticky; left: 0; z-index: 1; width: 140px; background: var(--bg-surface); border-right: 1px solid var(--border-subtle); }
+.differential-matrix thead tr > :first-child { background: var(--bg-elevated); }
+.scroll-hint { display: none; }
+@media (min-width: 681px) { .section-jump-disclosure > summary { display: none; } }
+@media (max-width: 900px) { .scroll-hint { display: block; } }
+@media (max-width: 680px) {
+  .section-jump-disclosure[open] .section-jump { border-top: 1px solid var(--border-subtle); }
+  .page-heading > .inline-actions { width: 100%; }
+  .attempt-track { min-height: 44px; }
+}
+
+.claim-line.claim-neutral { color: var(--text-secondary); background: var(--bg-elevated); border-left-color: var(--border-strong); }
+
+.button { transition: border-color 120ms ease; }

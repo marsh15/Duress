@@ -460,3 +460,17 @@ def test_symlinked_records_and_downloads_are_rejected_without_fallback(tmp_path:
     assert client.get("/operations/op-link").status_code == 404
     assert client.get("/dna/dna-link").status_code == 404
     assert client.get("/dna/dna-link/download").status_code == 404
+
+
+def test_home_shows_retained_findings_without_relying_on_index_summary(tmp_path: Path) -> None:
+    client = _client(tmp_path, showcase=False)
+    record = _investigation()
+    record["showcase"] = False
+    record["findings"] = [{"scenario_id": "S3-rendezvous", "signature": {
+        "check": "INV-1@1", "kind": "duplicate_fulfilment"}, "valid": 5, "fail": 5}]
+    (tmp_path / ".duress/investigations/run-01.json").write_text(json.dumps(record))
+    response = client.get("/")
+    assert response.status_code == 200
+    assert 'href="/investigations/run-01#findings-title"' in response.text
+    assert "INV-1@1 · duplicate_fulfilment" in response.text
+    assert "No executed failure findings retained" not in response.text

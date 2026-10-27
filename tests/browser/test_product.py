@@ -179,6 +179,10 @@ def test_new_investigation_replay_verify_reduce_and_differential(page, server):
     record = httpx.get(server[0] + admission['status_url']).json()
     assert record['status'] == 'completed' and record['verdict'] == 'FAIL'
     assert record['mode_effective'] == 'cached'
+    page.goto('/')
+    expect(page.locator('#recent-findings')).to_contain_text('duplicate_fulfilment')
+    expect(page.locator('#investigation-history')).to_contain_text('FAIL')
+    page.goto('/investigations/' + investigation_id)
     assert record['model']['provenance']['source'] == 'authored_fixture'
     assert record['trials_used'] == 30
     assert all(item['status']['outcome'] == 'confirmed' for item in record['hypotheses'])
@@ -347,3 +351,63 @@ def test_schedule_inspector_and_measured_timing_use_retained_evidence(page):
     assert page.locator('.timing-scale').inner_text().startswith('Relative axis: 0')
     page.emulate_media(reduced_motion='reduce')
     assert page.evaluate("getComputedStyle(document.querySelector('.button')).transitionDuration") in ['1e-05s', '0.00001s']
+
+
+@pytest.mark.parametrize('theme', ['dark', 'light'])
+def test_quality_mobile_palette_focus_and_verdict_priority(page, theme):
+    from playwright.sync_api import expect
+    page.goto('/dna/' + DNA_ID)
+    page.locator('#theme-preference').select_option(theme)
+    page.set_viewport_size({'width': 390, 'height': 844})
+    expect(page.get_by_role('button', name='Search and navigate', exact=True)).to_be_visible()
+    page.wait_for_load_state('networkidle')
+    page.add_script_tag(path=str(ROOT / 'tests/browser/vendor/axe.min.js'))
+    violations = page.evaluate("async()=> (await axe.run()).violations.filter(x=>['serious','critical'].includes(x.impact)).map(x=>x.id)")
+    assert violations == []
+    disclosure = page.locator('[data-section-disclosure]')
+    expect(disclosure).not_to_have_attribute('open', '')
+    signature = page.locator('.dna-signature-band')
+    assert signature.bounding_box()['y'] < 500
+    page.get_by_role('button', name='Open navigation', exact=True).click()
+    trigger = page.locator('.search-trigger')
+    trigger.click()
+    search = page.get_by_role('combobox', name='Search pages and actions')
+    expect(search).to_be_focused()
+    expect(search).to_have_attribute('aria-expanded', 'true')
+    active_id = search.get_attribute('aria-activedescendant')
+    expect(page.locator('#' + active_id)).to_have_attribute('aria-selected', 'true')
+    page.keyboard.press('ArrowDown')
+    assert search.get_attribute('aria-activedescendant') != active_id
+    page.keyboard.press('Escape')
+    expect(page.locator('#command-palette')).not_to_be_visible()
+    expect(trigger).to_be_focused()
+    assert page.locator('body').evaluate("x=>x.classList.contains('nav-open')")
+    page.keyboard.press('Escape')
+    expect(page.get_by_role('button', name='Open navigation', exact=True)).to_be_focused()
+    assert page.locator('#app-sidebar').evaluate('x=>x.inert')
+    disclosure.locator('summary').click()
+    expect(page.get_by_role('navigation', name='Evidence sections')).to_be_visible()
+    page.set_viewport_size({'width': 1440, 'height': 1000})
+    expect(page.get_by_role('navigation', name='Evidence sections')).to_be_visible()
+
+
+def test_quality_palette_projects_are_unique_and_index_updates_after_progress(page):
+    from playwright.sync_api import expect
+    # Only the read-only registry request is stubbed; result/evidence tests use actual execution.
+    page.route('**/api/projects', lambda route: route.fulfill(json={
+        'projects': [{'project': 'focus-check', 'available': True}]}))
+    page.goto('/')
+    expect(page.locator('#active-project')).to_contain_text('focus-check')
+    page.keyboard.press('Control+k')
+    page.locator('#command-search').fill('Project: focus-check')
+    expect(page.locator('#command-results').get_by_role('option')).to_have_count(1)
+    page.keyboard.press('Escape')
+    page.goto('/investigations/showcase-m2')
+    # Simulate only a progressive DOM swap, never an oracle outcome.
+    page.evaluate("""() => {
+        const section=document.createElement('section');section.setAttribute('aria-labelledby','late-detail');
+        const title=document.createElement('h2');title.id='late-detail';title.textContent='New retained detail';
+        section.append(title);document.querySelector('#investigation-live').append(section);
+        document.dispatchEvent(new CustomEvent('htmx:afterSwap'));
+    }""")
+    expect(page.locator('[data-section-index] a[href="#late-detail"]')).to_have_count(1)

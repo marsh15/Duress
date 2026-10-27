@@ -14,7 +14,7 @@
   <ul id="investigation-history" class="record-list" aria-live="polite"><li class="list-placeholder">Loading investigation records…</li></ul>
 </section>
 
-<section class="records-section" aria-labelledby="recent-findings-title"><div class="section-heading"><div><p class="eyebrow">Observed business failures</p><h2 id="recent-findings-title">Recent findings</h2></div></div><ul id="recent-findings" class="record-list"><li class="list-placeholder">Loading retained findings…</li></ul></section>
+<section class="records-section" aria-labelledby="recent-findings-title"><div class="section-heading"><div><p class="eyebrow">Observed business failures</p><h2 id="recent-findings-title">Recent findings</h2></div></div><ul id="recent-findings" class="record-list">{% for finding in recent_findings|default([]) %}{% set signature = finding.signature|default({}) %}<li class="record-list-row"><a class="record-list-main" href="/investigations/{{ finding.investigation_id }}#findings-title"><strong>{{ signature.check|default('Observed failure') }}{% if signature.kind %} · {{ signature.kind }}{% endif %}</strong><span>{{ finding.target_id }} · {{ finding.scenario_id|default('Scenario not recorded') }}</span></a></li>{% else %}<li class="list-placeholder">No executed failure findings retained in recent records. Hypothesis proposals alone are not findings.</li>{% endfor %}</ul></section>
 <section class="records-section dna-index-section" aria-labelledby="dna-index-title">
   <div class="section-heading">
     <div><p class="eyebrow">Portable artifacts</p><h2 id="dna-index-title">Failure DNA</h2></div>

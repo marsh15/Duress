@@ -10,7 +10,7 @@
   </div>
   <a class="button button-secondary" href="/investigations">Start or browse investigations</a>
 </header>
-<nav class="section-jump" data-section-index aria-label="Investigation sections"></nav>
+<details class="section-jump-disclosure" data-section-disclosure open><summary>On this page</summary><nav class="section-jump" data-section-index aria-label="Investigation sections"></nav></details>
 {% set poll_url = "/investigations/" ~ view.id ~ "/progress" %}
 {% include "_investigation_live.html" %}
 {% endblock %}

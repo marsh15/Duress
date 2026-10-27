@@ -17,7 +17,7 @@
 <button class="copy-button" type="button" data-copy="{{ view.id }}" data-copy-message="Artifact ID copied">Copy artifact ID</button>
 <script id="dna-document" type="application/json">{{ view.document|tojson }}</script>
 
-<nav class="section-jump" data-section-index aria-label="Evidence sections"></nav>
+<details class="section-jump-disclosure" data-section-disclosure open><summary>On this page</summary><nav class="section-jump" data-section-index aria-label="Evidence sections"></nav></details>
 <section class="dna-signature-band" aria-labelledby="signature-title">
   <div class="signature-mark" aria-hidden="true">!</div>
   <div><p class="eyebrow">Recorded failure signature</p><h2 id="signature-title">{{ view.signature.check|default('Unknown check') }} <span>·</span> {{ view.signature.kind|default('Unknown kind') }}</h2><p>{% if view.signature.roles %}Affected roles: {{ view.signature.roles|join(', ') }}{% else %}No roles recorded{% endif %}</p></div>
@@ -90,7 +90,7 @@
   <p class="section-intro">Test bounded single-delivery removals against the recorded failure. A reduced artifact becomes primary only after a separate replay revalidation; the result does not claim global minimality.</p>
   {% if view.reduction.available %}
     {% if view.reduction.outcome %}<p class="result-statement">Previous reduction outcome: <strong>{{ view.reduction.outcome }}</strong></p>{% endif %}
-    {% if view.reduction.claim %}<p class="claim-line">{{ view.reduction.claim }}</p>{% if view.reduction.outcome and view.reduction.outcome != 'REDUCED' %}<p class="field-help">This is the candidate search claim. No accepted smaller primary reproducer is recorded; the original remains primary.</p>{% elif not view.reduction.outcome %}<p class="field-help">This older record does not include an outcome or replay revalidation status, so the candidate is not identified as primary here.</p>{% endif %}{% endif %}
+    {% if view.reduction.claim %}<p class="claim-line{% if view.reduction.outcome != 'REDUCED' %} claim-neutral{% endif %}">{{ view.reduction.claim }}</p>{% if view.reduction.outcome and view.reduction.outcome != 'REDUCED' %}<p class="field-help">This is the candidate search claim. No accepted smaller primary reproducer is recorded; the original remains primary.</p>{% elif not view.reduction.outcome %}<p class="field-help">This older record does not include an outcome or replay revalidation status, so the candidate is not identified as primary here.</p>{% endif %}{% endif %}
     {% if view.reduction.reduced_schedule %}
     <div class="reduction-compare">
       <div><span>Original schedule</span><strong>{{ view.reduction.original_delivery_count }} deliveries</strong><p>{{ view.reduction.original_delivery_ids|join(' · ') }}</p></div>

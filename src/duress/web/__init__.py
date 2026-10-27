@@ -485,7 +485,8 @@ def _target_views(workspace: Any) -> list[dict[str, Any]]:
             "contract_version": profile.contract_version,
             "workers": profile.workers,
         }
-        for profile in registry.all()
+        for profile in sorted(registry.all(),
+                              key=lambda item: (item.target_id.startswith("fixture-"), item.target_id))
     ]
 
 
@@ -573,9 +574,16 @@ def install_web(app: FastAPI, workspace: Callable[[], Any]) -> FastAPI:
 
     @router.get("/", response_class=HTMLResponse, include_in_schema=False)
     async def home(request: Request) -> Response:
-        return HTMLResponse(
-            _render("index.html", request=request, showcase=_showcase_context(workspace()))
-        )
+        store = workspace()
+        recent_findings = []
+        for record in _investigation_records(store)[:8]:
+            for finding in _investigation_view(record)["findings"][:3]:
+                recent_findings.append({**finding,
+                    "investigation_id": record["investigation_id"],
+                    "target_id": record.get("target_id", "Target not recorded")})
+        return HTMLResponse(_render("index.html", request=request,
+                                    showcase=_showcase_context(store),
+                                    recent_findings=recent_findings))
 
     @router.get("/design-system", response_class=HTMLResponse, include_in_schema=False)
     async def design_system_page(request: Request) -> Response:
