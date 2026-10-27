@@ -6,11 +6,31 @@ Duress is a local-first reliability-testing tool for developer-owned webhook int
 
 An HTTP acknowledgment can hide duplicate tickets, missing business effects, and incorrect state transitions. Duress checks declared business entities after managed processes have drained and their termination has been confirmed.
 
-![Duress workspace overview](docs/design/quality-pass/overview-desktop-dark.png)
+![Current Duress workspace with a retained 30-trial investigation and observed business failure](docs/openfire/screenshots/overview-dark.png)
 
-[Light theme](docs/design/screenshots/overview-light.png) · [Executed investigation](docs/design/screenshots/investigation-completed.png) · [Failure DNA](docs/design/screenshots/failure-dna.png) · [Delivery sequence](docs/design/screenshots/delivery-sequence.png) · [Mobile setup](docs/design/screenshots/mobile-setup.png) · [Silent walkthrough](docs/design/screenshots/walkthrough.mp4) · [Design and validation](docs/design/redesign.md) · [Final visual quality pass](docs/design/quality-pass/README.md)
+[Light theme](docs/openfire/screenshots/overview-light.png) · [Executed investigation](docs/openfire/screenshots/investigation.png) · [Failure DNA](docs/openfire/screenshots/failure-dna.png) · [Delivery sequence](docs/openfire/screenshots/delivery-sequence.png) · [Business-state evidence](docs/openfire/screenshots/business-state.png) · [Mobile guide](docs/openfire/screenshots/mobile-guide.png) · [Screenshot provenance](docs/openfire/screenshots/provenance.json) · [Design and validation](docs/design/redesign.md)
 
 The workspace includes dark, light and system appearance, keyboard navigation with **Cmd/Ctrl+K**, a local project setup guide at `/guide`, and a shared component reference at `/design-system`. Execution lifecycle and business verdict remain separate. Historical release screenshots and measurements remain in `docs/screenshots` and `docs/release`.
+
+## Watch the 90-second demo
+
+[![Play the Duress demo — real concurrency failure, business-state evidence, Failure DNA and correction verification](docs/openfire/demo-poster.jpg)](https://marsh15.github.io/Duress/openfire/demo.html)
+
+**[▶ Play in your browser](https://marsh15.github.io/Duress/openfire/demo.html)** · [MP4 file](docs/openfire/duress-openfire-90s.mp4) · [Script and evidence](docs/openfire/demo-script.md)
+
+Captioned, silent, 90 seconds. The video shows authentic saved execution evidence and a labelled historical Alan contribution excerpt. It does not claim a newly running investigation or a fresh Alan skill invocation. The video player is separate from a deployed Duress application.
+
+## Architecture
+
+![Excalidraw architecture: shared CLI and web services, isolated trusted execution, independent business-state oracle, portable Failure DNA and bounded replay and correction verification](docs/architecture/duress-architecture.png)
+
+[Editable Excalidraw source](docs/architecture/duress-architecture.excalidraw) · [Vector image](docs/architecture/duress-architecture.svg) · [Architecture details](docs/ARCHITECTURE.md)
+
+## Alan contribution
+
+Duress's reference integration, execution engine and Failure DNA foundation were implemented with **Alan Code using Alan-served DeepSeek V4.1 Flash**. [Original session references and matching Git commits](docs/openfire/alan.md) preserve that contribution. Later productization, redesign and release work used other coding agents. A [Duress Reliability Check skill](skills/duress-reliability-check/SKILL.md) describes the supported local CLI workflow for Alan; its fresh import and invocation remain unverified because UI automation could not complete them. Authored cached proposals are separate from Alan's historical work and from genuine hosted inference, which remains unverified.
+
+[90-second captioned demo](docs/openfire/duress-openfire-90s.mp4) · [Demonstration script and provenance](docs/openfire/demo-script.md) · [Submission materials and outstanding account actions](docs/openfire/submission.md)
 
 ## Use your own application
 
@@ -77,7 +97,7 @@ uv run --python 3.12 duress differential --policy explore --json
 
 The seeded vulnerable handler performs a genuine non-atomic check/await/write. Concurrent deliveries can both pass the check and create duplicate fulfilment rows. The corrected handler uses a transaction and uniqueness guarantees. The intentionally incomplete naive fix deduplicates event IDs: it withstands repeated deliveries of one event but still fails the S5 cross-event business invariant.
 
-A reproduced defect deliberately returns exit code `1`. CLI results use `0` for PASS/NOT_REPRODUCED/VERIFIED, `1` for FAIL/REPRODUCED/DIFFERENT_FAILURE/NOT_VERIFIED, `2` for INCONCLUSIVE, `3` for usage errors, and `4` for REJECTED. Reduction and differential have their documented outcome-specific exit rules in the [backend handoff](docs/BACKEND_HANDOFF.md).
+A reproduced defect deliberately returns exit code `1`. CLI results use `0` for PASS/NOT_REPRODUCED/VERIFIED, `1` for FAIL/REPRODUCED/DIFFERENT_FAILURE/NOT_VERIFIED, `2` for INCONCLUSIVE, `3` for explicitly handled configuration/operational errors, and `4` for REJECTED. Typer parameter/usage errors and an invalid `doctor` result can also return `2`; inspect JSON and stderr rather than interpreting an exit code alone. Reduction and differential have their documented outcome-specific exit rules in the [backend handoff](docs/BACKEND_HANDOFF.md).
 
 `duress report <investigation_id> --output report.html` exports a stored record without execution. `duress sweep` checks retained managed-target pidfiles.
 
@@ -108,7 +128,7 @@ scripts/smoke.sh http://127.0.0.1:8000 --dna showcase/dna/e8007dd56adae8ae.json
 UV_PYTHON=3.12 scripts/portability.sh
 ```
 
-Release gates recorded 666 passing broad Python tests, three passing slow experiments, the ten browser scenarios (including documented targeted reruns), and 79 passing final focused cases in both the clean Python 3.12 checkout and Linux container. Exact scope and failed development attempts remain in the evidence.
+The [integrated beta gates](docs/release/2026-10-27-integrated/README.md) record 770 passing remote Python tests (30 browser opt-in skips), 579 focused local Python tests, 30 real browser tests, 111 Linux container tests, and 25 HTTP/static/security checks. Fresh installed-wheel PostgreSQL acceptance passed all five principal controls, the corrected nine-scenario suite (45/45), reduction, and reduced artifact-only replay (10/10). These are independent gate counts. Earlier measurements and failed attempts remain preserved with their original revisions.
 
 Browser checks exercise real local services, including investigation creation, persisted progress, business-state evidence, DNA export, replay, verification, reduction, differential comparison, tamper rejection, keyboard navigation, responsive layouts, and axe accessibility checks.
 
@@ -123,7 +143,7 @@ docker build -t duress:web .
 docker run --rm -p 8000:8000 -e PORT=8000 duress:web
 ```
 
-The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [render.yaml](render.yaml) defines the intended Render Docker service and health check. **No public deployment is claimed:** authenticated Render access was unavailable. See the [operations guide](docs/OPERATIONS.md) for deployment, storage, limits, and smoke checks.
+The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [render.yaml](render.yaml) defines the intended Render Docker service and health check. **Public application deployment is not yet verified.** The owner is deploying Render; follow the [deployment handoff](docs/openfire/RENDER_HANDOFF.md). See the [operations guide](docs/OPERATIONS.md) for deployment, storage, limits, and smoke checks.
 
 | Variable | Purpose |
 |---|---|

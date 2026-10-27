@@ -149,3 +149,15 @@ Separate-file gzip estimates: JavaScript including HTMX 30,537 bytes; CSS 15,288
 One cached local Chromium desktop navigation measured DOMContentLoaded at 80ms and load at 92ms. This is a single warmed local observation, not a benchmark or an INP/Lighthouse score. Cold-load, container responsiveness and real-device measurements remain unmeasured.
 
 The [final visual quality pass](quality-pass/README.md) records subsequent usability fixes, refreshed screenshots and the current regression results.
+
+## Integrated release acceptance
+
+The [final integration record](../release/2026-10-27-integrated/README.md) supersedes the
+earlier PR-state notes above. PR #2 merged normally; PR #3 was reconciled with main.
+The final narrow-screen pass corrected long trial identifiers and explanation overflow.
+252 route/theme/viewport states now fit their pages; 28 axe route/theme scans report no
+serious/critical violations. Final browser acceptance passed 30 tests, Python focused
+regression passed 579, and the original-Dockerfile Linux image passed 111 focused tests
+plus 25 HTTP/static/security checks. Counts retain their independent scopes and revisions.
+The record includes exact raw static sizes, screenshots, JUnit, external PostgreSQL
+acceptance and remaining screen-reader/device/performance limits.

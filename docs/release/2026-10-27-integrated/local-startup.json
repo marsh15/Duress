@@ -1,0 +1,139 @@
+{
+  "scope": "One fresh-browser-context local navigation per viewport; unthrottled macOS; not Lighthouse, INP, real mobile-device or population benchmark",
+  "observations": [
+    {
+      "navigation": [
+        {
+          "dcl_ms": 214.80000000074506,
+          "load_ms": 221.30000000074506
+        }
+      ],
+      "assets": [
+        {
+          "name": "appearance.js",
+          "transfer_bytes": 1000,
+          "encoded_bytes": 700
+        },
+        {
+          "name": "Geist.woff2",
+          "transfer_bytes": 69860,
+          "encoded_bytes": 69560
+        },
+        {
+          "name": "tokens.css",
+          "transfer_bytes": 2946,
+          "encoded_bytes": 2646
+        },
+        {
+          "name": "site.css",
+          "transfer_bytes": 51638,
+          "encoded_bytes": 51338
+        },
+        {
+          "name": "workspace.css",
+          "transfer_bytes": 27215,
+          "encoded_bytes": 26915
+        },
+        {
+          "name": "htmx.min.js",
+          "transfer_bytes": 51538,
+          "encoded_bytes": 51238
+        },
+        {
+          "name": "site.js",
+          "transfer_bytes": 18076,
+          "encoded_bytes": 17776
+        },
+        {
+          "name": "investigations.js",
+          "transfer_bytes": 6014,
+          "encoded_bytes": 5714
+        },
+        {
+          "name": "analysis.js",
+          "transfer_bytes": 8008,
+          "encoded_bytes": 7708
+        },
+        {
+          "name": "workspace.js",
+          "transfer_bytes": 16999,
+          "encoded_bytes": 16699
+        },
+        {
+          "name": "GeistMono.woff2",
+          "transfer_bytes": 71404,
+          "encoded_bytes": 71104
+        }
+      ],
+      "cls": 0.1344111408436214,
+      "viewport": 375
+    },
+    {
+      "navigation": [
+        {
+          "dcl_ms": 72.30000000074506,
+          "load_ms": 116.40000000223517
+        }
+      ],
+      "assets": [
+        {
+          "name": "appearance.js",
+          "transfer_bytes": 1000,
+          "encoded_bytes": 700
+        },
+        {
+          "name": "tokens.css",
+          "transfer_bytes": 2946,
+          "encoded_bytes": 2646
+        },
+        {
+          "name": "Geist.woff2",
+          "transfer_bytes": 69860,
+          "encoded_bytes": 69560
+        },
+        {
+          "name": "site.css",
+          "transfer_bytes": 51638,
+          "encoded_bytes": 51338
+        },
+        {
+          "name": "workspace.css",
+          "transfer_bytes": 27215,
+          "encoded_bytes": 26915
+        },
+        {
+          "name": "site.js",
+          "transfer_bytes": 18076,
+          "encoded_bytes": 17776
+        },
+        {
+          "name": "htmx.min.js",
+          "transfer_bytes": 51538,
+          "encoded_bytes": 51238
+        },
+        {
+          "name": "investigations.js",
+          "transfer_bytes": 6014,
+          "encoded_bytes": 5714
+        },
+        {
+          "name": "analysis.js",
+          "transfer_bytes": 8008,
+          "encoded_bytes": 7708
+        },
+        {
+          "name": "workspace.js",
+          "transfer_bytes": 16999,
+          "encoded_bytes": 16699
+        },
+        {
+          "name": "GeistMono.woff2",
+          "transfer_bytes": 71404,
+          "encoded_bytes": 71104
+        }
+      ],
+      "cls": 0.1027363711251153,
+      "viewport": 1280
+    }
+  ]
+}

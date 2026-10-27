@@ -1,0 +1,81 @@
+{
+  "method": "Full real-time Chromium playback from beginning to end; screenshots at 10-second intervals; silent captioned video",
+  "observations": [
+    {
+      "time": 0.0376,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 4
+    },
+    {
+      "time": 10.0648,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 156
+    },
+    {
+      "time": 20.0624,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 306
+    },
+    {
+      "time": 30.0437,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 455
+    },
+    {
+      "time": 40.0511,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 606
+    },
+    {
+      "time": 50.1318,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 757
+    },
+    {
+      "time": 60.2107,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 908
+    },
+    {
+      "time": 70.0499,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 1056
+    },
+    {
+      "time": 80.0519,
+      "duration": 90,
+      "ended": false,
+      "error": null,
+      "frames": 1206
+    },
+    {
+      "time": 90,
+      "duration": 90,
+      "ended": true,
+      "error": null,
+      "frames": 1350
+    }
+  ],
+  "final": {
+    "time": 90,
+    "duration": 90,
+    "ended": true,
+    "error": null
+  }
+}
