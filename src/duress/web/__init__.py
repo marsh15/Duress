@@ -758,7 +758,8 @@ def _report_css() -> str:
     for font in ("Geist", "GeistMono"):
         encoded = base64.b64encode((_STATIC / "fonts" / f"{font}.woff2").read_bytes()).decode("ascii")
         css = css.replace(f"fonts/{font}.woff2", f"data:font/woff2;base64,{encoded}")
-    return css
+    license_text = (_STATIC / "fonts" / "LICENSE.txt").read_text(encoding="utf-8")
+    return "/* Embedded Geist font license\n" + license_text + "\n*/\n" + css
 
 
 def render_report(document: Mapping[str, Any] | Any) -> str:

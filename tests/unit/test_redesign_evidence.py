@@ -28,6 +28,7 @@ def test_portable_report_embeds_themes_and_fonts_without_interactive_buttons():
                           'trials': [], 'events': [], 'dna_ids': []})
     assert '--bg-canvas: #0C1115' in html
     assert 'data:font/woff2;base64,' in html
+    assert 'SIL OPEN FONT LICENSE Version 1.1' in html
     assert '<button' not in html
     assert '<script' not in html
 
