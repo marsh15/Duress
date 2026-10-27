@@ -5,9 +5,10 @@ on:
   push:
     branches:
       - main
-      - feature
-      - "feature/**"
-      - "feat/**"
+
+concurrency:
+  group: productization-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
