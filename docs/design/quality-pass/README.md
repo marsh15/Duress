@@ -96,7 +96,7 @@ untouched captures.
 - [Target matrix](targets-matrix.png)
 - [Project matrix](project-matrix.png) · [Project actions](project-actions-matrix.png)
 - [External investigation](external-state-matrix.png) · [Business-state comparison](business-state-matrix.png)
-- [Comparison matrix](comparison-matrix.png) · [Setup](comparison-form-matrix.png) · [Mobile scrolled](comparison-mobile-scrolled.png) · [Neutral non-reduction result](non-reduction-neutral.png)
+- [Comparison matrix](comparison-matrix.png) · [Setup](comparison-form-matrix.png) · [Mobile scrolled](comparison-mobile-scrolled.png)
 - [Measured timing](attempt-timing-matrix.png) · [Full desktop](attempt-timing-desktop-dark.png)
 - [Mobile command palette](command-palette-mobile.png)
 - [Portable report](portable-report-matrix.png) · [Offline artifact references](portable-report-artifact-references.png) · [External report](external-report-matrix.png)
