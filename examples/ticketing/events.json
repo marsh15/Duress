@@ -1,0 +1,58 @@
+{
+  "events": {
+    "paid": {
+      "payload": {
+        "event_type": "booking.paid",
+        "booking_id": "booking-101",
+        "amount": "49.50",
+        "event_id": "paid-101"
+      }
+    },
+    "paid-distinct": {
+      "payload": {
+        "event_type": "booking.paid",
+        "booking_id": "booking-101",
+        "amount": "49.50",
+        "event_id": "paid-distinct-101"
+      }
+    },
+    "cancel": {
+      "payload": {
+        "event_type": "booking.cancelled",
+        "booking_id": "booking-101",
+        "amount": "49.50",
+        "event_id": "cancel-101"
+      }
+    },
+    "invalid": {
+      "payload": {
+        "event_type": "booking.paid",
+        "booking_id": "booking-101",
+        "amount": "99.00",
+        "event_id": "invalid-101"
+      }
+    },
+    "slow": {
+      "payload": {
+        "event_type": "booking.paid",
+        "booking_id": "booking-101",
+        "amount": "49.50",
+        "event_id": "slow-101",
+        "test_controls": {
+          "processing_delay_ms": 200
+        }
+      }
+    },
+    "ambiguous": {
+      "payload": {
+        "event_type": "booking.paid",
+        "booking_id": "booking-101",
+        "amount": "49.50",
+        "event_id": "ambiguous-101",
+        "test_controls": {
+          "ack_delay_ms": 500
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "events": [
+    {
+      "id": "event-summit-2026",
+      "capacity": 2
+    }
+  ],
+  "bookings": [
+    {
+      "id": "booking-101",
+      "event_id": "event-summit-2026",
+      "customer_id": "customer-ana",
+      "amount": "49.50",
+      "status": "pending"
+    },
+    {
+      "id": "booking-102",
+      "event_id": "event-summit-2026",
+      "customer_id": "customer-ben",
+      "amount": "62.00",
+      "status": "pending"
+    },
+    {
+      "id": "booking-103",
+      "event_id": "event-summit-2026",
+      "customer_id": "customer-chen",
+      "amount": "75.00",
+      "status": "pending"
+    },
+    {
+      "id": "booking-104",
+      "event_id": "event-summit-2026",
+      "customer_id": "customer-devi",
+      "amount": "88.00",
+      "status": "pending"
+    }
+  ]
+}

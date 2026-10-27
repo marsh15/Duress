@@ -2,13 +2,31 @@
 
 **Put your integrations under pressure. Keep the proof.**
 
-Duress is an autonomous reliability investigator for event-driven integrations, demonstrated against controlled synthetic payment-webhook targets. It constructs bounded experiments, inspects committed business state through an independent oracle, and preserves observed failures as portable **Failure DNA**.
+Duress is a local-first reliability-testing tool for developer-owned webhook integrations. It runs bounded delivery experiments, independently observes persisted business state through SQLite or PostgreSQL, evaluates configurable business invariants, and preserves failures as portable **Failure DNA**. The original controlled payment benchmark remains available as a guided demonstration.
 
-An HTTP acknowledgment can hide duplicate fulfilments, missing business effects, and incorrect state transitions. Duress checks the payment, order, and fulfilment rows after the target has settled.
+An HTTP acknowledgment can hide duplicate tickets, missing business effects, and incorrect state transitions. Duress checks declared business entities after managed processes have drained and their termination has been confirmed.
 
 ![Duress workbench](docs/screenshots/workbench.png)
 
 [Executed investigation](docs/screenshots/investigation.png) · [Business-state evidence](docs/screenshots/business-state.png) · [Comparison](docs/screenshots/comparison.png) · [Accepted reduction](docs/screenshots/accepted-reduction.png) · [Silent walkthrough](docs/screenshots/duress-walkthrough.webm) · [Demo outline](docs/DEMO.md)
+
+## Use your own application
+
+Build an installable beta wheel with `uv build --wheel`, then install it into Python 3.12. Use the `[postgresql]` extra for PostgreSQL observation. A package-index release has not been published.
+
+```bash
+duress init ./owned-integration --project owned-integration
+cd owned-integration
+duress doctor --config duress.toml --json
+duress check --config duress.toml --output result.json --junit result.xml --artifacts artifacts/
+duress register --config duress.toml
+```
+
+The starter is independently runnable. Replace its manifest, event fixtures and contract with your application's declarations; no engine changes are needed. Use `duress serve` and open `/projects` for approved local-project investigation, evidence, replay, verification and reduction.
+
+[External-project guide](docs/productization/EXTERNAL_PROJECTS.md) · [Invariant contract](docs/productization/CONTRACT.md) · [Independent PostgreSQL ticketing example](examples/ticketing/README.md) · [Reusable CI](docs/productization/CI.md) · [Productization evidence](docs/productization/EVIDENCE.md)
+
+External commands/URLs are disabled in hosted mode. Managed local targets provide verified process settlement; authorized staging delivery currently remains INCONCLUSIVE because remote quiescence is unverified. External investigations use deterministic registered scenarios. Live and cached AI selection remains scoped to the bundled payment pack.
 
 ## From investigation to proof
 
@@ -22,7 +40,7 @@ The bundled M2 showcase is explicitly historical. Browsing it starts no experime
 
 ## Quickstart
 
-Requires Python **3.12**, [uv](https://docs.astral.sh/uv/), and macOS or Linux. Bundled target profiles are part of the application; run from the checkout.
+Requires Python **3.12**, [uv](https://docs.astral.sh/uv/), and macOS or Linux. Bundled target profiles are packaged with the application; the following contributor/demo workflow uses a checkout.
 
 ```bash
 git clone https://github.com/marsh15/Duress.git
@@ -120,7 +138,7 @@ The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [
 
 Python 3.12, FastAPI, Pydantic, SQLite, HTTPX, Typer, Jinja, HTMX, pytest, and Playwright. Assets are bundled and require no CDN.
 
-This demonstrates a controlled synthetic integration contract, not arbitrary production targets or a finding about Razorpay. Fault-controlled experiments are labelled separately from fault-free observations. Digests detect alteration, not authorship. The application is a single-workspace developer tool; reads are public if exposed. Use one API worker because admission and background tasks are process-local. Hosted storage is ephemeral; download artifacts to retain them across redeploys.
+The payment demonstration is a controlled synthetic contract, not a finding about Razorpay. External integration adapters support explicitly configured owned local applications; they do not authorize arbitrary production testing. Fault-controlled experiments are labelled separately from fault-free observations. Digests detect alteration, not authorship. The application is a single-workspace developer tool; reads are public if exposed. Use one API worker because admission and background tasks are process-local. Hosted storage is ephemeral; download artifacts to retain them across redeploys.
 
 Genuine hosted inference, the multi-run hosted live-versus-exhaustive comparison, and Render capacity remain unverified. Cached and exhaustive modes remain fully usable. No local model weights are required or downloaded.
 

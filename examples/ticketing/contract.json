@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "id": "ticketing-v1",
+  "version": 1,
+  "entities": {
+    "events": {
+      "table": "events",
+      "key": "id",
+      "columns": [
+        "id",
+        "capacity"
+      ]
+    },
+    "bookings": {
+      "table": "bookings",
+      "key": "id",
+      "columns": [
+        "id",
+        "event_id",
+        "customer_id",
+        "amount",
+        "status"
+      ]
+    },
+    "tickets": {
+      "table": "tickets",
+      "key": "id",
+      "columns": [
+        "id",
+        "booking_id",
+        "event_id",
+        "customer_id",
+        "amount"
+      ]
+    }
+  },
+  "invariants": [
+    {
+      "id": "one-ticket-per-booking",
+      "kind": "unique_by",
+      "entity": "tickets",
+      "keys": [
+        "booking_id"
+      ]
+    },
+    {
+      "id": "ticket-references-booking",
+      "kind": "reference_exists",
+      "entity": "tickets",
+      "reference": "booking_id",
+      "target_entity": "bookings",
+      "target_key": "id"
+    },
+    {
+      "id": "expected-ticket-effect",
+      "kind": "expected_effect",
+      "entity": "tickets"
+    },
+    {
+      "id": "booking-transitions",
+      "kind": "state_transition",
+      "entity": "bookings",
+      "field": "status",
+      "allowed": [
+        {
+          "from_state": "pending",
+          "to_state": "paid"
+        },
+        {
+          "from_state": "pending",
+          "to_state": "cancelled"
+        },
+        {
+          "from_state": "paid",
+          "to_state": "cancelled"
+        }
+      ]
+    },
+    {
+      "id": "ticket-amount-matches",
+      "kind": "value_consistency",
+      "mode": "fields_equal",
+      "entity": "tickets",
+      "field": "amount",
+      "related_entity": "bookings",
+      "reference": "booking_id",
+      "related_key": "id",
+      "related_field": "amount"
+    },
+    {
+      "id": "ticket-customer_id-matches",
+      "kind": "value_consistency",
+      "mode": "fields_equal",
+      "entity": "tickets",
+      "field": "customer_id",
+      "related_entity": "bookings",
+      "reference": "booking_id",
+      "related_key": "id",
+      "related_field": "customer_id"
+    },
+    {
+      "id": "ticket-event_id-matches",
+      "kind": "value_consistency",
+      "mode": "fields_equal",
+      "entity": "tickets",
+      "field": "event_id",
+      "related_entity": "bookings",
+      "reference": "booking_id",
+      "related_key": "id",
+      "related_field": "event_id"
+    },
+    {
+      "id": "event-capacity",
+      "kind": "value_consistency",
+      "mode": "count_at_most",
+      "entity": "events",
+      "field": "capacity",
+      "related_entity": "tickets",
+      "reference": "event_id",
+      "related_key": "id"
+    },
+    {
+      "id": "booking-ownership",
+      "kind": "scope_ownership",
+      "entity": "bookings"
+    },
+    {
+      "id": "acknowledgement-intent",
+      "kind": "acknowledgement_consistency"
+    }
+  ]
+}

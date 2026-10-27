@@ -1,0 +1,173 @@
+name: Productization regression and ticketing controls
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feature
+      - "feature/**"
+      - "feat/**"
+
+permissions:
+  contents: read
+
+jobs:
+  productization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      DURESS_HOME: ${{ runner.temp }}/duress-ticketing-home
+    steps:
+      - name: Check out Duress
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@557e51de59eb14aaaba2ed9621916900a91d50c6 # v6.6.1
+        with:
+          enable-cache: true
+
+      - name: Prepare acceptance artifact directory
+        run: mkdir -p "$RUNNER_TEMP/productization-artifacts"
+
+      - name: Sync locked development environment
+        run: uv sync --locked --all-groups
+
+      - name: Run complete regression suite
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          uv run --locked pytest -q \
+            --junitxml "$RUNNER_TEMP/productization-artifacts/pytest.xml"
+
+      - name: Build wheel and source distribution
+        run: uv build --wheel --sdist --clear --out-dir "$RUNNER_TEMP/duress-dist"
+
+      - name: Clean install and check outside the source checkout
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python -m venv "$RUNNER_TEMP/duress-clean-venv"
+          venv_python="$RUNNER_TEMP/duress-clean-venv/bin/python"
+          wheel="$(python - "$RUNNER_TEMP/duress-dist" <<'PY'
+          import sys
+          from pathlib import Path
+          wheels = list(Path(sys.argv[1]).glob("*.whl"))
+          if len(wheels) != 1:
+              raise SystemExit("expected one built Duress wheel")
+          print(wheels[0])
+          PY
+          )"
+          "$venv_python" -m pip install --disable-pip-version-check --upgrade pip
+          wheel_requirement="$("$venv_python" - "$wheel" <<'PY'
+          import sys
+          from pathlib import Path
+          print(f"duress[postgresql] @ {Path(sys.argv[1]).resolve().as_uri()}")
+          PY
+          )"
+          "$venv_python" -m pip install "$wheel_requirement"
+          mkdir -p "$RUNNER_TEMP/duress-installed-smoke"
+          cd "$RUNNER_TEMP/duress-installed-smoke"
+          "$RUNNER_TEMP/duress-clean-venv/bin/duress" --help
+          "$RUNNER_TEMP/duress-clean-venv/bin/python" -c \
+            'import duress, pathlib, sys; assert pathlib.Path(duress.__file__).resolve().is_relative_to(pathlib.Path(sys.prefix))'
+
+      - name: Clone the independent ticketing Git bundle
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bundle="$GITHUB_WORKSPACE/examples/ticketing.bundle"
+          if [[ ! -f "$bundle" ]]; then
+            echo "examples/ticketing.bundle is required for the independent acceptance run" >&2
+            exit 1
+          fi
+          git clone --no-hardlinks "$bundle" "$RUNNER_TEMP/ticketing-app"
+
+      - name: Install the independent ticketing application
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          "$RUNNER_TEMP/duress-clean-venv/bin/python" -m pip install \
+            --disable-pip-version-check "$RUNNER_TEMP/ticketing-app"
+          "$RUNNER_TEMP/duress-clean-venv/bin/python" \
+            scripts/setup_ticketing_example.py "$RUNNER_TEMP/ticketing-app"
+
+      - name: Start isolated PostgreSQL on loopback
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          password="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+          echo "::add-mask::$password"
+          container_name="duress-ticketing-postgres-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          docker run --detach --name "$container_name" \
+            --env POSTGRES_DB=duress_ticketing_test \
+            --env POSTGRES_USER=postgres \
+            --env POSTGRES_PASSWORD="$password" \
+            --publish 127.0.0.1::5432 \
+            postgres:16-alpine >/dev/null
+          port="$(docker port "$container_name" 5432/tcp | sed 's/.*://')"
+          for attempt in {1..60}; do
+            if docker exec "$container_name" pg_isready -U postgres -d duress_ticketing_test >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec "$container_name" pg_isready -U postgres -d duress_ticketing_test >/dev/null
+          printf 'DURESS_TICKETING_DB=postgresql://postgres:%s@127.0.0.1:%s/duress_ticketing_test\n' \
+            "$password" "$port" >> "$GITHUB_ENV"
+
+      - name: Run actual ticketing acceptance controls
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          "$RUNNER_TEMP/duress-clean-venv/bin/python" scripts/ci_ticketing.py \
+            "$RUNNER_TEMP/ticketing-app" \
+            --artifacts-dir "$RUNNER_TEMP/productization-artifacts/ticketing" \
+            --timeout 300
+
+      - name: Suppress credentials from acceptance artifacts
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from urllib.parse import unquote, urlsplit
+
+          dsn = os.environ.get("DURESS_TICKETING_DB", "")
+          parsed = urlsplit(dsn)
+          credentials = {value.encode("utf-8") for value in
+                         (dsn, unquote(parsed.password or "")) if value}
+          directory = Path(os.environ["RUNNER_TEMP"]) / "productization-artifacts"
+          suppressed = 0
+          for path in directory.rglob("*") if directory.exists() else ():
+              if path.is_file() and any(secret in path.read_bytes() for secret in credentials):
+                  path.write_text('{"artifact_status":"suppressed_runtime_credentials"}\n', encoding="utf-8")
+                  suppressed += 1
+          if suppressed:
+              print(f"Suppressed {suppressed} credential-bearing artifact file(s).")
+              raise SystemExit("runtime database credentials were found in acceptance artifacts")
+          PY
+
+      - name: Upload regression and acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: productization-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/productization-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop isolated PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force "duress-ticketing-postgres-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >/dev/null 2>&1 || true

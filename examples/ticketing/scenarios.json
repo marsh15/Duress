@@ -1,0 +1,560 @@
+[
+  {
+    "id": "normal",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 1,
+          "max_delta": 1
+        }
+      ],
+      "required_transitions": [
+        {
+          "entity": "bookings",
+          "identity": "booking-101",
+          "from_state": "pending",
+          "to_state": "paid"
+        }
+      ],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": [
+            "booking-101"
+          ]
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "2xx"
+    },
+    "require_overlap": false,
+    "acknowledgements": {
+      "d1": {
+        "intent": "create",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "sequential-duplicate",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      },
+      {
+        "id": "d2",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1"
+        ]
+      },
+      {
+        "deliveries": [
+          "d2"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 1,
+          "max_delta": 1
+        }
+      ],
+      "required_transitions": [
+        {
+          "entity": "bookings",
+          "identity": "booking-101",
+          "from_state": "pending",
+          "to_state": "paid"
+        }
+      ],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": [
+            "booking-101"
+          ]
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "2xx",
+      "d2": "2xx"
+    },
+    "require_overlap": false,
+    "acknowledgements": {
+      "d1": {
+        "intent": "create",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "concurrent-duplicate",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      },
+      {
+        "id": "d2",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      },
+      {
+        "id": "d3",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1",
+          "d2",
+          "d3"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 1,
+          "max_delta": 1
+        }
+      ],
+      "required_transitions": [
+        {
+          "entity": "bookings",
+          "identity": "booking-101",
+          "from_state": "pending",
+          "to_state": "paid"
+        }
+      ],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": [
+            "booking-101"
+          ]
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "2xx",
+      "d2": "2xx",
+      "d3": "2xx"
+    },
+    "require_overlap": true,
+    "acknowledgements": {
+      "d1": {
+        "intent": "create",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "distinct-events",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      },
+      {
+        "id": "d2",
+        "fixture": "paid-distinct",
+        "event_id": "paid-distinct-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1",
+          "d2"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 1,
+          "max_delta": 1
+        }
+      ],
+      "required_transitions": [
+        {
+          "entity": "bookings",
+          "identity": "booking-101",
+          "from_state": "pending",
+          "to_state": "paid"
+        }
+      ],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": [
+            "booking-101"
+          ]
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "2xx",
+      "d2": "2xx"
+    },
+    "require_overlap": true,
+    "acknowledgements": {
+      "d1": {
+        "intent": "create",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "ambiguous-ack",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "ambiguous",
+        "event_id": "ambiguous-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 1,
+          "max_delta": 1
+        }
+      ],
+      "required_transitions": [
+        {
+          "entity": "bookings",
+          "identity": "booking-101",
+          "from_state": "pending",
+          "to_state": "paid"
+        }
+      ],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": [
+            "booking-101"
+          ]
+        }
+      ]
+    },
+    "expected_status": {},
+    "require_overlap": false,
+    "require_retry": true,
+    "delivery_policy": {
+      "attempt_timeout_ms": 100,
+      "max_attempts": 2,
+      "retry_on": [
+        "timeout"
+      ],
+      "backoff_ms": [
+        10
+      ]
+    },
+    "settle_ms": 600,
+    "acknowledgements": {
+      "d1": {
+        "intent": "create",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "delayed-processing",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "slow",
+        "event_id": "slow-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 1,
+          "max_delta": 1
+        }
+      ],
+      "required_transitions": [
+        {
+          "entity": "bookings",
+          "identity": "booking-101",
+          "from_state": "pending",
+          "to_state": "paid"
+        }
+      ],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": [
+            "booking-101"
+          ]
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "2xx"
+    },
+    "require_overlap": false,
+    "acknowledgements": {
+      "d1": {
+        "intent": "create",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "out-of-order",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "cancel",
+        "event_id": "cancel-101"
+      },
+      {
+        "id": "late-paid",
+        "fixture": "paid",
+        "event_id": "paid-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1"
+        ]
+      },
+      {
+        "deliveries": [
+          "late-paid"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 0,
+          "max_delta": 0
+        }
+      ],
+      "required_transitions": [
+        {
+          "entity": "bookings",
+          "identity": "booking-101",
+          "from_state": "pending",
+          "to_state": "cancelled"
+        }
+      ],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": [
+            "booking-101"
+          ]
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "2xx",
+      "late-paid": "4xx"
+    },
+    "require_overlap": false,
+    "acknowledgements": {
+      "d1": {
+        "intent": "update",
+        "entity": "bookings",
+        "match": {
+          "id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "invalid-data",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "invalid",
+        "event_id": "invalid-101"
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 0,
+          "max_delta": 0
+        }
+      ],
+      "required_transitions": [],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": []
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "4xx"
+    },
+    "require_overlap": false,
+    "acknowledgements": {
+      "d1": {
+        "intent": "no_effect",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  },
+  {
+    "id": "invalid-signature",
+    "deliveries": [
+      {
+        "id": "d1",
+        "fixture": "paid",
+        "event_id": "paid-101",
+        "invalid_signature": true
+      }
+    ],
+    "steps": [
+      {
+        "deliveries": [
+          "d1"
+        ]
+      }
+    ],
+    "context": {
+      "expected_effects": [
+        {
+          "entity": "tickets",
+          "match": {
+            "booking_id": "booking-101"
+          },
+          "min_delta": 0,
+          "max_delta": 0
+        }
+      ],
+      "required_transitions": [],
+      "scopes": [
+        {
+          "entity": "bookings",
+          "identities": []
+        }
+      ]
+    },
+    "expected_status": {
+      "d1": "4xx"
+    },
+    "require_overlap": false,
+    "acknowledgements": {
+      "d1": {
+        "intent": "no_effect",
+        "entity": "tickets",
+        "match": {
+          "booking_id": "booking-101"
+        }
+      }
+    }
+  }
+]
