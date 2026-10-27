@@ -10,7 +10,7 @@ import asyncio
 import json
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
 import httpx
 
@@ -55,6 +55,7 @@ async def run_schedule(
     signature_header: str = signing.HEADER,
     event_id_header: str = signing.EVENT_ID_HEADER,
     transport: httpx.AsyncBaseTransport | None = None,
+    request_builder: Callable[[Any, int], tuple[str, str, bytes, dict[str, str]]] | None = None,
 ) -> ExecutionResult:
     base = time.monotonic()
     records: list[AttemptRecord] = []
@@ -80,9 +81,14 @@ async def run_schedule(
                     else signing.sign(secret, body)
                 ),
             }
+            method = "POST"
+            destination = url
+            if request_builder is not None:
+                method, destination, body, headers = request_builder(delivery, attempt)
             try:
-                response = await client.post(
-                    url,
+                response = await client.request(
+                    method,
+                    destination,
                     content=body,
                     headers=headers,
                     timeout=httpx.Timeout(timeout_s),
@@ -141,7 +147,10 @@ async def run_schedule(
                 )
 
         async def run_delivery(delivery: DeliverySpec, gate: asyncio.Event, built: asyncio.Event, built_state: dict[str, int]) -> None:
-            body = canonical_json(event_payload(schedule, delivery, roles)).encode()
+            body = (
+                request_builder(delivery, 1)[2] if request_builder is not None
+                else canonical_json(event_payload(schedule, delivery, roles)).encode()
+            )
             timeout_ms, attempts, backoff = schedule.resolve_attempts(delivery)
             built_state["count"] += 1
             if built_state["count"] == built_state["total"]:

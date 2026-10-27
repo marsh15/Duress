@@ -1,0 +1,16 @@
+# External integration extension contract
+
+Baseline: `4684bd1743c0b09104a53750230b5e98fae2cb2f`. AI-assisted implementation, started 2026-10-27.
+
+The payment pack and `exec@1` behavior remain compatible. New `external@1` adapters use the existing schedule dispatcher and process-table-confirmed supervisor settlement. The new declarative contract and observer APIs live in `duress.external`; they have no payment vocabulary. Existing stored artifacts retain their original preflight.
+
+- Local TOML manifest, strictly validated, contains project/target identity, managed argv/cwd or explicitly authorized staging destination, HTTP event settings, observation field allowlists, fixture and invariant files, and bounded scenarios.
+- Managed trial runtime variables: `DURESS_DB`, `DURESS_SCHEMA`, `DURESS_HOST`, `DURESS_PORT`, `DURESS_INSTANCE`, `DURESS_SECRET`, `DURESS_FIXTURES`. PostgreSQL connection strings are environment references, never artifact values. Each managed PostgreSQL trial uses a fresh schema in a dedicated local test database.
+- External application readiness: configured GET path returning JSON `instance` equal to `DURESS_INSTANCE`. Managed settlement inherits existing group termination confirmation. Staging has no process-termination claim; insufficient settlement is INCONCLUSIVE.
+- Delivery uses JSON fixture bytes, configurable POST/PUT/PATCH endpoint, literal headers plus constrained event-id/secret references, optional HMAC SHA256. Exact bytes participate in DNA compatibility. Existing dispatcher owns groups, delay, retries, deadlines and attempt evidence.
+- `external.contract`: strict `Contract`, `EntitySpec`, `Snapshot`, `InvariantResult`; `load_contract(path)`, `evaluate(contract, before, after, *, context={})`. Contract has `schema_version=1`, `id`, `version=1`, `entities` mapping normalized names to table/key/columns, and a discriminated `invariants` list. Snapshot has `entities`, `available`, `valid`, `settled`, `provenance`, `error`. Results distinguish satisfied/violated/not_evaluable/invalid.
+- `external.observers`: `observe(contract, *, kind, database, schema='public', settled=False)` returns Snapshot; database is SQLite file or resolved PostgreSQL DSN. Identifiers and fields come only from validated contract. Read-only, bounded row snapshots, provenance and schema compatibility required. No user SQL.
+- Portable `external-dna@1` artifacts contain canonical digests of full contract, event bytes and scenario schedule, adapter versions and normalized observation schema. Runtime paths, commands, secrets and destination URLs are resolved only from the receiving local manifest. Replay rejects changed business semantics before execution. Candidate verification compares the same contract and event plan with a separately authorized local manifest.
+- Local project records are isolated by project id; registration is CLI-only. HTTP can list approved projects and start bounded registered investigations only in local mode. Hosted mode refuses external execution.
+
+Acceptance evidence is recorded separately from historical evidence under `docs/productization/`. A separate sibling Git repository contains the ticketing service; it imports no Duress code. The final no-engine-edit proof records the core commit before external integration and checks hashes afterward.
