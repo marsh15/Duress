@@ -94,6 +94,15 @@ async def test_failure_dna_is_exact_portable_and_rejects_changed_rules(external_
     changed=copy.deepcopy(dna); changed['characterization']['p0']=0.2
     with pytest.raises(ValueError,match='metadata'):
         preflight(changed,project)
+    original_read=Path.read_bytes
+    for module in ('target.py','aggregation.py','store.py'):
+        with monkeypatch.context() as patch:
+            def altered(path, name=module):
+                content=original_read(path)
+                return content+b"\n# incompatible engine implementation\n" if path.name==name else content
+            patch.setattr(Path,'read_bytes',altered)
+            with pytest.raises(ValueError,match='implementation_sha256'):
+                preflight(dna,project)
     project.contract.invariants[0].max_count=2
     with pytest.raises(ValueError,match='contract'):
         preflight(dna,project)
