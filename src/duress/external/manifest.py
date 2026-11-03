@@ -33,7 +33,7 @@ def proxy_error(value: str) -> str | None:
     if (parts.scheme not in {"http", "https"} or not parts.hostname
             or parts.username is not None or parts.password is not None
             or parts.path not in {"", "/"} or parts.query or parts.fragment):
-        return "proxy must be an http or https origin without credentials; use proxy_ref for authenticated proxies"
+        return "proxy must be an http or https origin without credentials (authenticated proxies are not supported)"
     return None
 
 

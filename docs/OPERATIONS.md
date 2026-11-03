@@ -54,9 +54,9 @@ Runtime files are lost on restart/redeploy/idle spin-down; download DNA before t
 
 Open items:
 
-- The one invalid public trial (`harness:target_unavailable` in `inv-20261027T134459-5dffbe`) is diagnosed in [INVALID_TRIAL.md](investigations/INVALID_TRIAL.md) as a probable readiness-budget expiry. A slow cold start is the leading hypothesis, but it is unproven: per-phase timings and target logs were not retained. Retaining them, and measuring before any budget change, is proposed and awaits owner approval.
-- `src/duress/orchestrator.py:244` records `invalid_output` where a repair-call `transport_error` should record `transport_error`. A strict xfail test records it. The one-line fix is pending because that file is frozen.
-- `docs/productization/core-freeze.json` hashes mismatch for `cli.py`, `external/reporting.py`, `external/web.py`, `web/__init__.py`, `external/manifest.py` and `external/services.py`. Owner review is pending.
+- The one invalid public trial (`harness:target_unavailable` in `inv-20261027T134459-5dffbe`) is diagnosed in [INVALID_TRIAL.md](investigations/INVALID_TRIAL.md) as a probable readiness-budget expiry. A slow cold start is the leading hypothesis, but it is unproven: per-phase timings and target logs were not retained. Trial rows now record per-phase timings so the next occurrence can be measured; no budget change is made without measurements. Target logs are still not retained.
+- A repair-call `transport_error` is now recorded as `transport_error` (fixed in `orchestrator.py`; regression test no longer xfail).
+- `docs/productization/core-freeze.json` was re-frozen to the current hashes of seven files that had drifted (`cli.py`, `orchestrator.py`, `external/{manifest,reporting,services,web}.py`, `web/__init__.py`); the runner, oracle, preflight, replay and invariant core hashes were not changed.
 - Authenticated public replay and correction verification are pending owner operation with the private token.
 
 Build published distributions from an exact clean Git export. Local `.playwright-cli/` browser-session files and `brag-output*/` video-render workspaces are excluded from Git/source-build and Docker contexts; preserve them locally instead of shipping them. Validate archive contents and checksums before uploading release assets.

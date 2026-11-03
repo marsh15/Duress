@@ -241,7 +241,7 @@ async def _model_phase(
             output = investigator.parse_model_output(response.content)
         except LlmError as exc:
             finish_model_record()
-            reason = exc.reason if exc.reason in {"cache_miss", "limit_exceeded"} else "invalid_output"
+            reason = exc.reason if exc.reason in {"cache_miss", "limit_exceeded", "transport_error"} else "invalid_output"
             return ModelPhase(
                 fallback_reason=reason,
                 fallback_detail=f"repair call failed: {exc.reason}: {exc.detail}",
@@ -288,6 +288,7 @@ def _trial_rows(result: ScenarioResult) -> list[dict[str, Any]]:
                 "settlement": observation.settlement,
                 "released_by": observation.stub.released_by,
                 "duration_s": round(observation.duration_s, 3),
+                "phase_timings": {k: round(v, 3) for k, v in observation.phase_timings.items()},
             }
         )
     return rows

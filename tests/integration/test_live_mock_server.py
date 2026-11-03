@@ -308,14 +308,6 @@ async def test_repair_call_failure_still_falls_back_to_exhaustive(tmp_path):
     assert record["verdict"] == "INCONCLUSIVE"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "DEFECT (not fixed here): orchestrator._model_phase maps a transport_error "
-        "raised by the repair call to 'invalid_output'. The fix is in "
-        "src/duress/orchestrator.py, which is frozen and outside this task's owned paths."
-    ),
-)
 @pytest.mark.asyncio
 async def test_repair_call_transport_failure_is_reported_as_transport_error(tmp_path):
     replies = [Reply.ok("not json"), Reply.error(500, "provider down")]
