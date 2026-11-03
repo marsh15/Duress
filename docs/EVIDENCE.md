@@ -151,6 +151,8 @@ Screenshots under `docs/screenshots/` were captured from the running local appli
 
 **Not verified:** a Render deployment, hosted/browser smoke tests, hosted timing or capacity, and a live model provider. Autonomous investigation and reduction are pending and were excluded from this frontend assignment. The full M6 milestone is not claimed.
 
+*Later status (not part of the M6 snapshot above):* the Render Free deployment was verified afterwards at https://duress.onrender.com, executor `344db907adfb61519cab7023ce6db3772dcc3824`, for the scope recorded in the [public release record](release/2026-10-27-public/README.md). Hosted capacity and a live model provider remain unverified.
+
 ### Broad regression observation and final artifact presentation check
 
 The first post-change fast run returned **222 passed, 2 failed, 7 skipped, 3 deselected** in 519.07 s. The failures were in unchanged tests: `test_s9_fixed_second_payment_is_an_order_duplicate` reached the 20-valid-trial aggregate PASS quota but then asserted one fulfilment on every observation, including an empty snapshot; `test_c10_rendezvous_releases_by_parties_then_timeout_then_not_at_all` observed about 78 ms against its 50 ms assertion. This run overlapped browser and Docker work. That overlap is a possible contributing condition, not an established cause. No engine, target or original assertion was modified.
@@ -279,6 +281,8 @@ The first final-image export was interrupted by a host disk-full condition (`Sto
 
 No `DURESS_LLM_*` runtime settings were available. Genuine hosted inference, provider interoperability, and the hosted multi-run live-versus-exhaustive comparison remain unverified. Cached authored-fixture and deterministic exhaustive execution are implemented and covered separately. No local model weights or Alan Code credentials were used.
 
-Render-specific connected tooling, CLI credentials, and a logged-in dashboard session were unavailable; the browser reached Render's login page. No public deployment URL or hosted capacity claim is made. Deployment needs an authorized Render account/session or runtime API credential. Local Docker success does not replace that hosted check.
+Render-specific connected tooling, CLI credentials, and a logged-in dashboard session were unavailable; the browser reached Render's login page. Local Docker success does not replace the hosted check.
+
+*Later status (this sentence describes the release session only):* the public Free deployment was verified afterwards, as recorded in the [public release record](release/2026-10-27-public/README.md). That record makes no claim about sustained capacity, and the billing exposure is not independently verified.
 
 The final source audit preserved the critical execution files and target bytes, checked unique API route ownership, token/admission boundaries, safe record paths, autoescaping/JSON encoding, and actual process cleanup. Confirmed defects fixed in this pass were disabled web workflows, corrupt-record crashes/symlink reads, missing retained schedule/state presentation, container signal forwarding, recovery archives entering the image context, populated-record accessibility/mobile issues, and null retry presentation. No known correctness-blocking defect remains in the exercised local product paths. Relevant full/slow/browser/clean-environment results and development failures are retained above. All 28 historical measurement files still match their baseline hashes.

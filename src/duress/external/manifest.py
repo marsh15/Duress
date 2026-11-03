@@ -23,6 +23,44 @@ class Project(StrictModel):
     project: str = Field(pattern=r"^[a-z][a-z0-9_-]{0,62}$")
 
 
+def proxy_error(value: str) -> str | None:
+    """Explain why a proxy URL is refused. Never echoes the value itself."""
+    try:
+        parts = urlsplit(value)
+        parts.port  # noqa: B018 - raises ValueError for an invalid port
+    except ValueError:
+        return "proxy must be a valid http or https URL"
+    if (parts.scheme not in {"http", "https"} or not parts.hostname
+            or parts.username is not None or parts.password is not None
+            or parts.path not in {"", "/"} or parts.query or parts.fragment):
+        return "proxy must be an http or https origin without credentials (authenticated proxies are not supported)"
+    return None
+
+
+class Quiescence(StrictModel):
+    """Opt-in cooperative quiescence attestation for a staging application.
+
+    The owned application answers GET ``path?nonce=N`` with exactly
+    ``{"quiescent": true, "nonce": N}`` when it has no in-flight writes. Duress
+    also requires the observed state to stay identical across ``stable_reads``
+    bracketed reads spaced ``interval_ms`` apart, all inside ``timeout_ms``.
+    """
+
+    path: str = "/duress/quiescence"
+    stable_reads: int = Field(default=3, ge=2, le=10)
+    interval_ms: int = Field(default=200, ge=20, le=5000)
+    timeout_ms: int = Field(default=5000, ge=100, le=10000)
+
+    @model_validator(mode="after")
+    def bounded(self):
+        if (not self.path.startswith("/") or self.path.startswith("//")
+                or any(c in self.path for c in "?# \r\n\t")):
+            raise ValueError("quiescence path must be a local absolute path without query or fragment")
+        if (self.stable_reads - 1) * self.interval_ms > self.timeout_ms:
+            raise ValueError("quiescence stable window exceeds timeout_ms")
+        return self
+
+
 class Target(StrictModel):
     id: str = Field(pattern=IDENTIFIER)
     mode: Literal["managed", "staging"] = "managed"
@@ -38,12 +76,20 @@ class Target(StrictModel):
     isolated_test_database: bool = False
     max_processes: int = Field(default=8, ge=1, le=32)
     memory_mb: int = Field(default=1024, ge=128, le=4096)
+    # Staging-only, opt-in network settings. Absent means direct connection
+    # and the default certificate trust store; ambient proxy/CA env is ignored.
+    proxy: str | None = None
+    proxy_ref: str | None = Field(default=None, pattern=ENVIRONMENT)
+    ca_bundle: str | None = None
+    quiescence: Quiescence | None = None
 
     @model_validator(mode="after")
     def boundary(self):
         if self.mode == "managed":
             if not self.init or not self.serve or self.base_url or self.allowed_origins:
                 raise ValueError("managed targets require init/serve argv; URLs are assigned at runtime")
+            if self.proxy or self.proxy_ref or self.ca_bundle or self.quiescence:
+                raise ValueError("proxy, CA bundle and quiescence settings apply only to staging targets")
         else:
             if self.init or self.serve or not self.staging_authorized:
                 raise ValueError("staging requires explicit authorization and cannot launch commands")
@@ -53,6 +99,12 @@ class Target(StrictModel):
                     or parsed.username or parsed.password or parsed.query or parsed.fragment
                     or parsed.path not in {"", "/"} or origin not in self.allowed_origins):
                 raise ValueError("staging base_url must be an exact authorized origin without credentials")
+            if self.proxy and self.proxy_ref:
+                raise ValueError("choose proxy or proxy_ref, not both")
+            if self.proxy is not None and proxy_error(self.proxy):
+                raise ValueError(proxy_error(self.proxy))
+            if self.ca_bundle is not None and (not self.ca_bundle.strip() or any(c in self.ca_bundle for c in "\r\n\0")):
+                raise ValueError("ca_bundle must be a file path")
         if not self.readiness_path.startswith("/") or self.readiness_path.startswith("//"):
             raise ValueError("readiness_path must be an absolute local path")
         for name in [*self.env, *self.env_refs, *self.env_refs.values()]:
@@ -211,6 +263,7 @@ class LoadedProject:
     contract: Any
     payloads: dict[str, bytes]
     expected_schema: str | None = None
+    ca_bundle_path: Path | None = None
 
     def scenario(self, name: str) -> Scenario:
         for scenario in self.manifest.scenarios:
@@ -283,5 +336,14 @@ def load_project(path: Path) -> LoadedProject:
             invalid=[r for r in evaluate(contract,missing,missing,context=ack_context) if r.status=="invalid"]
             if invalid:
                 raise ValueError(f"{scenario.id}: invalid acknowledgement: {invalid[0].explanation}")
+    ca_bundle_path = None
+    if manifest.target.ca_bundle is not None:
+        # Relative paths resolve from the manifest, like every other file reference.
+        ca_bundle_path = (path.parent / manifest.target.ca_bundle).resolve()
+        if not ca_bundle_path.is_file():
+            raise ValueError("ca_bundle must name an existing file")
+        if ca_bundle_path.stat().st_size > 1_000_000:
+            raise ValueError("ca_bundle exceeds 1MB")
     return LoadedProject(path, manifest, cwd, fixtures_path,
-                         {"seed":fixtures,"events":event_fixtures["events"]}, contract, payloads)
+                         {"seed":fixtures,"events":event_fixtures["events"]}, contract, payloads,
+                         ca_bundle_path=ca_bundle_path)

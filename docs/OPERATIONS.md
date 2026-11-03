@@ -26,7 +26,7 @@ Before a GitHub checkpoint, inspect `git diff --check`, execute focused page/API
 
 The repository contains `render.yaml` for a Docker Free service with `/api/health` as its health check. Render generates the demo token. Free compute does not cap all workspace/bandwidth/build charges; follow the [$0 deployment handoff](openfire/RENDER_HANDOFF.md), inspect account billing, and do not upgrade without explicit approval. Provider credentials are unnecessary for cached or exhaustive investigation, replay and verification. Live investigation uses `DURESS_LLM_BASE_URL`, `DURESS_LLM_MODEL` and optional `DURESS_LLM_API_KEY`; genuine hosted inference remains unverified. Bind `DURESS_ROOT=/app` and use `/tmp/duress` as ephemeral runtime storage. Logs go to the existing uvicorn stdout/stderr stream; generated evidence stays in the runtime home, outside Git.
 
-No Render deployment is claimed without an actual deployment and HTTP/browser checks. The local Docker checks do not establish hosted capacity, performance or availability.
+The public Free deployment is claimed only for the scope recorded in the [public release record](release/2026-10-27-public/README.md). The local Docker checks do not establish hosted capacity, performance or availability.
 
 ## Data and access
 
@@ -50,6 +50,13 @@ The existing owner-operated Free service at https://duress.onrender.com serves v
 
 Authenticated public replay and correction verification remain pending owner execution with the private demo token. The available agent browser cannot inspect Render Billing: the owner confirms Free and Billing reviewed, while credit eligibility/expiry, current charges and future exposure remain independently unverified. Paid resources are not authorized. Keep one worker, the generated private token, quotas and loopback-only targets. Preserve the working service; documentation-only checkpoints use `[skip render]` to avoid replacing its ephemeral records. GitHub CI is separate and remains enabled.
 
-Runtime files are lost on restart/redeploy/idle spin-down; download DNA before those events. A previous verified commit can be manually redeployed for rollback. Genuine Duress hosted-model interoperability and the live-versus-exhaustive experiment remain unverified; cached/exhaustive synthetic execution does not need model credentials.
+Runtime files are lost on restart/redeploy/idle spin-down; download DNA before those events. A previous verified commit can be manually redeployed for rollback. Genuine Duress hosted-model interoperability and the live-versus-exhaustive experiment remain unverified; cached/exhaustive synthetic execution does not need model credentials. The live path is covered by local mock-provider tests (`tests/integration/test_live_mock_server.py`) and by `scripts/live_llm_check.py` and `scripts/compare_modes.py`, which the owner runs with a real key. No real provider has been called.
+
+Open items:
+
+- The one invalid public trial (`harness:target_unavailable` in `inv-20261027T134459-5dffbe`) is diagnosed in [INVALID_TRIAL.md](investigations/INVALID_TRIAL.md) as a probable readiness-budget expiry. A slow cold start is the leading hypothesis, but it is unproven: per-phase timings and target logs were not retained. Trial rows now record per-phase timings so the next occurrence can be measured; no budget change is made without measurements. Target logs are still not retained.
+- A repair-call `transport_error` is now recorded as `transport_error` (fixed in `orchestrator.py`; regression test no longer xfail).
+- `docs/productization/core-freeze.json` was re-frozen to the current hashes of seven files that had drifted (`cli.py`, `orchestrator.py`, `external/{manifest,reporting,services,web}.py`, `web/__init__.py`); the runner, oracle, preflight, replay and invariant core hashes were not changed.
+- Authenticated public replay and correction verification are pending owner operation with the private token.
 
 Build published distributions from an exact clean Git export. Local `.playwright-cli/` browser-session files and `brag-output*/` video-render workspaces are excluded from Git/source-build and Docker contexts; preserve them locally instead of shipping them. Validate archive contents and checksums before uploading release assets.

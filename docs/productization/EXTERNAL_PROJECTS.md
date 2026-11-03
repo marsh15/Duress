@@ -91,7 +91,19 @@ Bounds preserve the existing execution envelope: 10 deliveries, groups of at mos
 
 Staging declares `mode="staging"`, a `base_url` containing an exact origin, matching `allowed_origins`, and `staging_authorized=true`. It cannot declare init/serve commands. It requires independently observed PostgreSQL and local secret references for signing. Redirects are not followed. Staging authorization is a declaration by the local operator, not an inference of ownership.
 
-The first staging adapter records before/final state and real delivery attempts, but deliberately returns INCONCLUSIVE because remote writer quiescence is unverified. A successful HTTP response is never treated as process termination. Do not interpret this workflow as verified managed execution or portable staging replay. Managed local targets provide the stronger acceptance path.
+The staging adapter records before/final state and real delivery attempts. Without a configured quiescence probe it always returns INCONCLUSIVE (`staging_quiescence_unverified`), because remote writer quiescence is unverified. A successful HTTP response is never treated as process termination or as quiescence. Do not interpret this workflow as verified managed execution or portable staging replay. Managed local targets provide the stronger acceptance path.
+
+### Opt-in quiescence probe
+
+A staging target may declare `[target.quiescence]`. It is rejected for managed targets. The owned application must answer `GET <base_url><path>?nonce=N` (default `path = "/duress/quiescence"`) with exactly `{"quiescent": true, "nonce": N}`, echoing the fresh nonce, when it has no in-flight writes. Defaults are `stable_reads = 3` (range 2 to 10), `interval_ms = 200` (20 to 5000) and `timeout_ms = 5000` (100 to 10000); the stable window must fit inside `timeout_ms`.
+
+Duress establishes quiescence only when, inside the bound, an attestation succeeds before and after each of `stable_reads` consecutive reads of the observed PostgreSQL state, and that state is identical across those reads. The baseline is read only after the pre-probe succeeds. If the pre-probe fails, no event is sent and the verdict stays INCONCLUSIVE. When both probes are established, the trial may reach PASS or FAIL, with reason `remote_quiescence_attested` added. Otherwise the INCONCLUSIVE verdict stands. HTTP 2xx alone, a missing endpoint, a replayed nonce, a busy writer and drifting state all keep the verdict INCONCLUSIVE. The probe evidence records counts and reasons only, never the nonce, headers or body.
+
+Caveats:
+
+- Duress cannot verify from outside that the attestation is truthful. The probe is cooperative. It establishes that the owned application attested and that the observed state stayed stable, not that no other writer exists.
+- The probe does not establish process termination. The default drain disclosure is replaced only by the attested quiescence reason.
+- The real PostgreSQL staging path is not exercised in unit tests.
 
 ## Failure DNA, replay and verification
 
@@ -124,4 +136,11 @@ The local workbench reconciles orphaned queued/running records when it starts. R
 
 The web workbench at `/projects` displays registered projects and real saved evidence. Registration/configuration remains a local CLI operation. Execution routes require loopback client/Host, same-origin browser requests, existing token authorization when configured, operation admission and quotas; hosted mode rejects execution. Local state reads also require loopback. This is a single-user local tool, not multi-tenant hosted SaaS. See [WEB.md](WEB.md), [STORAGE.md](STORAGE.md) and [CI.md](CI.md).
 
-The initial external HTTP adapter connects directly and disables ambient HTTP proxy and custom certificate environment settings for both managed and staging delivery. Private staging endpoints that require an organization-specific proxy or CA are not supported by this adapter; failed connectivity remains INCONCLUSIVE. This is an explicit beta limitation, not evidence about the integration's business behavior.
+Ambient `HTTP(S)_PROXY` and `SSL_CERT_FILE` environment is still ignored by default, for managed and staging delivery alike. Staging targets may opt in to network settings:
+
+- `proxy`, a literal http or https origin, or `proxy_ref`, an environment reference to one. Set at most one. Paths, queries and fragments are refused. Credentials in the proxy URL are refused in both forms, so authenticated proxies are not supported. The validator message that suggests `proxy_ref` for authenticated proxies is inaccurate, and this is flagged for the owner.
+- `ca_bundle`, a PEM file path resolved relative to the manifest, at most 1 MB. It replaces the default trust store for that target, so only the declared certificates are trusted. Include every CA the endpoint chain needs.
+
+Settings are validated during precheck, before any delivery. Managed targets reject them.
+
+Not tested: CONNECT tunnels (HTTPS through a proxy) are untested. Treat proxy and CA support as unverified against any real organisational proxy or private CA. Failed connectivity remains INCONCLUSIVE. This is an explicit beta limitation, not evidence about the integration's business behavior.
