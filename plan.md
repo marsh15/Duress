@@ -1,5 +1,7 @@
 # Duress — Architecture & Implementation Plan (Revision 4, FROZEN for M0)
 
+> **Historical document.** This is the frozen M0 plan (Revision 4). It records the original intent, scope and sequencing, and it is not a status report. The repository is now implemented, and any milestone status or "pending" wording below is plan-time text. For current scope and limitations see [README.md](README.md), [docs/OPERATIONS.md](docs/OPERATIONS.md) and [docs/EVIDENCE.md](docs/EVIDENCE.md).
+
 > Put your integrations under pressure. Keep the proof.
 
 ## R. Revision log
