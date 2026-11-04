@@ -36,7 +36,7 @@ Scope: the public Free-tier cached investigation recorded in `docs/release/2026-
 - Port reuse: discussed above; not supported by the reason string.
 - Stale process from an earlier trial: each trial owns its process group, and the failed trial's settlement is `clean`. Not supported.
 - Harness event loop blocked during the window: readiness only awaits (`httpx` and `asyncio.sleep`, `target.py:344-368`). Not supported.
-- Target bug (hung startup, not just slow): not excluded. The target log would distinguish a slow start from a hang, and it was not retained (`target.log` lives in the trial workdir under the ephemeral `/tmp/duress`, per the README).
+- Target bug (hung startup, not just slow): not excluded. The target log would distinguish a slow start from a hang. Non-PASS trials do copy their whole workdir, including `target.log`, into `evidence/<trial_id>` (`operations.py`, `store.copy_evidence`), but hosted runtime records were not exported before they were lost, so this trial's log is unavailable.
 - Unrelated: the CI PostgreSQL readiness race in `docs/release/2026-10-27-public/ci-readiness-recovery.md` is a different component.
 
 ## Why no source change was made
@@ -56,7 +56,7 @@ Limits of the test: the delay is simulated, not the Free-tier speed. It reproduc
 
 ## Mitigation (proposed, not applied)
 
-1. Measure before changing anything: keep `phase_timings` (already produced at `target.py:223-224`) in the per-trial record (`orchestrator.py:278-295`), and keep the target log for INCONCLUSIVE trials. Run one Free investigation to get the real readiness distribution. Both files are frozen, so this needs explicit owner approval.
+1. Measure before changing anything: per-trial `phase_timings` are now recorded in the trial row (`orchestrator._trial_rows`). Run one Free investigation and export the evidence directory immediately to get the real readiness distribution and target logs.
 2. If readiness tails approach 10 s: raise the readiness budget through a deployment setting. `limits.py:131-135` requires the watchdog to be raised to match, and `TRIAL_START_MARGIN_S` and the 440 s wall cap (`wall_cap_s`) need re-checking. A larger budget costs time only on slow starts, but the worst case (every start hitting the new budget) must still fit the 440 s wall cap, so size the change from measured readiness. This changes harness-invalid rates, not verdict rules.
 3. Do not weaken the classification: a readiness timeout must stay INCONCLUSIVE and must never become PASS or FAIL.
 

@@ -54,7 +54,7 @@ Runtime files are lost on restart/redeploy/idle spin-down; download DNA before t
 
 Open items:
 
-- The one invalid public trial (`harness:target_unavailable` in `inv-20261027T134459-5dffbe`) is diagnosed in [INVALID_TRIAL.md](investigations/INVALID_TRIAL.md) as a probable readiness-budget expiry. A slow cold start is the leading hypothesis, but it is unproven: per-phase timings and target logs were not retained. Trial rows now record per-phase timings so the next occurrence can be measured; no budget change is made without measurements. Target logs are still not retained.
+- The one invalid public trial (`harness:target_unavailable` in `inv-20261027T134459-5dffbe`) is diagnosed in [INVALID_TRIAL.md](investigations/INVALID_TRIAL.md) as a probable readiness-budget expiry. A slow cold start is the leading hypothesis, but it is unproven: per-phase timings and target logs were not retained. Trial rows now record per-phase timings so the next occurrence can be measured; no budget change is made without measurements. Non-PASS trials already keep `target.log` under `evidence/`; export it before the Free instance restarts.
 - A repair-call `transport_error` is now recorded as `transport_error` (fixed in `orchestrator.py`; regression test no longer xfail).
 - `docs/productization/core-freeze.json` was re-frozen to the current hashes of seven files that had drifted (`cli.py`, `orchestrator.py`, `external/{manifest,reporting,services,web}.py`, `web/__init__.py`); the runner, oracle, preflight, replay and invariant core hashes were not changed.
 - Authenticated public replay and correction verification are pending owner operation with the private token.
