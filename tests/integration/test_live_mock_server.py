@@ -154,6 +154,17 @@ async def test_truncated_json_twice_falls_back_after_one_repair(tmp_path):
     assert record["fallback_reason"] == "invalid_output"
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("text", ["", "   \n"], ids=["empty", "whitespace"])
+async def test_empty_reply_is_repaired_once_then_falls_back(tmp_path, text):
+    with MockOpenAIServer([Reply.ok(text)]) as server:
+        record = await run_live(tmp_path, server.base_url)
+
+    assert len(server.requests) == 2  # one call, one repair, never a third
+    assert record["mode_effective"] == "exhaustive"
+    assert record["fallback_reason"] == "invalid_output"
+
+
 # --------------------------------------------------------------------------- #
 # Schema-invalid and linkage-invalid proposals
 # --------------------------------------------------------------------------- #
