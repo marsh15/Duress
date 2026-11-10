@@ -65,3 +65,12 @@ Limits of the test: the delay is simulated, not the Free-tier speed. It reproduc
 - Whether the failed start was slow or hung is not established. No target log, per-phase timing or Free-instance readiness measurement exists in the retained evidence.
 - The 12x Free-versus-local factor comes from total trial durations, not readiness alone, and the readiness share of the Free timing is inferred.
 - The retained trial record cannot show which phase consumed the time, so this diagnosis rests on the reason-string path and on local timing.
+
+## Measurement tooling (added 2026-11-10)
+
+`scripts/measure_readiness.py` produces the evidence the mitigation above calls for. It changes no budget and no verdict.
+
+- `uv run python scripts/measure_readiness.py --trials 20 --out readiness-local.json` runs fresh S1 trials with the real supervisor in a temporary runtime home and reports min, median, p95 and max per phase, the readiness budget, `max_over_budget`, the number of trials at or above 80% of the budget, and the number that timed out.
+- `uv run python scripts/measure_readiness.py --from-record inv.json` does the same from an investigation record (for example `curl -s https://HOST/api/investigations/ID -o inv.json`). Records written before per-phase timings were retained cannot be measured and the script exits 2 for them.
+
+Not yet measured: the Free instance. Until a report from that host exists, the 10 s budget stays as it is; the local sample only shows how far an unloaded machine is from it.
