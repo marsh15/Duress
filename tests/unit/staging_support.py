@@ -7,6 +7,8 @@ can exercise honest, absent, replayed, negative and drifting behaviour.
 from __future__ import annotations
 
 import json
+import select
+import socket
 import ssl
 import threading
 import urllib.error
@@ -232,6 +234,75 @@ class ForwardProxy:
                 self._forward(self.rfile.read(length))
 
         return Handler
+
+
+class ConnectProxy:
+    """Minimal CONNECT tunnel: records each requested authority, then relays raw bytes.
+
+    HTTPS through a proxy never shows the proxy the request, only the CONNECT target, so
+    ``tunnels`` is the observable evidence that traffic went through it.
+    """
+
+    def __init__(self):
+        self.tunnels: list[str] = []
+        self.lock = threading.Lock()
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), self._handler())
+        self.port = self.server.server_address[1]
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+
+    @property
+    def origin(self) -> str:
+        return f"http://127.0.0.1:{self.port}"
+
+    def __enter__(self):
+        self.thread.start()
+        return self
+
+    def __exit__(self, *exc):
+        self.server.shutdown()
+        self.server.server_close()
+
+    def _handler(self):
+        proxy = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def do_CONNECT(self):
+                host, _, port = self.path.rpartition(":")
+                with proxy.lock:
+                    proxy.tunnels.append(self.path)
+                try:
+                    upstream = socket.create_connection((host, int(port)), timeout=2)
+                except (OSError, ValueError):
+                    self.send_error(502)
+                    return
+                self.send_response(200, "Connection Established")
+                self.end_headers()
+                self.wfile.flush()
+                _relay(self.connection, upstream)
+
+        return Handler
+
+
+def _relay(client: socket.socket, upstream: socket.socket) -> None:
+    """Copy bytes both ways until either side closes."""
+    sockets = [client, upstream]
+    try:
+        while True:
+            readable, _, _ = select.select(sockets, [], [], 5)
+            if not readable:
+                return
+            for source in readable:
+                data = source.recv(65536)
+                if not data:
+                    return
+                (upstream if source is client else client).sendall(data)
+    except OSError:
+        return
+    finally:
+        upstream.close()
 
 
 def make_self_signed(directory: Path) -> tuple[Path, Path] | None:

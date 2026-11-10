@@ -8,7 +8,14 @@ import pytest
 from duress.external import observers
 from duress.external.contract import Snapshot
 from duress.external.services import trial
-from tests.unit.staging_support import QUIESCENCE_TABLE, FakeStaging, ForwardProxy, load_staging
+from tests.unit.staging_support import (
+    QUIESCENCE_TABLE,
+    ConnectProxy,
+    FakeStaging,
+    ForwardProxy,
+    load_staging,
+    make_self_signed,
+)
 
 
 @pytest.fixture
@@ -124,3 +131,19 @@ async def test_declared_proxy_carries_probe_and_delivery(tmp_path, observed):
     assert app.posts == ["/webhooks"]
     assert any(item == app.origin + "/webhooks" for item in proxy.requests)
     assert any(item.startswith(app.origin + "/duress/quiescence?nonce=") for item in proxy.requests)
+
+
+@pytest.mark.asyncio
+async def test_https_probe_and_delivery_through_a_connect_proxy(tmp_path, observed):
+    material = make_self_signed(tmp_path / "certs")
+    if material is None:
+        pytest.skip("openssl CLI is not available to create a localhost certificate")
+    cert, key = material
+    with ConnectProxy() as proxy, FakeStaging("honest", tls=(str(cert), str(key))) as app:
+        observed(app)
+        record = await run_trial(tmp_path, app, quiescence=QUIESCENCE_TABLE,
+                                 target_extra=f'proxy = "{proxy.origin}"\nca_bundle = "ca.pem"',
+                                 files={"ca.pem": cert.read_bytes()})
+    assert record["verdict"]["status"] == "PASS", record["verdict"]
+    assert app.posts == ["/webhooks"]
+    assert set(proxy.tunnels) == {f"127.0.0.1:{app.port}"}

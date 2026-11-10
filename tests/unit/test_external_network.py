@@ -10,6 +10,7 @@ from duress.external.quiescence import await_quiescence
 from tests.unit.staging_support import (
     QUIESCENCE_TABLE,
     FakeStaging,
+    ConnectProxy,
     ForwardProxy,
     load_staging,
     make_self_signed,
@@ -121,3 +122,65 @@ async def test_default_trust_rejects_self_signed_staging_and_declared_bundle_acc
         trusted = await await_quiescence(trusted_project, reader(), {})
     assert not untrusted.established and untrusted.reason == "quiescence_unreachable"
     assert trusted.established
+
+
+@pytest.mark.asyncio
+async def test_https_through_a_connect_proxy_with_a_declared_ca_bundle(tmp_path):
+    material = make_self_signed(tmp_path / "certs")
+    if material is None:
+        pytest.skip("openssl CLI is not available to create a localhost certificate")
+    cert, key = material
+    with ConnectProxy() as proxy, FakeStaging("honest", tls=(str(cert), str(key))) as app:
+        project = load_staging(tmp_path / "project", app.origin, quiescence=QUIESCENCE_TABLE,
+                               target_extra=f'proxy = "{proxy.origin}"\nca_bundle = "ca.pem"',
+                               files={"ca.pem": cert.read_bytes()})
+        outcome = await await_quiescence(project, reader(), {})
+    assert outcome.established, outcome
+    assert proxy.tunnels, "the TLS connection must have been tunnelled through CONNECT"
+    assert set(proxy.tunnels) == {f"127.0.0.1:{app.port}"}
+
+
+@pytest.mark.asyncio
+async def test_connect_tunnel_does_not_bypass_certificate_verification(tmp_path):
+    material = make_self_signed(tmp_path / "certs")
+    if material is None:
+        pytest.skip("openssl CLI is not available to create a localhost certificate")
+    cert, key = material
+    with ConnectProxy() as proxy, FakeStaging("honest", tls=(str(cert), str(key))) as app:
+        project = load_staging(tmp_path / "project", app.origin, quiescence=QUIESCENCE_TABLE,
+                               target_extra=f'proxy = "{proxy.origin}"')
+        outcome = await await_quiescence(project, reader(), {})
+    assert not outcome.established and outcome.reason == "quiescence_unreachable"
+    assert proxy.tunnels, "the handshake was attempted through the tunnel and then refused"
+    assert app.probes == 0
+
+
+@pytest.mark.asyncio
+async def test_unreachable_proxy_is_inconclusive_not_a_pass(tmp_path):
+    dead = ConnectProxy()
+    origin = dead.origin
+    dead.server.server_close()  # nothing listens on that port any more
+    with FakeStaging("honest") as app:
+        project = load_staging(tmp_path / "project", app.origin, quiescence=QUIESCENCE_TABLE,
+                               target_extra=f'proxy = "{origin}"')
+        outcome = await await_quiescence(project, reader(), {})
+    assert not outcome.established and outcome.reason == "quiescence_unreachable"
+    assert app.probes == 0
+
+
+@pytest.mark.asyncio
+async def test_proxy_that_cannot_reach_the_origin_is_inconclusive_not_a_pass(tmp_path):
+    material = make_self_signed(tmp_path / "certs")
+    if material is None:
+        pytest.skip("openssl CLI is not available to create a localhost certificate")
+    cert, key = material
+    with FakeStaging("honest", tls=(str(cert), str(key))) as app:
+        origin = app.origin
+    # The application has stopped: the proxy's CONNECT gets 502 for its address.
+    with ConnectProxy() as proxy:
+        project = load_staging(tmp_path / "project", origin, quiescence=QUIESCENCE_TABLE,
+                               target_extra=f'proxy = "{proxy.origin}"\nca_bundle = "ca.pem"',
+                               files={"ca.pem": cert.read_bytes()})
+        outcome = await await_quiescence(project, reader(), {})
+    assert proxy.tunnels
+    assert not outcome.established and outcome.reason == "quiescence_unreachable"
