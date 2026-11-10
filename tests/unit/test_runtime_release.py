@@ -17,6 +17,14 @@ def test_container_excludes_local_recovery_archives_and_runtime_evidence():
     assert ".duress/" in ignored
 
 
+def test_container_context_excludes_nested_agent_worktrees_and_credentials_files():
+    # `.duress/` only matches at the context root. A tool worktree below `.claude/`
+    # carries its own runtime homes, which `COPY . .` would otherwise bake into the image.
+    ignored = (ROOT / ".dockerignore").read_text().splitlines()
+    for pattern in (".claude/", "**/.duress/", "**/.recovery/", "**/.env", "**/.env.*"):
+        assert pattern in ignored, pattern
+
+
 def test_container_entrypoint_hands_signals_to_the_single_server_process():
     dockerfile = (ROOT / "Dockerfile").read_text()
     command_line = next(line for line in dockerfile.splitlines() if line.startswith("CMD "))

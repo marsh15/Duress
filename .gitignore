@@ -15,3 +15,10 @@ duress-report.html
 # Local browser sessions and generated launch-video workspace
 /.playwright-cli/
 /brag-output*/
+
+# Credentials and local databases
+.env
+.env.*
+*.db
+*.sqlite
+*.sqlite3

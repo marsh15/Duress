@@ -13,3 +13,10 @@ docs/measurements/
 # Local browser sessions and generated launch-video workspace
 .playwright-cli/
 brag-output*/
+
+# Nested runtime homes, agent worktrees and credential files must never enter the image
+.claude/
+**/.duress/
+**/.recovery/
+**/.env
+**/.env.*
