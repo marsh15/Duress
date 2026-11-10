@@ -1,12 +1,23 @@
 """Onboarding and operations on trusted local project manifests."""
 import asyncio
 import json
+from contextlib import contextmanager
 from pathlib import Path
 
 import typer
 
 from .manifest import load_project
 from .storage import ProjectStore, register_project
+
+
+@contextmanager
+def config_errors():
+    """Report an unreadable manifest or project record as exit 3 (configuration/operational error)."""
+    try:
+        yield
+    except (ValueError, OSError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(3) from None
 
 
 def emit(value, json_output=True):
@@ -103,8 +114,9 @@ def install(app: typer.Typer, dna_app: typer.Typer):
     @dna_app.command("export")
     def dna_export(dna: str, config: Path=typer.Option(...,"--config"), output: Path=typer.Option(...,"--output")):
         """Export an exact external Failure DNA artifact without execution."""
-        output.parent.mkdir(parents=True,exist_ok=True)
-        output.write_text(json.dumps(payload(config,dna),indent=2)+"\n")
+        with config_errors():
+            output.parent.mkdir(parents=True,exist_ok=True)
+            output.write_text(json.dumps(payload(config,dna),indent=2)+"\n")
         typer.echo(str(output))
 
     @app.command("project-store")
@@ -115,11 +127,12 @@ def install(app: typer.Typer, dna_app: typer.Typer):
                       retain_days:int=typer.Option(30,"--retain-days",min=1),
                       apply:bool=typer.Option(False,"--apply")):
         """Diagnose/reconcile records, dry-run retention, and integrity-checked export/import."""
-        store=ProjectStore(load_project(config).manifest.duress.project)
-        if action=="diagnostics": result=store.diagnostics()
-        elif action=="reconcile": result=store.reconcile()
-        elif action=="cleanup": result=store.cleanup(retain_days,dry_run=not apply)
-        elif action=="export" and destination: result={"path":str(store.export_to(destination))}
-        elif action=="import" and destination and source: result=store.import_from(source,destination)
-        else: raise typer.BadParameter("action is diagnostics/reconcile/cleanup/export/import; export needs destination, import also source")
+        with config_errors():
+            store=ProjectStore(load_project(config).manifest.duress.project)
+            if action=="diagnostics": result=store.diagnostics()
+            elif action=="reconcile": result=store.reconcile()
+            elif action=="cleanup": result=store.cleanup(retain_days,dry_run=not apply)
+            elif action=="export" and destination: result={"path":str(store.export_to(destination))}
+            elif action=="import" and destination and source: result=store.import_from(source,destination)
+            else: raise typer.BadParameter("action is diagnostics/reconcile/cleanup/export/import; export needs destination, import also source")
         emit(result)

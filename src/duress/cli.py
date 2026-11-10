@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from contextlib import contextmanager
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -42,6 +43,16 @@ def _workspace() -> Workspace:
     # Resource discovery can resolve an installed wheel or DURESS_ROOT while
     # runtime records remain in the invoking directory (or DURESS_HOME).
     return replace(workspace, root=workspace.registry.root)
+
+
+@contextmanager
+def _operational_errors(*types: type[Exception]):
+    """Report an expected lookup/configuration failure as exit 3, never as a verdict code."""
+    try:
+        yield
+    except types as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(3) from None
 
 
 def scenario_params(
@@ -83,8 +94,9 @@ def targets_command(config: Path | None = typer.Option(None,"--config"),
     """List target profiles."""
     if config:
         from .external.manifest import load_project
-        from .external.commands import emit
-        project=load_project(config)
+        from .external.commands import config_errors, emit
+        with config_errors():
+            project=load_project(config)
         emit({"project":project.manifest.duress.project,"target_id":project.manifest.target.id,
               "adapter":"external@1","mode":project.manifest.target.mode,
               "contract":f"{project.contract.id}@{project.contract.version}",
@@ -175,7 +187,9 @@ def dna_list_command(json_output: bool = typer.Option(False, "--json"),
     if config:
         from .external.manifest import load_project
         from .external.storage import ProjectStore
-        items=[r["payload"] for r in ProjectStore(load_project(config).manifest.duress.project).list("dna")]
+        from .external.commands import config_errors
+        with config_errors():
+            items=[r["payload"] for r in ProjectStore(load_project(config).manifest.duress.project).list("dna")]
         typer.echo(json.dumps(items,indent=2))
         return
     items = dna_index(_workspace())
@@ -214,9 +228,10 @@ def replay_command(
         typer.echo(f"error: no DNA {dna!r}", err=True)
         raise typer.Exit(3) from None
     target_id = target or str(document.provenance.get("target_id") or "razorpay-vulnerable")
-    run = asyncio.run(
-        replay(workspace, dna_id=dna, target_id=target_id, policy=policy)
-    )
+    with _operational_errors(KeyError):
+        run = asyncio.run(
+            replay(workspace, dna_id=dna, target_id=target_id, policy=policy)
+        )
     if json_output:
         typer.echo(json.dumps(run.outcome.model_dump(mode="json"), indent=2))
     else:
@@ -250,14 +265,15 @@ def verify_fix_command(
             raise typer.BadParameter("external verification requires --candidate-config")
         _external_operation("verify",config,dna,candidate_config=candidate_config,json_output=json_output)
         return
-    run = asyncio.run(
-        verify_fix(
-            _workspace(),
-            dna_id=dna,
-            vulnerable_target_id=vulnerable,
-            candidate_target_id=candidate,
+    with _operational_errors(FileNotFoundError, KeyError):
+        run = asyncio.run(
+            verify_fix(
+                _workspace(),
+                dna_id=dna,
+                vulnerable_target_id=vulnerable,
+                candidate_target_id=candidate,
+            )
         )
-    )
     outcome = run.outcome
     if json_output:
         typer.echo(json.dumps(outcome.model_dump(mode="json"), indent=2))
@@ -509,8 +525,10 @@ def report_command(
         from .external.manifest import load_project
         from .external.storage import ProjectStore
         from .external.reporting import html_report
-        record=ProjectStore(load_project(config).manifest.duress.project).load("investigations",investigation)["payload"]
-        output.write_text(html_report(record))
+        from .external.commands import config_errors
+        with config_errors():
+            record=ProjectStore(load_project(config).manifest.duress.project).load("investigations",investigation)["payload"]
+            output.write_text(html_report(record))
         typer.echo(str(output.resolve()))
         return
     from .records import load_investigation_record
