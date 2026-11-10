@@ -8,7 +8,8 @@ on:
 
 concurrency:
   group: productization-${{ github.ref }}
-  cancel-in-progress: true
+  # A newer push to main must not cancel the run validating the previous main commit.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

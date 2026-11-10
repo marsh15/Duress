@@ -54,7 +54,7 @@ binds a randomly assigned host port on `127.0.0.1`, and removes the container
 afterward. No external database credential or configured password is needed.
 The config contains only the environment variable reference. The runner keeps
 JSON, JUnit XML, and exported Failure DNA in a temporary artifact directory and
-uploads them even when a step fails. Artifacts are retained for 14 days; the
+uploads them even when a test step fails. The upload is skipped when the credential-suppression step itself fails, so a detected credential never reaches an artifact. Artifacts are retained for 14 days; the
 database DSN and runtime config are not uploaded.
 
 The gate treats `PASS` as exit 0, `FAIL` as 1, `INCONCLUSIVE` as 2, configuration
