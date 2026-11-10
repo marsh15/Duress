@@ -108,7 +108,7 @@ def targets_command(config: Path | None = typer.Option(None,"--config"),
         return
     for profile in workspace.registry.all():
         typer.echo(
-            f"{profile.target_id:<32}{profile.profile_id:<18}{profile.variant:<18}"
+            f"{profile.target_id:<32}{profile.profile_id:<18}{profile.variant:<26}"
             f"contract v{profile.contract_version}  workers={profile.workers}"
         )
 

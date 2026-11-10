@@ -62,3 +62,14 @@ def test_unreadable_project_manifest_is_an_operational_error(tmp_path):
                  ["project-store", "--config", missing]):
         result = CliRunner().invoke(cli.app, argv)
         assert result.exit_code == 3, (argv, result.exit_code, result.output)
+
+
+def test_targets_table_keeps_columns_apart_for_long_variant_names():
+    import re
+
+    result = CliRunner().invoke(cli.app, ["targets"])
+    assert result.exit_code == 0, result.output
+    lines = [line for line in result.output.splitlines() if "contract v" in line]
+    assert lines
+    for line in lines:
+        assert re.search(r"\S {2,}contract v\d", line), line
