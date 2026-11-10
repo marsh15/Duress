@@ -103,7 +103,7 @@ Caveats:
 
 - Duress cannot verify from outside that the attestation is truthful. The probe is cooperative. It establishes that the owned application attested and that the observed state stayed stable, not that no other writer exists.
 - The probe does not establish process termination. The default drain disclosure is replaced only by the attested quiescence reason.
-- The real PostgreSQL staging path is not exercised in unit tests.
+- The unit tests patch observation. The real PostgreSQL staging path (DSN, repeatable-read snapshots, bracketed reads, duplicate-effect FAIL, drifting-writer INCONCLUSIVE, unreachable database) is exercised by `tests/integration/test_staging_postgres.py`, which needs the `postgresql` extra and a reachable server (`DURESS_TEST_PG_ADMIN_DSN`, or libpq defaults) and otherwise skips. It runs against a fake staging application, not a deployed service.
 
 ## Failure DNA, replay and verification
 
@@ -143,4 +143,4 @@ Ambient `HTTP(S)_PROXY` and `SSL_CERT_FILE` environment is still ignored by defa
 
 Settings are validated during precheck, before any delivery. Managed targets reject them.
 
-Not tested: CONNECT tunnels (HTTPS through a proxy) are untested. Treat proxy and CA support as unverified against any real organisational proxy or private CA. Failed connectivity remains INCONCLUSIVE. This is an explicit beta limitation, not evidence about the integration's business behavior.
+Tested locally: HTTPS probe and delivery through a CONNECT tunnel with a declared self-signed CA bundle (`tests/unit/test_external_network.py`, `tests/unit/test_external_staging_trial.py`), certificate verification still enforced through the tunnel, and an unreachable proxy or a proxy that cannot reach the origin both stay INCONCLUSIVE. Not tested: authenticated proxies (refused by design), proxy auto-configuration, TLS-intercepting proxies, or any real organisational proxy or private CA. Failed connectivity remains INCONCLUSIVE. This is an explicit beta limitation, not evidence about the integration's business behavior.

@@ -4,7 +4,7 @@
 
 From a checkout with Python 3.12+, run `uv sync --frozen`, then `uv run duress serve --host 127.0.0.1 --port 8000`. The default bind is loopback. `GET /api/health` reports version, hosted mode, token requirement and whether the operation gate is busy. Stop with Ctrl-C; `duress sweep` checks retained target pidfiles using the existing engine cleanup path.
 
-The public web pages are `/`, `/targets`, `/investigations`, `/investigations/{id}`, `/dna`, `/dna/{id}`, `/operations/{id}`, `/reductions/{id}`, `/differential`, `/differential/{id}`, and retained `/evidence/{trial_id}` snapshots. API documentation is at `/docs`.
+The public web pages are `/`, `/targets`, `/investigations`, `/investigations/{id}`, `/dna`, `/dna/{id}`, `/operations/{id}`, `/reductions/{id}`, `/differential`, `/differential/{id}`, and retained `/evidence/{trial_id}` snapshots. The workspace also serves `/guide`, `/design-system`, the local-only `/projects` workbench (`/api/projects/...` for its API) and `/dna/{id}/download`. API documentation is at `/docs`.
 
 ## Container
 
@@ -32,7 +32,7 @@ The public Free deployment is claimed only for the scope recorded in the [public
 
 This is one workspace. Reads are public if you expose the server; the token protects the existing write operations. JSON exports may include source-independent synthetic entity identifiers and observations. Keep production credentials and data out of runtime records and Git. The browser uses text nodes for API-provided strings, Jinja autoescapes records, and embedded JSON uses the Jinja JSON encoder.
 
-The API's existing quotas and in-memory gate are retained. Use a single application worker for the public demo; separate web workers do not share that gate. Deploy behind a correctly configured trusted reverse proxy when using forwarded client addresses. Multi-user authorization and durable storage are outside the supported scope.
+The API's existing quotas and in-memory gate are retained. Use a single application worker for the public demo; separate web workers do not share that gate. The quota key is the first `X-Forwarded-For` entry when that header is present, otherwise the socket peer. The application does not check that the header came from a trusted proxy, so a client that can reach the server directly (or through a proxy that appends rather than replaces the header) can choose its own key and avoid the per-IP quota. The single-operation gate, the token and the loopback-only targets still apply. Whether Render's edge overwrites or appends the header was not verified, so treat the quota as a courtesy limit, not an abuse boundary, and keep the demo token private. Multi-user authorization and durable storage are outside the supported scope.
 
 ## Investigation and analysis actions
 

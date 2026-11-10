@@ -31,8 +31,8 @@ fresh isolated process groups. This opening section records the original backend
 
 New asynchronous endpoints return an ID and relative `status_url`; poll it until
 `status` is `completed` or `failed`. HTTP 202 means admitted, not successful.
-Unknown records/targets return 404, invalid bodies 422, a busy operation 409,
-and exhausted admission quota 429. Authorized write routes accept
+Unknown records/targets return 404, invalid bodies 422, a missing or wrong token
+401, an oversized body 413, a busy operation 409, and exhausted admission quota 429. Authorized write routes accept
 `X-Duress-Token` or `Authorization: Bearer ...` when `DURESS_DEMO_TOKEN` is set.
 Anonymous investigation starts are restricted to cached mode; local operation
 without a configured token permits every mode. Rate limits and the shared gate
@@ -163,7 +163,7 @@ CLI equivalents: `duress investigate razorpay-vulnerable --mode cached --json`,
 `duress reduce <dna-id> --target razorpay-vulnerable --json`,
 `duress differential --policy explore --json`. Investigation exit codes are
 0 PASS, 1 FAIL, 2 INCONCLUSIVE/failed; reduction is 0 REDUCED/NOT_REDUCED,
-2 SKIPPED/INCONCLUSIVE, 4 REJECTED; usage errors are 3. Differential exit codes
+2 SKIPPED/INCONCLUSIVE, 4 REJECTED. Handled operational errors (unknown DNA or target id, unreadable manifest) exit 3; Typer usage errors (missing argument, unknown option) exit 2. Differential exit codes
 are 1 for disagreements, 2 for inconclusive cells without a disagreement, and
 0 when all compared cells agree and none is inconclusive.
 

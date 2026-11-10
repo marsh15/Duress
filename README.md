@@ -160,11 +160,12 @@ The public service binds to `0.0.0.0:$PORT`; managed targets stay on loopback. [
 | `DURESS_ROOT` | Checkout root containing target profiles; `/app` in Docker |
 | `DURESS_HOME` | Runtime records, evidence, and pidfiles; defaults to `.duress/` |
 | `DURESS_DEMO_TOKEN` | Protects write operations via `X-Duress-Token` or bearer authorization, subject to cached-mode admission policy |
-| `DURESS_HOSTED` | Hosted metadata in `/api/health` |
+| `DURESS_HOSTED` | Hosted metadata in `/api/health`; also refuses external-project execution with 403 and skips project recovery |
 | `PORT` | Container public listening port; defaults to `8000` |
 | `DURESS_LLM_BASE_URL` | OpenAI-compatible API base URL, including its API version prefix where needed |
 | `DURESS_LLM_MODEL` | Provider model identifier for live mode |
 | `DURESS_LLM_API_KEY` | Runtime provider API key when required |
+| `DURESS_LLM_CACHE` | Optional extra read-only directory of cached model responses, searched before the committed fixtures |
 
 ## Stack, scope, and limitations
 
@@ -172,6 +173,6 @@ Python 3.12, FastAPI, Pydantic, SQLite, optional PostgreSQL/psycopg, HTTPX, Type
 
 The payment demonstration is a controlled synthetic contract, not a finding about Razorpay. External integration adapters support explicitly configured owned local applications; they do not authorize arbitrary production testing. Fault-controlled experiments are labelled separately from fault-free observations. Digests detect alteration, not authorship. The bundled hosted demonstration uses a single workspace with public evidence reads. External local projects have separate records and loopback-only web access. Use one API worker because admission and background tasks are process-local. Hosted storage is ephemeral; download artifacts to retain them across redeploys.
 
-The public Free deployment at https://duress.onrender.com is verified for the scope in its [release record](docs/release/2026-10-27-public/README.md). Genuine hosted inference, the multi-run live-versus-exhaustive comparison against a real provider, and Render capacity, sustained load and billing exposure remain unverified. Live mode is exercised only through a local mock provider, and no real provider has been called. Staging quiescence and proxy/CA support are opt-in: CONNECT/HTTPS-through-proxy is untested, and unit tests do not exercise the real PostgreSQL staging path. Cached and exhaustive modes remain fully usable. No local model weights are required or downloaded.
+The public Free deployment at https://duress.onrender.com is verified for the scope in its [release record](docs/release/2026-10-27-public/README.md). Genuine hosted inference, the multi-run live-versus-exhaustive comparison against a real provider, and Render capacity, sustained load and billing exposure remain unverified. Live mode is exercised only through a local mock provider, and no real provider has been called. Staging quiescence and proxy/CA support are opt-in. HTTPS through an HTTP proxy (CONNECT) is exercised against a local tunnel proxy with a self-signed CA, and the staging quiescence path is exercised against a real PostgreSQL by `tests/integration/test_staging_postgres.py` (it skips cleanly when psycopg or a server is unavailable). Neither has been tried against a real organisational proxy, private CA or managed PostgreSQL service. Cached and exhaustive modes remain fully usable. No local model weights are required or downloaded.
 
 [Architecture](docs/ARCHITECTURE.md) · [Artifact contract](docs/FAILURE_DNA.md) · [Decisions](docs/DECISIONS.md) · [Implementation history](docs/IMPLEMENTATION_LOG.md) · [Backend/API contract](docs/BACKEND_HANDOFF.md)
