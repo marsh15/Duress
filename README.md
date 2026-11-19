@@ -109,7 +109,7 @@ The seeded vulnerable handler performs a genuine non-atomic check/await/write. C
 
 A reproduced defect deliberately returns exit code `1`. CLI results use `0` for PASS/NOT_REPRODUCED/VERIFIED, `1` for FAIL/REPRODUCED/DIFFERENT_FAILURE/NOT_VERIFIED, `2` for INCONCLUSIVE, `3` for explicitly handled configuration/operational errors, and `4` for REJECTED. Typer parameter/usage errors and an invalid `doctor` result can also return `2`; inspect JSON and stderr rather than interpreting an exit code alone. Reduction and differential have their documented outcome-specific exit rules in the [backend handoff](docs/BACKEND_HANDOFF.md).
 
-`duress report <investigation_id> --output report.html` exports a stored record without execution. `duress sweep` checks retained managed-target pidfiles.
+`duress report <investigation_id> --output report.html` exports a stored record without execution. `duress sweep` checks retained managed-target pidfiles and exits 3 if a recorded process group is still alive.
 
 ## The trust boundary
 

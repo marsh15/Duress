@@ -499,6 +499,9 @@ def sweep_command() -> None:
         )
     if not result.killed and not result.stale and not result.unresolved:
         typer.echo("nothing to sweep")
+    if result.unresolved:
+        # A process group that will not die is an operational failure, not a clean sweep.
+        raise typer.Exit(3)
 
 
 @app.command("serve")

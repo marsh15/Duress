@@ -95,7 +95,7 @@ The staging adapter records before/final state and real delivery attempts. Witho
 
 ### Opt-in quiescence probe
 
-A staging target may declare `[target.quiescence]`. It is rejected for managed targets. The owned application must answer `GET <base_url><path>?nonce=N` (default `path = "/duress/quiescence"`) with exactly `{"quiescent": true, "nonce": N}`, echoing the fresh nonce, when it has no in-flight writes. Defaults are `stable_reads = 3` (range 2 to 10), `interval_ms = 200` (20 to 5000) and `timeout_ms = 5000` (100 to 10000); the stable window must fit inside `timeout_ms`.
+A staging target may declare `[target.quiescence]`. It is rejected for managed targets. The owned application must answer `GET <base_url><path>?nonce=N` (default `path = "/duress/quiescence"`) with exactly `{"quiescent": true, "nonce": N}`, echoing the fresh nonce, when it has no in-flight writes. Defaults are `stable_reads = 3` (range 2 to 10), `interval_ms = 200` (20 to 5000) and `timeout_ms = 5000` (100 to 10000); the stable window must fit inside `timeout_ms`. Size `timeout_ms` for your database: the 600 ms in-memory window is too tight for real PostgreSQL reads (the integration test uses 8 s), and a window that cannot settle ends INCONCLUSIVE with `quiescence_state_unstable`.
 
 Duress establishes quiescence only when, inside the bound, an attestation succeeds before and after each of `stable_reads` consecutive reads of the observed PostgreSQL state, and that state is identical across those reads. The baseline is read only after the pre-probe succeeds. If the pre-probe fails, no event is sent and the verdict stays INCONCLUSIVE. When both probes are established, the trial may reach PASS or FAIL, with reason `remote_quiescence_attested` added. Otherwise the INCONCLUSIVE verdict stands. HTTP 2xx alone, a missing endpoint, a replayed nonce, a busy writer and drifting state all keep the verdict INCONCLUSIVE. The probe evidence records counts and reasons only, never the nonce, headers or body.
 
@@ -138,7 +138,7 @@ The web workbench at `/projects` displays registered projects and real saved evi
 
 Ambient `HTTP(S)_PROXY` and `SSL_CERT_FILE` environment is still ignored by default, for managed and staging delivery alike. Staging targets may opt in to network settings:
 
-- `proxy`, a literal http or https origin, or `proxy_ref`, an environment reference to one. Set at most one. Paths, queries and fragments are refused. Credentials in the proxy URL are refused in both forms, so authenticated proxies are not supported. The validator message that suggests `proxy_ref` for authenticated proxies is inaccurate, and this is flagged for the owner.
+- `proxy`, a literal http or https origin, or `proxy_ref`, an environment reference to one. Set at most one. Paths, queries and fragments are refused. Credentials in the proxy URL are refused in both forms, so authenticated proxies are not supported.
 - `ca_bundle`, a PEM file path resolved relative to the manifest, at most 1 MB. It replaces the default trust store for that target, so only the declared certificates are trusted. Include every CA the endpoint chain needs.
 
 Settings are validated during precheck, before any delivery. Managed targets reject them.

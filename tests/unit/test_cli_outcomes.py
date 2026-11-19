@@ -73,3 +73,29 @@ def test_targets_table_keeps_columns_apart_for_long_variant_names():
     assert lines
     for line in lines:
         assert re.search(r"\S {2,}contract v\d", line), line
+
+
+def _sweep_result(**groups):
+    from types import SimpleNamespace
+
+    info = SimpleNamespace(pgid=4242, instance="inst")
+    return SimpleNamespace(
+        killed=[info] if groups.get("killed") else [],
+        stale=[],
+        unresolved=[info] if groups.get("unresolved") else [],
+    )
+
+
+def test_sweep_exits_3_when_a_process_group_is_still_alive(tmp_path, monkeypatch):
+    monkeypatch.setenv("DURESS_HOME", str(tmp_path))
+    monkeypatch.setattr(cli, "sweep", lambda home: _sweep_result(unresolved=True))
+    result = CliRunner().invoke(cli.app, ["sweep"])
+    assert result.exit_code == 3, result.output
+    assert "unresolved pgid=4242" in result.output
+
+
+def test_sweep_exits_0_when_every_recorded_group_was_resolved(tmp_path, monkeypatch):
+    monkeypatch.setenv("DURESS_HOME", str(tmp_path))
+    monkeypatch.setattr(cli, "sweep", lambda home: _sweep_result(killed=True))
+    result = CliRunner().invoke(cli.app, ["sweep"])
+    assert result.exit_code == 0, result.output
